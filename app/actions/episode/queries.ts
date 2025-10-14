@@ -210,3 +210,56 @@ export async function getEpisodeMetadata(slug: string) {
     };
   }
 }
+
+// Get all episodes with drama info (for admin) with pagination
+export async function getAllEpisodes(page: number = 1, limit: number = 20) {
+  try {
+    const skip = (page - 1) * limit;
+
+    const [episodes, total] = await Promise.all([
+      prisma.episode.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        include: {
+          drama: {
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              thumbnail: true,
+            },
+          },
+        },
+      }),
+      prisma.episode.count(),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      success: true,
+      data: episodes,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasMore: page < totalPages,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      data: [],
+      pagination: {
+        page: 1,
+        limit,
+        total: 0,
+        totalPages: 0,
+        hasMore: false,
+      },
+      error: "Failed to fetch episodes",
+    };
+  }
+}

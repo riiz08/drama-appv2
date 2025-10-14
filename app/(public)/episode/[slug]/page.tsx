@@ -1,3 +1,5 @@
+// FILE: app/episode/[slug]/page.tsx (UPDATED)
+
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
@@ -11,25 +13,26 @@ import VideoPlayer from "@/components/episode/VideoPlayer";
 import EpisodeInfo from "@/components/episode/EpisodeInfo";
 import EpisodeNavigation from "@/components/episode/EpisodeNavigation";
 import EpisodeListPlayer from "@/components/episode/EpisodeListPlayer";
+import AdUnit from "@/components/ads/AdUnit";
+import { ADSENSE_CONFIG } from "@/lib/adsense-config";
+import { getHomepageData } from "@/app/actions";
+import OngoingSection from "@/components/home/OnGoingSection";
 
 // Generate static params for all episodes
 export async function generateStaticParams() {
-  const { success, slugs } = await getAllEpisodeSlugs();
-
-  if (!success) return [];
-
-  return slugs.map((slug) => ({
-    slug,
-  }));
+  return [];
 }
+
+export const revalidate = 259200;
 
 // Generate metadata for SEO
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { success, episode } = await getEpisodeBySlug(params.slug);
+  const { slug } = await params;
+  const { success, episode } = await getEpisodeBySlug(slug);
 
   if (!success || !episode) {
     return {
@@ -78,9 +81,11 @@ export async function generateMetadata({
 export default async function EpisodePlayerPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const { success, episode } = await getEpisodeBySlug(params.slug);
+  const { slug } = await params;
+  const { success, episode } = await getEpisodeBySlug(slug);
+  const { data } = await getHomepageData();
 
   if (!success || !episode) {
     notFound();
@@ -105,17 +110,45 @@ export default async function EpisodePlayerPage({
         {/* Episode Info */}
         <EpisodeInfo episode={episode} />
 
+        {/* Ad 1: Above Video Player */}
+        <div className="max-w-5xl mx-auto">
+          <AdUnit
+            slot={ADSENSE_CONFIG.slots.playerAboveVideo}
+            format="auto"
+            responsive={true}
+          />
+        </div>
+
         {/* Video Player */}
         <VideoPlayer
           videoUrl={episode.videoUrl}
           title={`${episode.drama.title} - Episode ${episode.episodeNum}`}
         />
+
+        {/* Ad 2: Below Video Player */}
+        <div className="max-w-3xl mx-auto">
+          <AdUnit
+            slot={ADSENSE_CONFIG.slots.playerBelowVideo}
+            format="auto"
+            responsive={true}
+          />
+        </div>
+
         {/* Navigation (Prev/Next) */}
         <EpisodeNavigation
           prev={prev}
           next={next}
           dramaSlug={episode.drama.slug}
         />
+
+        {/* Ad 3: After Navigation */}
+        <div className="max-w-3xl mx-auto">
+          <AdUnit
+            slot={ADSENSE_CONFIG.slots.playerAfterNav}
+            format="auto"
+            responsive={true}
+          />
+        </div>
 
         {/* Episode List */}
         {allEpisodes.length > 0 && (
@@ -125,6 +158,27 @@ export default async function EpisodePlayerPage({
             dramaTitle={episode.drama.title}
           />
         )}
+
+        {/* Ad 4: After Episode List */}
+        <div className="max-w-3xl mx-auto">
+          <AdUnit
+            slot={ADSENSE_CONFIG.slots.playerAfterEpisodeList}
+            format="auto"
+            responsive={true}
+          />
+        </div>
+
+        {/* Ongoing Dramas */}
+        {data.ongoing.length > 0 && <OngoingSection dramas={data.ongoing} />}
+
+        {/* Ad 5: Bottom Banner */}
+        <div className="max-w-5xl mx-auto py-4">
+          <AdUnit
+            slot={ADSENSE_CONFIG.slots.playerBottomBanner}
+            format="auto"
+            responsive={true}
+          />
+        </div>
       </div>
     </main>
   );

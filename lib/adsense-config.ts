@@ -1,0 +1,24 @@
+export const ADSENSE_CONFIG = {
+  publisherId: process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID, // GANTI dengan ID kamu
+
+  slots: {
+    // Homepage Slots
+    homepageHeroBanner: "3106377852",
+    homepageAfterPopular: "6967244581",
+    homepageAfterEpisodes: "8168645615",
+    homepageAfterOngoing: "2913924287",
+    homepageBottomBanner: "7831209048",
+
+    // Video Player Slots (BARU - ganti dengan slot ID kamu)
+    playerAboveVideo: "2340091092", // Above video player
+    playerBelowVideo: "3665932437", // Below video player
+    playerAfterNav: "8873709852", // After prev/next navigation
+    playerAfterEpisodeList: "9859488464", // After episode list
+    playerBottomBanner: "8096132039", // Bottom banner
+  },
+
+  // Layout keys untuk in-feed ads (dari AdSense dashboard)
+  layoutKeys: {
+    homepageInFeed: "-6t+ed+2i-1n-4w",
+  },
+};

@@ -3,7 +3,7 @@ import { Search, Tv, CheckCircle } from "lucide-react";
 
 interface BrowseHeaderProps {
   query?: string;
-  status?: "ONGOING" | "TAMAT";
+  status?: string;
   total: number;
 }
 

@@ -30,6 +30,7 @@ export async function getAllDramas(options?: {
         isPopular: true,
         description: true,
         airTime: true,
+        episodes: true,
       },
     });
 
@@ -125,7 +126,7 @@ export async function searchDramas(
 
 // Get dramas with filters and sorting
 export async function getDramasWithFilters(filters: {
-  status?: Status;
+  status?: string;
   search?: string;
   sortBy?: "title" | "releaseDate" | "popular";
   order?: "asc" | "desc";

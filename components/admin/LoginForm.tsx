@@ -1,35 +1,54 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Mail, Lock, AlertCircle } from "lucide-react";
-import { loginAction } from "@/app/actions/auth/login";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardBody } from "@heroui/card";
+import {
+  Mail,
+  Lock,
+  AlertCircle,
+  Eye,
+  EyeClosed,
+  EyeIcon,
+  EyeClosedIcon,
+} from "lucide-react";
+import { signIn } from "next-auth/react";
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 
 export default function LoginForm() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [isPending, startTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isVisible, setIsVisible] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
-    startTransition(async () => {
-      const formData = new FormData();
-      formData.append("email", email);
-      formData.append("password", password);
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
 
-      const result = await loginAction(formData);
-
-      if (!result.success) {
-        setError(result.error || "Login gagal");
+      if (result?.error) {
+        setError("Email atau password salah");
+      } else {
+        router.push("/admin");
+        router.refresh();
       }
-      // If success, server action will redirect
-    });
+    } catch (error) {
+      setError("Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+      setIsLoading(false);
+    }
   };
+  const toggleVisibility = () => setIsVisible(!isVisible);
 
   return (
     <Card className="bg-zinc-900 border border-zinc-800">
@@ -52,7 +71,6 @@ export default function LoginForm() {
             onChange={(e) => setEmail(e.target.value)}
             startContent={<Mail className="w-5 h-5 text-gray-400" />}
             isRequired
-            isDisabled={isPending}
             classNames={{
               input: "text-white",
               inputWrapper: "bg-zinc-800 border-zinc-700",
@@ -61,14 +79,27 @@ export default function LoginForm() {
 
           {/* Password Input */}
           <Input
-            type="password"
+            endContent={
+              <button
+                aria-label="toggle password visibility"
+                className="focus:outline-solid outline-transparent"
+                type="button"
+                onClick={toggleVisibility}
+              >
+                {isVisible ? (
+                  <EyeIcon className="text-2xl text-default-400 pointer-events-none" />
+                ) : (
+                  <EyeClosedIcon className="text-2xl text-default-400 pointer-events-none" />
+                )}
+              </button>
+            }
             label="Password"
-            placeholder="••••••••"
+            placeholder="Enter your password"
+            type={isVisible ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             startContent={<Lock className="w-5 h-5 text-gray-400" />}
             isRequired
-            isDisabled={isPending}
             classNames={{
               input: "text-white",
               inputWrapper: "bg-zinc-800 border-zinc-700",
@@ -81,10 +112,9 @@ export default function LoginForm() {
             color="danger"
             size="lg"
             className="w-full font-semibold"
-            isLoading={isPending}
-            isDisabled={isPending}
+            isLoading={isLoading}
           >
-            {isPending ? "Memproses..." : "Login"}
+            {isLoading ? "Memproses..." : "Login"}
           </Button>
         </form>
       </CardBody>

@@ -6,21 +6,12 @@ import BrowseFilters from "@/components/browse/BrowseFilters";
 import BrowseGrid from "@/components/browse/BrowseGrid";
 import BrowsePagination from "@/components/browse/BrowsePagination";
 
-interface BrowsePageProps {
-  searchParams: {
-    q?: string;
-    status?: "ONGOING" | "TAMAT";
-    sort?: "popular" | "latest" | "title";
-    page?: string;
-  };
-}
-
 // Generate metadata for SEO
 export async function generateMetadata({
   searchParams,
-}: BrowsePageProps): Promise<Metadata> {
-  const status = searchParams.status as "ONGOING" | "TAMAT" | undefined;
-  const query = searchParams.q;
+}: any): Promise<Metadata> {
+  const status = searchParams?.status as "ONGOING" | "TAMAT" | undefined;
+  const query = searchParams?.q;
 
   let title = generateBrowseTitle(status);
   let description =
@@ -50,20 +41,20 @@ export async function generateMetadata({
   };
 }
 
-export default async function BrowsePage({ searchParams }: BrowsePageProps) {
-  const page = parseInt(searchParams.page || "1");
+export default async function BrowsePage({ searchParams }: any) {
+  const page = parseInt(searchParams?.page || "1");
   const limit = 20;
   const offset = (page - 1) * limit;
 
   // Get dramas with filters
   const result = await getDramasWithFilters({
-    search: searchParams.q,
-    status: searchParams.status,
-    sortBy: searchParams.sort === "title" ? "title" : "releaseDate",
+    search: searchParams?.q,
+    status: searchParams?.status,
+    sortBy: searchParams?.sort === "title" ? "title" : "releaseDate",
     order:
-      searchParams.sort === "popular"
+      searchParams?.sort === "popular"
         ? "desc"
-        : searchParams.sort === "title"
+        : searchParams?.sort === "title"
           ? "asc"
           : "desc",
     limit,
@@ -79,19 +70,19 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* Header */}
         <BrowseHeader
-          query={searchParams.q}
-          status={searchParams.status}
+          query={searchParams?.q}
+          status={searchParams?.status}
           total={total}
         />
 
         {/* Filters */}
         <BrowseFilters
-          currentStatus={searchParams.status}
-          currentSort={searchParams.sort}
+          currentStatus={searchParams?.status}
+          currentSort={searchParams?.sort}
         />
 
         {/* Results Grid */}
-        <BrowseGrid dramas={dramas} query={searchParams.q} />
+        <BrowseGrid dramas={dramas} query={searchParams?.q} />
 
         {/* Pagination */}
         {total > limit && (

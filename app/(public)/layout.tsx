@@ -1,12 +1,10 @@
-//file app/layout.tsx
+//file app/(public)/layout.tsx
 
 import "@/styles/globals.css";
 import type { Metadata } from "next";
-import clsx from "clsx";
-import { Providers } from "./providers";
-import { fontSans } from "@/config/fonts";
-import { ToastProvider } from "@heroui/toast";
-import AdSenseScript from "@/components/ads/AdsenseScript";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import { headers } from "next/headers";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://mangeakkk.my.id"),
@@ -89,28 +87,10 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" suppressHydrationWarning>
-      <head>
-        <meta name="theme-color" content="#000000" />
-      </head>
-      <body
-        className={clsx(
-          "min-h-screen bg-black text-white font-sans antialiased",
-          fontSans.variable
-        )}
-      >
-        <Providers
-          themeProps={{
-            attribute: "class",
-            defaultTheme: "dark",
-            forcedTheme: "dark",
-          }}
-        >
-          <ToastProvider />
-          {children}
-          <AdSenseScript />
-        </Providers>
-      </body>
-    </html>
+    <div className="relative flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-grow pt-16 md:pt-20">{children}</main>
+      <Footer />
+    </div>
   );
 }

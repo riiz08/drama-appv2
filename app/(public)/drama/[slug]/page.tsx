@@ -13,21 +13,13 @@ import RelatedDramas from "@/components/drama/RelatedDramas";
 
 // Generate static params for all dramas
 export async function generateStaticParams() {
-  const { success, slugs } = await getAllDramaSlugs();
-
-  if (!success) return [];
-
-  return slugs.map((slug: any) => ({
-    slug,
-  }));
+  return [];
 }
 
+export const revalidate = 259200;
+
 // Generate metadata for SEO
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: any): Promise<Metadata> {
   const { success, drama } = await getDramaBySlug(params.slug);
 
   if (!success || !drama) {
@@ -71,11 +63,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function DramaDetailPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
+export default async function DramaDetailPage({ params }: any) {
   const { success, drama } = await getDramaBySlug(params.slug);
 
   if (!success || !drama) {

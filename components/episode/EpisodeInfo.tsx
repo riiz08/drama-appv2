@@ -1,20 +1,23 @@
 import Link from "next/link";
-import { Calendar, ArrowLeft } from "lucide-react";
+import { Calendar, ArrowLeft, Hash } from "lucide-react";
 import { getDramaUrl, formatDate, getStatusLabel } from "@/lib/utils";
 import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
 import { Chip } from "@heroui/chip";
+import Image from "next/image";
 
 interface EpisodeInfoProps {
   episode: {
     episodeNum: number;
     releaseDate: Date;
+    slug: string;
     drama: {
       title: string;
       slug: string;
       description: string;
       status: "ONGOING" | "TAMAT";
       totalEpisode: number | null;
+      thumbnail: string;
     };
   };
 }
@@ -39,6 +42,14 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
 
         {/* Title & Episode Number */}
         <div className="space-y-2">
+          <Image
+            src={episode.drama.thumbnail}
+            alt="{episode.drama.title}"
+            loading="lazy"
+            width={300}
+            height={250}
+            className="mx-auto py-4 rounded-xl"
+          />
           <h1 className="text-2xl md:text-3xl font-bold text-white">
             {episode.drama.title}
           </h1>
@@ -67,6 +78,38 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
           <span className="text-sm">
             Dirilis: {formatDate(episode.releaseDate)}
           </span>
+        </div>
+
+        {/* Tags */}
+        <div>
+          <Chip
+            as={Link}
+            href={`/drama/${episode.drama.slug}`}
+            startContent={<Hash className="w-4 h-4" />}
+          >
+            {episode.drama.title}
+          </Chip>
+          <Chip
+            as={Link}
+            startContent={<Hash className="w-4 h-4" />}
+            href={`/episode/${episode.slug}`}
+          >
+            {episode.drama.title} episod {episode.episodeNum}
+          </Chip>
+          <Chip
+            as={Link}
+            startContent={<Hash className="w-4 h-4" />}
+            href={`/`}
+          >
+            Kepala Bergetar
+          </Chip>
+          <Chip
+            as={Link}
+            startContent={<Hash className="w-4 h-4" />}
+            href={`/`}
+          >
+            Basah Jeruk
+          </Chip>
         </div>
 
         {/* Description */}

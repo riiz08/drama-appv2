@@ -1,10 +1,12 @@
 import { Metadata } from "next";
-import { getHomepageData } from "./actions";
+import { getHomepageData } from "@/app/actions";
 import HeroSection from "@/components/home/HeroSection";
 import PopularSection from "@/components/home/PopularSection";
 import CompletedSection from "@/components/home/CompletedSection";
 import LatestEpisodesSection from "@/components/home/LatestEpisodesSection";
 import OngoingSection from "@/components/home/OnGoingSection";
+import { ADSENSE_CONFIG } from "@/lib/adsense-config";
+import AdUnit from "@/components/ads/AdUnit";
 
 // SEO Metadata
 export const metadata: Metadata = {
@@ -64,23 +66,73 @@ export default async function HomePage() {
       {/* Hero Section */}
       {data.featured && <HeroSection drama={data.featured} />}
 
+      {/* Ad 1: Hero Banner (After Hero) */}
+      <div className="container mx-auto px-4 py-6">
+        <AdUnit
+          slot={ADSENSE_CONFIG.slots.homepageHeroBanner}
+          format="auto"
+          responsive={true}
+          className="max-w-5xl mx-auto"
+        />
+      </div>
+
       {/* Content Sections */}
       <div className="space-y-12 pb-20">
         {/* Popular Dramas */}
         {data.popular.length > 0 && <PopularSection dramas={data.popular} />}
+
+        {/* Ad 2: After Popular Section */}
+        <div className="container mx-auto px-4">
+          <AdUnit
+            slot={ADSENSE_CONFIG.slots.homepageAfterPopular}
+            format="auto"
+            responsive={true}
+            className="max-w-3xl mx-auto"
+          />
+        </div>
 
         {/* Latest Episodes */}
         {data.latestEpisodes.length > 0 && (
           <LatestEpisodesSection episodes={data.latestEpisodes} />
         )}
 
+        {/* Ad 3: After Latest Episodes */}
+        <div className="container mx-auto px-4">
+          <AdUnit
+            slot={ADSENSE_CONFIG.slots.homepageAfterEpisodes}
+            format="auto"
+            responsive={true}
+            className="max-w-3xl mx-auto"
+          />
+        </div>
+
         {/* Ongoing Dramas */}
         {data.ongoing.length > 0 && <OngoingSection dramas={data.ongoing} />}
+
+        {/* Ad 4: After Ongoing Section */}
+        <div className="container mx-auto px-4">
+          <AdUnit
+            slot={ADSENSE_CONFIG.slots.homepageAfterOngoing}
+            format="auto"
+            responsive={true}
+            className="max-w-3xl mx-auto"
+          />
+        </div>
 
         {/* Completed Dramas */}
         {data.completed.length > 0 && (
           <CompletedSection dramas={data.completed} />
         )}
+
+        {/* Ad 5: Bottom Banner (Before Footer) */}
+        <div className="container mx-auto px-4 py-6">
+          <AdUnit
+            slot={ADSENSE_CONFIG.slots.homepageBottomBanner}
+            format="auto"
+            responsive={true}
+            className="max-w-3xl mx-auto"
+          />
+        </div>
       </div>
     </main>
   );

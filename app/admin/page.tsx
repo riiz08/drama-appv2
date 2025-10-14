@@ -8,6 +8,8 @@ import { Card, CardBody } from "@heroui/card";
 import { Tv, PlayCircle, TrendingUp, CheckCircle } from "lucide-react";
 import AdminHeader from "@/components/admin/AdminHeader";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Dashboard Admin | Mangeakkk Drama",
   robots: {

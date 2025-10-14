@@ -1,79 +1,78 @@
+// lib/auth.ts
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  // Aktifkan jika kamu deploy ke custom domain
   trustHost: true,
+
   providers: [
     Credentials({
+      name: "Admin Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      authorize: async (credentials) => {
-        try {
-          // Validate credentials
-          if (!credentials?.email || !credentials?.password) {
-            throw new Error("Email dan password harus diisi");
-          }
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
 
-          // For now, check against environment variable
-          const adminEmail = process.env.ADMIN_EMAIL;
-          const adminPassword = process.env.ADMIN_PASSWORD;
+        const adminEmail = process.env.ADMIN_EMAIL;
+        const adminPassword = process.env.ADMIN_PASSWORD;
 
-          if (!adminEmail || !adminPassword) {
-            throw new Error("Konfigurasi admin tidak ditemukan");
-          }
+        if (!adminEmail || !adminPassword) {
+          console.error("ADMIN_EMAIL or ADMIN_PASSWORD not set in environment");
+          return null;
+        }
 
-          // Check email
-          if (credentials.email !== adminEmail) {
-            throw new Error("Email atau password salah");
-          }
-
-          // Check password (for now plain text, later use bcrypt)
-          if (credentials.password !== adminPassword) {
-            throw new Error("Email atau password salah");
-          }
-
-          // Return user object
+        if (
+          credentials.email === adminEmail &&
+          credentials.password === adminPassword
+        ) {
           return {
-            id: "admin-1",
+            id: "admin",
             email: adminEmail,
             name: "Admin",
             role: "admin",
           };
-        } catch (error) {
-          console.error("Auth error:", error);
-          return null;
         }
+
+        return null;
       },
     }),
   ],
+
   pages: {
     signIn: "/admin/login",
     error: "/admin/login",
   },
+
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 hari
+  },
+
   callbacks: {
     authorized: async ({ auth }) => {
+      // Hanya izinkan akses ke /admin jika sudah login
       return !!auth;
     },
     jwt: async ({ token, user }) => {
       if (user) {
-        token.role = user.role;
         token.id = user.id;
+        token.role = user.role;
       }
       return token;
     },
     session: async ({ session, token }) => {
-      if (session.user) {
-        session.user.role = token.role as string;
+      if (session.user && token) {
         session.user.id = token.id as string;
+        session.user.role = token.role as string;
       }
       return session;
     },
   },
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
+
   secret: process.env.NEXTAUTH_SECRET,
 });
