@@ -7,6 +7,7 @@ import LatestEpisodesSection from "@/components/home/LatestEpisodesSection";
 import OngoingSection from "@/components/home/OnGoingSection";
 import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 import AdUnit from "@/components/ads/AdUnit";
+import { unstable_cache } from "next/cache";
 
 // SEO Metadata
 export const metadata: Metadata = {
@@ -46,9 +47,18 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const { success, data } = await getHomepageData();
+  const getCachedHomePageData = unstable_cache(
+    async () => {
+      const { success, data } = await getHomepageData();
+      return { success, data };
+    },
+    ["HomepageData"],
+    { revalidate: 60 }
+  );
 
-  if (!success || !data) {
+  const homepageData = await getCachedHomePageData();
+
+  if (!homepageData.success || !homepageData.data) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center">
@@ -64,7 +74,9 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen bg-black">
       {/* Hero Section */}
-      {data.featured && <HeroSection drama={data.featured} />}
+      {homepageData.data.featured && (
+        <HeroSection drama={homepageData.data.featured} />
+      )}
 
       {/* Ad 1: Hero Banner (After Hero) */}
       <div className="container mx-auto px-4 py-6">
@@ -79,7 +91,9 @@ export default async function HomePage() {
       {/* Content Sections */}
       <div className="space-y-12 pb-20">
         {/* Popular Dramas */}
-        {data.popular.length > 0 && <PopularSection dramas={data.popular} />}
+        {homepageData.data.popular.length > 0 && (
+          <PopularSection dramas={homepageData.data.popular} />
+        )}
 
         {/* Ad 2: After Popular Section */}
         <div className="container mx-auto px-4">
@@ -92,8 +106,8 @@ export default async function HomePage() {
         </div>
 
         {/* Latest Episodes */}
-        {data.latestEpisodes.length > 0 && (
-          <LatestEpisodesSection episodes={data.latestEpisodes} />
+        {homepageData.data.latestEpisodes.length > 0 && (
+          <LatestEpisodesSection episodes={homepageData.data.latestEpisodes} />
         )}
 
         {/* Ad 3: After Latest Episodes */}
@@ -107,7 +121,9 @@ export default async function HomePage() {
         </div>
 
         {/* Ongoing Dramas */}
-        {data.ongoing.length > 0 && <OngoingSection dramas={data.ongoing} />}
+        {homepageData.data.ongoing.length > 0 && (
+          <OngoingSection dramas={homepageData.data.ongoing} />
+        )}
 
         {/* Ad 4: After Ongoing Section */}
         <div className="container mx-auto px-4">
@@ -120,8 +136,8 @@ export default async function HomePage() {
         </div>
 
         {/* Completed Dramas */}
-        {data.completed.length > 0 && (
-          <CompletedSection dramas={data.completed} />
+        {homepageData.data.completed.length > 0 && (
+          <CompletedSection dramas={homepageData.data.completed} />
         )}
 
         {/* Ad 5: Bottom Banner (Before Footer) */}
