@@ -1,10 +1,13 @@
+//file DramaHero.tsx
+
 "use client";
 
 import { useState } from "react";
 import Image from "next/image";
-import { Calendar, Tv2, Clock, ImageOff } from "lucide-react";
+import { Calendar, Tv2, Clock, ImageOff, Hash } from "lucide-react";
 import { formatDate, getStatusLabel } from "@/lib/utils";
 import { Chip } from "@heroui/chip";
+import Link from "next/link";
 
 interface DramaHeroProps {
   drama: {
@@ -15,6 +18,7 @@ interface DramaHeroProps {
     status: "ONGOING" | "TAMAT";
     totalEpisode: number | null;
     airTime: string | null;
+    slug: string;
   };
 }
 
@@ -30,9 +34,10 @@ export default function DramaHero({ drama }: DramaHeroProps) {
             <div className="absolute inset-0 scale-110 blur-2xl opacity-20">
               <Image
                 src={drama.thumbnail}
-                alt=""
+                alt="Mangeakk Drama"
                 fill
                 className="object-cover"
+                priority
                 onError={() => setImageError(true)}
               />
             </div>
@@ -122,6 +127,38 @@ export default function DramaHero({ drama }: DramaHeroProps) {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Tags */}
+            <div>
+              <Chip
+                as={Link}
+                href={`/drama/${drama.slug}`}
+                startContent={<Hash className="w-4 h-4" />}
+              >
+                {drama.title}
+              </Chip>
+              <Chip
+                as={Link}
+                startContent={<Hash className="w-4 h-4" />}
+                href={`/episode/${drama.slug}`}
+              >
+                {drama.title} full episod
+              </Chip>
+              <Chip
+                as={Link}
+                startContent={<Hash className="w-4 h-4" />}
+                href={`/`}
+              >
+                Kepala Bergetar
+              </Chip>
+              <Chip
+                as={Link}
+                startContent={<Hash className="w-4 h-4" />}
+                href={`/`}
+              >
+                Basah Jeruk
+              </Chip>
             </div>
           </div>
         </div>

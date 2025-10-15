@@ -65,7 +65,7 @@ export default function EpisodeFormModal({
   const fetchDramas = async () => {
     setLoadingDramas(true);
     try {
-      const result = await getAllDramas();
+      const result = await getAllDramas({ status: "ONGOING" });
       if (result.success) {
         setDramas(result.dramas || []);
       }
@@ -102,26 +102,31 @@ export default function EpisodeFormModal({
     }
   }, [isOpen, mode, episode]);
 
-  // Auto generate slug from drama title and episode number
-  const generateSlug = (dramaId: string, episodeNum: string) => {
+  // Auto generate slug and video URL from drama and episode number
+  const generateUrls = (dramaId: string, episodeNum: string) => {
     const drama = dramas.find((d) => d.id === dramaId);
     if (drama && episodeNum) {
       const slug = `${drama.slug}-episode-${episodeNum}`;
-      setFormData((prev) => ({ ...prev, slug }));
+      const videoUrl = `https://cdn.mangeakkk.my.id/${drama.slug}/${episodeNum}/index.m3u8`;
+      setFormData((prev) => ({
+        ...prev,
+        slug,
+        videoUrl,
+      }));
     }
   };
 
   const handleDramaChange = (value: string) => {
     setFormData((prev) => ({ ...prev, dramaId: value }));
     if (formData.episodeNum) {
-      generateSlug(value, formData.episodeNum);
+      generateUrls(value, formData.episodeNum);
     }
   };
 
   const handleEpisodeNumChange = (value: string) => {
     setFormData((prev) => ({ ...prev, episodeNum: value }));
     if (formData.dramaId) {
-      generateSlug(formData.dramaId, value);
+      generateUrls(formData.dramaId, value);
     }
   };
 
@@ -243,16 +248,19 @@ export default function EpisodeFormModal({
               {/* Video URL */}
               <Input
                 label="Video URL"
-                placeholder="https://example.com/video.mp4"
+                placeholder="https://cdn.mangeakkk.my.id/slug/episode/index.m3u8"
                 value={formData.videoUrl}
                 onValueChange={(value) =>
                   setFormData((prev) => ({ ...prev, videoUrl: value }))
                 }
+                isDisabled
+                description="Auto-generated, bisa diedit manual"
                 isRequired
                 classNames={{
                   label: "text-white",
                   input: "text-white",
                   inputWrapper: "bg-zinc-800 border-zinc-700",
+                  description: "text-gray-400",
                 }}
               />
 
@@ -261,6 +269,7 @@ export default function EpisodeFormModal({
                 label="Slug (URL)"
                 placeholder="drama-title-episode-1"
                 value={formData.slug}
+                isDisabled
                 onValueChange={(value) =>
                   setFormData((prev) => ({ ...prev, slug: value }))
                 }

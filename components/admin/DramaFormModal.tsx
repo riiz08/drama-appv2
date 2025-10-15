@@ -91,15 +91,22 @@ export default function DramaFormModal({
     }
   }, [isOpen, mode, drama]);
 
-  // Auto generate slug from title
+  // Auto generate slug and thumbnail from title
   const handleTitleChange = (value: string) => {
+    const newSlug = value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+
+    const newThumbnail = newSlug
+      ? `https://cdn.mangeakkk.my.id/${newSlug}/${newSlug}.webp`
+      : "";
+
     setFormData((prev) => ({
       ...prev,
       title: value,
-      slug: value
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, ""),
+      slug: newSlug,
+      thumbnail: newThumbnail,
     }));
   };
 
@@ -192,10 +199,11 @@ export default function DramaFormModal({
                 label="Slug (URL)"
                 placeholder="judul-drama"
                 value={formData.slug}
+                isDisabled
                 onValueChange={(value) =>
                   setFormData((prev) => ({ ...prev, slug: value }))
                 }
-                description="Auto-generated dari judul, bisa diedit manual"
+                description="Auto-generated dari judul"
                 isRequired
                 classNames={{
                   label: "text-white",
@@ -225,16 +233,19 @@ export default function DramaFormModal({
               {/* Thumbnail URL */}
               <Input
                 label="Thumbnail URL"
-                placeholder="https://example.com/image.jpg"
+                placeholder="https://cdn.mangeakkk.my.id/slug/slug.webp"
                 value={formData.thumbnail}
+                isDisabled
                 onValueChange={(value) =>
                   setFormData((prev) => ({ ...prev, thumbnail: value }))
                 }
+                description="Auto-generated dari slug, bisa diedit manual"
                 isRequired
                 classNames={{
                   label: "text-white",
                   input: "text-white",
                   inputWrapper: "bg-zinc-800 border-zinc-700",
+                  description: "text-gray-400",
                 }}
               />
 

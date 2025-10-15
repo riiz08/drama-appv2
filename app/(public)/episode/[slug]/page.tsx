@@ -2,11 +2,7 @@
 
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import {
-  getEpisodeBySlug,
-  getAllEpisodeSlugs,
-  getAdjacentEpisodes,
-} from "@/app/actions/episode";
+import { getEpisodeBySlug, getAdjacentEpisodes } from "@/app/actions/episode";
 import { getEpisodesByDramaId } from "@/app/actions/episode";
 import { generateEpisodeTitle, generateMetaDescription } from "@/lib/utils";
 import VideoPlayer from "@/components/episode/VideoPlayer";
@@ -17,6 +13,7 @@ import AdUnit from "@/components/ads/AdUnit";
 import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 import { getHomepageData } from "@/app/actions";
 import OngoingSection from "@/components/home/OnGoingSection";
+import CompletedSection from "@/components/home/CompletedSection";
 
 // Generate static params for all episodes
 export async function generateStaticParams() {
@@ -125,15 +122,6 @@ export default async function EpisodePlayerPage({
           title={`${episode.drama.title} - Episode ${episode.episodeNum}`}
         />
 
-        {/* Ad 2: Below Video Player */}
-        <div className="max-w-3xl mx-auto">
-          <AdUnit
-            slot={ADSENSE_CONFIG.slots.playerBelowVideo}
-            format="auto"
-            responsive={true}
-          />
-        </div>
-
         {/* Navigation (Prev/Next) */}
         <EpisodeNavigation
           prev={prev}
@@ -175,6 +163,20 @@ export default async function EpisodePlayerPage({
         <div className="max-w-5xl mx-auto py-4">
           <AdUnit
             slot={ADSENSE_CONFIG.slots.playerBottomBanner}
+            format="auto"
+            responsive={true}
+          />
+        </div>
+
+        {/* Completed Dramas */}
+        {data.completed.length > 0 && (
+          <CompletedSection dramas={data.completed} />
+        )}
+
+        {/* Ad 5: After Completed Dramas */}
+        <div className="max-w-3xl mx-auto">
+          <AdUnit
+            slot={ADSENSE_CONFIG.slots.playerBelowVideo}
             format="auto"
             responsive={true}
           />

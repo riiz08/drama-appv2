@@ -15,6 +15,13 @@ export const ADSENSE_CONFIG = {
     playerAfterNav: "8873709852", // After prev/next navigation
     playerAfterEpisodeList: "9859488464", // After episode list
     playerBottomBanner: "8096132039", // Bottom banner
+
+    // Drama Detail Slots (BARU - ganti dengan slot ID kamu)
+    dramaAfterHero: "7728413447", // After hero/thumbnail
+    dramaAfterSynopsis: "4320501532", // After synopsis
+    dramaAfterEpisodes: "3391042176", // After episode list
+    dramaAfterRelated: "3789168436", // After related dramas
+    dramaBottomBanner: "8279572623", // Bottom banner
   },
 
   // Layout keys untuk in-feed ads (dari AdSense dashboard)

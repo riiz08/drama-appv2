@@ -1,3 +1,5 @@
+// FILE: app/drama/[slug]/page.tsx (UPDATED)
+
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
@@ -10,6 +12,10 @@ import DramaHero from "@/components/drama/DramaHero";
 import DramaSynopsis from "@/components/drama/DramaSynopsis";
 import EpisodeList from "@/components/drama/EpisodeList";
 import RelatedDramas from "@/components/drama/RelatedDramas";
+import CompletedSection from "@/components/home/CompletedSection";
+import { getHomepageData } from "@/app/actions";
+import AdUnit from "@/components/ads/AdUnit";
+import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 
 // Generate static params for all dramas
 export async function generateStaticParams() {
@@ -19,8 +25,13 @@ export async function generateStaticParams() {
 export const revalidate = 259200;
 
 // Generate metadata for SEO
-export async function generateMetadata({ params }: any): Promise<Metadata> {
-  const { success, drama } = await getDramaBySlug(params.slug);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<any>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const { success, drama } = await getDramaBySlug(slug);
 
   if (!success || !drama) {
     return {
@@ -63,8 +74,13 @@ export async function generateMetadata({ params }: any): Promise<Metadata> {
   };
 }
 
-export default async function DramaDetailPage({ params }: any) {
-  const { success, drama } = await getDramaBySlug(params.slug);
+export default async function DramaDetailPage({
+  params,
+}: {
+  params: Promise<any>;
+}) {
+  const { slug } = await params;
+  const { success, drama } = await getDramaBySlug(slug);
 
   if (!success || !drama) {
     notFound();
@@ -73,22 +89,75 @@ export default async function DramaDetailPage({ params }: any) {
   // Get related dramas
   const relatedResult = await getRelatedDramas(drama.id, 6);
   const relatedDramas = relatedResult.success ? relatedResult.dramas : [];
+  const completedResult = await getHomepageData();
 
   return (
     <main className="min-h-screen bg-black">
       {/* Hero Section */}
       <DramaHero drama={drama} />
 
+      {/* Ad 1: After Hero */}
+      <div className="max-w-5xl mx-auto px-4 py-6">
+        <AdUnit
+          slot={ADSENSE_CONFIG.slots.dramaAfterHero}
+          format="auto"
+          responsive={true}
+        />
+      </div>
+
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
         {/* Synopsis */}
         <DramaSynopsis description={drama.description} />
 
+        {/* Ad 2: After Synopsis */}
+        <div className="max-w-3xl mx-auto">
+          <AdUnit
+            slot={ADSENSE_CONFIG.slots.dramaAfterSynopsis}
+            format="auto"
+            responsive={true}
+          />
+        </div>
+
         {/* Episode List */}
         <EpisodeList episodes={drama.episodes} dramaTitle={drama.title} />
 
+        {/* Ad 3: After Episode List */}
+        <div className="max-w-3xl mx-auto">
+          <AdUnit
+            slot={ADSENSE_CONFIG.slots.dramaAfterEpisodes}
+            format="auto"
+            responsive={true}
+          />
+        </div>
+
         {/* Related Dramas */}
         {relatedDramas.length > 0 && <RelatedDramas dramas={relatedDramas} />}
+
+        {/* Ad 4: After Related Dramas */}
+        {relatedDramas.length > 0 && (
+          <div className="max-w-3xl mx-auto">
+            <AdUnit
+              slot={ADSENSE_CONFIG.slots.dramaAfterRelated}
+              format="auto"
+              responsive={true}
+            />
+          </div>
+        )}
+
+        {/* Completed Dramas */}
+        {completedResult.data.completed.length > 0 && (
+          <CompletedSection dramas={completedResult.data.completed} />
+        )}
+
+        {/* Ad 5: Bottom Banner */}
+        <div className="max-w-5xl mx-auto py-4">
+          <AdUnit
+            slot={ADSENSE_CONFIG.slots.dramaBottomBanner}
+            format="auto"
+            responsive={true}
+          />
+        </div>
       </div>
     </main>
   );
