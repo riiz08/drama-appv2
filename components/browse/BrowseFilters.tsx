@@ -29,7 +29,22 @@ export default function BrowseFilters({
     // Reset to page 1 when filter changes
     params.delete("page");
 
-    router.push(`/browse?${params.toString()}`);
+    const newUrl = `/drama?${params.toString()}`;
+    router.push(newUrl);
+  };
+
+  const handleStatusChange = (keys: any) => {
+    const selectedKey = Array.from(keys)[0];
+    if (selectedKey) {
+      handleFilterChange("status", selectedKey as string);
+    }
+  };
+
+  const handleSortChange = (keys: any) => {
+    const selectedKey = Array.from(keys)[0];
+    if (selectedKey) {
+      handleFilterChange("sort", selectedKey as string);
+    }
   };
 
   const handleClearFilters = () => {
@@ -40,9 +55,9 @@ export default function BrowseFilters({
 
     const query = params.get("q");
     if (query) {
-      router.push(`/browse?q=${query}`);
+      router.push(`/drama?q=${query}`);
     } else {
-      router.push("/browse");
+      router.push("/drama");
     }
   };
 
@@ -61,12 +76,13 @@ export default function BrowseFilters({
         <Select
           label="Status"
           placeholder="Semua Status"
-          selectedKeys={currentStatus ? [currentStatus] : ["all"]}
-          onChange={(e) => handleFilterChange("status", e.target.value)}
+          selectedKeys={new Set([currentStatus || "all"])}
+          onSelectionChange={handleStatusChange}
           className="max-w-xs"
           classNames={{
             trigger: "bg-zinc-800 border-zinc-700",
           }}
+          disallowEmptySelection
         >
           <SelectItem key="all">Semua Status</SelectItem>
           <SelectItem key="ONGOING">Sedang Tayang</SelectItem>
@@ -77,12 +93,13 @@ export default function BrowseFilters({
         <Select
           label="Urutkan"
           placeholder="Terbaru"
-          selectedKeys={currentSort ? [currentSort] : ["latest"]}
-          onChange={(e) => handleFilterChange("sort", e.target.value)}
+          selectedKeys={new Set([currentSort || "latest"])}
+          onSelectionChange={handleSortChange}
           className="max-w-xs"
           classNames={{
             trigger: "bg-zinc-800 border-zinc-700",
           }}
+          disallowEmptySelection
         >
           <SelectItem key="latest">Terbaru</SelectItem>
           <SelectItem key="popular">Populer</SelectItem>
@@ -92,8 +109,9 @@ export default function BrowseFilters({
         {/* Clear Filters Button */}
         {hasFilters && (
           <Button
-            variant="flat"
+            variant="shadow"
             color="danger"
+            size="md"
             onPress={handleClearFilters}
             startContent={<X className="w-4 h-4" />}
             className="sm:ml-auto"

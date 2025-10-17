@@ -14,22 +14,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     {
-      url: `${baseUrl}/browse`,
+      url: `${baseUrl}/drama`,
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/browse?status=ONGOING`,
+      url: `${baseUrl}/drama?status=ONGOING`,
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/browse?status=TAMAT`,
+      url: `${baseUrl}/drama?status=TAMAT`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/drama?sort=popular`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/drama?sort=latest`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.5,
     },
   ];
 
@@ -48,7 +60,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const episodeResult = await getAllEpisodeSlugs();
   const episodePages: MetadataRoute.Sitemap = episodeResult.success
     ? episodeResult.slugs.map((slug) => ({
-        url: `${baseUrl}/episode/${slug}`,
+        url: `${baseUrl}/${slug}`,
         lastModified: new Date(),
         changeFrequency: "weekly" as const,
         priority: 0.6,

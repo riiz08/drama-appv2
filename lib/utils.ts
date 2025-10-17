@@ -97,7 +97,7 @@ export function getStatusColor(status: "ONGOING" | "TAMAT"): string {
 
 export function generateMetaTitle(title: string, suffix?: string): string {
   const siteName = suffix || "Mangeakkk Drama";
-  return `${title} | ${siteName}`;
+  return `${title} ${siteName}`;
 }
 
 export function generateMetaDescription(
@@ -108,14 +108,14 @@ export function generateMetaDescription(
 }
 
 export function generateDramaTitle(dramaTitle: string): string {
-  return generateMetaTitle(`Nonton ${dramaTitle} Sub Indo`);
+  return generateMetaTitle(`Nonton ${dramaTitle} Full Episod]`);
 }
 
 export function generateEpisodeTitle(
   dramaTitle: string,
   episodeNum: number
 ): string {
-  return generateMetaTitle(`${dramaTitle} Episode ${episodeNum} Sub Indo`);
+  return generateMetaTitle(`${dramaTitle} Episode ${episodeNum} FUll Episod`);
 }
 
 export function generateBrowseTitle(status?: "ONGOING" | "TAMAT"): string {
@@ -133,7 +133,7 @@ export function getDramaUrl(slug: string): string {
 }
 
 export function getEpisodeUrl(slug: string): string {
-  return `/episode/${slug}`;
+  return `/${slug}`;
 }
 
 export function getBrowseUrl(params?: {
@@ -145,7 +145,7 @@ export function getBrowseUrl(params?: {
   if (params?.search) searchParams.set("q", params.search);
 
   const query = searchParams.toString();
-  return `/browse${query ? `?${query}` : ""}`;
+  return `/drama${query ? `?${query}` : ""}`;
 }
 
 // ============================================

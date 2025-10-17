@@ -1,4 +1,4 @@
-// FILE: app/episode/[slug]/page.tsx (UPDATED)
+// FILE: app/[slug]/page.tsx (UPDATED)
 
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -70,7 +70,7 @@ export async function generateMetadata({
       images: [episode.drama.thumbnail],
     },
     alternates: {
-      canonical: `https://mangeakkk.my.id/episode/${episode.slug}`,
+      canonical: `https://mangeakkk.my.id/${episode.slug}`,
     },
   };
 }

@@ -33,9 +33,9 @@ export default function Navbar() {
 
   const navLinks = [
     { href: "/", label: "Beranda" },
-    { href: "/browse", label: "Jelajah" },
-    { href: "/browse?status=ONGOING", label: "Sedang Tayang" },
-    { href: "/browse?status=TAMAT", label: "Selesai" },
+    { href: "/drama", label: "Jelajah" },
+    { href: "/drama?status=ONGOING", label: "Sedang Tayang" },
+    { href: "/drama?status=TAMAT", label: "Selesai" },
   ];
 
   return (

@@ -30,7 +30,7 @@ export default function OngoingSection({ dramas }: OngoingSectionProps) {
         </div>
         <Button
           as={Link}
-          href="/browse?status=ONGOING"
+          href="/drama?status=ONGOING"
           variant="light"
           size="sm"
           endContent={<ChevronRight className="w-4 h-4" />}

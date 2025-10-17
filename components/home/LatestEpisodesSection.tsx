@@ -105,7 +105,7 @@ export default function LatestEpisodesSection({
         </div>
         <Button
           as={Link}
-          href="/browse?sort=latest"
+          href="/drama?sort=latest"
           variant="light"
           size="sm"
           endContent={<ChevronRight className="w-4 h-4" />}

@@ -136,10 +136,12 @@ export async function getDramasWithFilters(filters: {
   try {
     const where: any = {};
 
-    if (filters.status) {
+    // Status filter - only apply if status is provided and valid
+    if (filters.status && filters.status !== "all") {
       where.status = filters.status;
     }
 
+    // Search filter
     if (filters.search) {
       where.title = {
         contains: filters.search,
@@ -147,13 +149,16 @@ export async function getDramasWithFilters(filters: {
       };
     }
 
+    // Determine order by
     let orderBy: any = {};
     if (filters.sortBy === "popular") {
+      // For popular, sort by isPopular first, then by release date
       orderBy = [{ isPopular: "desc" }, { releaseDate: "desc" }];
+    } else if (filters.sortBy === "title") {
+      orderBy = { title: "asc" };
     } else {
-      orderBy = {
-        [filters.sortBy || "title"]: filters.order || "asc",
-      };
+      // Default: latest (releaseDate desc)
+      orderBy = { releaseDate: "desc" };
     }
 
     const [dramas, total] = await Promise.all([
@@ -184,6 +189,7 @@ export async function getDramasWithFilters(filters: {
       hasMore: (filters.offset || 0) + dramas.length < total,
     };
   } catch (error) {
+    console.error("Error fetching dramas with filters:", error);
     return {
       success: false,
       dramas: [],

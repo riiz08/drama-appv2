@@ -30,7 +30,7 @@ export default function PopularSection({ dramas }: PopularSectionProps) {
         </div>
         <Button
           as={Link}
-          href="/browse?sort=popular"
+          href="/drama?sort=popular"
           variant="light"
           size="sm"
           endContent={<ChevronRight className="w-4 h-4" />}

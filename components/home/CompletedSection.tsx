@@ -30,7 +30,7 @@ export default function CompletedSection({ dramas }: CompletedSectionProps) {
         </div>
         <Button
           as={Link}
-          href="/browse?status=TAMAT"
+          href="/drama?status=TAMAT"
           variant="light"
           size="sm"
           endContent={<ChevronRight className="w-4 h-4" />}

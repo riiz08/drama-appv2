@@ -5,10 +5,10 @@ export default function Footer() {
 
   const footerLinks = {
     drama: [
-      { label: "Drama Popular", href: "/browse?sort=popular" },
-      { label: "Sedang Tayang", href: "/browse?status=ONGOING" },
-      { label: "Baru Selesai", href: "/browse?status=TAMAT" },
-      { label: "Semua Drama", href: "/browse" },
+      { label: "Drama Popular", href: "/drama?sort=popular" },
+      { label: "Sedang Tayang", href: "/drama?status=ONGOING" },
+      { label: "Baru Selesai", href: "/drama?status=TAMAT" },
+      { label: "Semua Drama", href: "/drama" },
     ],
   };
 

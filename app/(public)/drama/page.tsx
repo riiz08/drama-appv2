@@ -6,19 +6,30 @@ import BrowseFilters from "@/components/browse/BrowseFilters";
 import BrowseGrid from "@/components/browse/BrowseGrid";
 import BrowsePagination from "@/components/browse/BrowsePagination";
 
+// Type for search params
+type SearchParams = Promise<{
+  page?: string;
+  status?: string;
+  sort?: string;
+  q?: string;
+}>;
+
 // Generate metadata for SEO
 export async function generateMetadata({
   searchParams,
-}: any): Promise<Metadata> {
-  const status = searchParams?.status as "ONGOING" | "TAMAT" | undefined;
-  const query = searchParams?.q;
+}: {
+  searchParams: SearchParams;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const status = params?.status as "ONGOING" | "TAMAT" | undefined;
+  const query = params?.q;
 
   let title = generateBrowseTitle(status);
   let description =
     "Jelajahi koleksi drama Malaysia lengkap dengan subtitle Indonesia.";
 
   if (query) {
-    title = `Hasil Pencarian: ${query} | Mangeakkk Drama`;
+    title = `Hasil Pencarian: ${query} Mangeakkk Drama`;
     description = `Hasil pencarian untuk "${query}". Nonton drama Malaysia sub Indo terlengkap.`;
   } else if (status === "ONGOING") {
     description =
@@ -36,27 +47,42 @@ export async function generateMetadata({
       description,
     },
     alternates: {
-      canonical: "https://mangeakkk.my.id/browse",
+      canonical: "https://mangeakkk.my.id/drama",
     },
   };
 }
 
-export default async function BrowsePage({ searchParams }: any) {
-  const page = parseInt(searchParams?.page || "1");
+export default async function BrowsePage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const params = await searchParams;
+  const page = parseInt(params?.page || "1");
   const limit = 20;
   const offset = (page - 1) * limit;
 
-  // Get dramas with filters
+  // Determine sort parameters
+  let sortBy: "title" | "releaseDate" | "popular" = "releaseDate";
+  let order: "asc" | "desc" = "desc";
+
+  if (params?.sort === "title") {
+    sortBy = "title";
+    order = "asc";
+  } else if (params?.sort === "popular") {
+    sortBy = "popular";
+    order = "desc";
+  } else if (params?.sort === "latest") {
+    sortBy = "releaseDate";
+    order = "desc";
+  }
+
+  // Get dramas with filters - PERBAIKAN: pastikan status masuk ke parameter
   const result = await getDramasWithFilters({
-    search: searchParams?.q,
-    status: searchParams?.status,
-    sortBy: searchParams?.sort === "title" ? "title" : "releaseDate",
-    order:
-      searchParams?.sort === "popular"
-        ? "desc"
-        : searchParams?.sort === "title"
-          ? "asc"
-          : "desc",
+    search: params?.q,
+    status: params?.status, // Ini yang tadinya tidak masuk!
+    sortBy,
+    order,
     limit,
     offset,
   });
@@ -69,20 +95,16 @@ export default async function BrowsePage({ searchParams }: any) {
     <main className="min-h-screen bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* Header */}
-        <BrowseHeader
-          query={searchParams?.q}
-          status={searchParams?.status}
-          total={total}
-        />
+        <BrowseHeader query={params?.q} status={params?.status} total={total} />
 
         {/* Filters */}
         <BrowseFilters
-          currentStatus={searchParams?.status}
-          currentSort={searchParams?.sort}
+          currentStatus={params?.status}
+          currentSort={params?.sort}
         />
 
         {/* Results Grid */}
-        <BrowseGrid dramas={dramas} query={searchParams?.q} />
+        <BrowseGrid dramas={dramas} query={params?.q} />
 
         {/* Pagination */}
         {total > limit && (
