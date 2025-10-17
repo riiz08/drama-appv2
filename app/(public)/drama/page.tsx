@@ -5,6 +5,7 @@ import BrowseHeader from "@/components/browse/BrowseHeader";
 import BrowseFilters from "@/components/browse/BrowseFilters";
 import BrowseGrid from "@/components/browse/BrowseGrid";
 import BrowsePagination from "@/components/browse/BrowsePagination";
+import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
 // Type for search params
 type SearchParams = Promise<{
@@ -93,6 +94,9 @@ export default async function BrowsePage({
 
   return (
     <main className="min-h-screen bg-black">
+      <BreadcrumbSchema
+        items={[{ name: "Drama", url: "https://mangeakkk.my.id/drama" }]}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* Header */}
         <BrowseHeader query={params?.q} status={params?.status} total={total} />

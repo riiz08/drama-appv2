@@ -16,6 +16,8 @@ import CompletedSection from "@/components/home/CompletedSection";
 import { getHomepageData } from "@/app/actions";
 import AdUnit from "@/components/ads/AdUnit";
 import { ADSENSE_CONFIG } from "@/lib/adsense-config";
+import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
+import { TVSeriesSchema } from "@/components/schema/TvSeriesSchema";
 
 // Generate static params for all dramas
 export async function generateStaticParams() {
@@ -44,10 +46,10 @@ export async function generateMetadata({
     description: generateMetaDescription(drama.description),
     keywords: [
       `nonton ${drama.title}`,
-      `${drama.title} sub indo`,
-      `streaming ${drama.title}`,
+      `${drama.title} full episod`,
+      `streaming ${drama.title} HD`,
       "drama malaysia",
-      "drama malaysia sub indo",
+      "drama malaysia full episod",
     ],
     openGraph: {
       title: generateDramaTitle(drama.title),
@@ -93,6 +95,19 @@ export default async function DramaDetailPage({
 
   return (
     <main className="min-h-screen bg-black">
+      <BreadcrumbSchema
+        items={[
+          { name: "Drama", url: "https://mangeakkk.my.id/drama" },
+          {
+            name: drama.title,
+            url: `https://mangeakkk.my.id/drama/${drama.slug}`,
+          },
+        ]}
+      />
+
+      {/* TVSeries Schema */}
+      <TVSeriesSchema drama={drama} />
+
       {/* Hero Section */}
       <DramaHero drama={drama} />
 

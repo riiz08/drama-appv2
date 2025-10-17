@@ -11,9 +11,9 @@ import { unstable_cache } from "next/cache";
 
 // SEO Metadata
 export const metadata: Metadata = {
-  title: "Mangeakkk Drama - Nonton Drama Malaysia Subtitle Indonesia Terbaru",
+  title: "Mangeakkk Drama - Nonton Drama Malaysia Full Episod",
   description:
-    "Nonton drama Malaysia terbaru dan terlengkap dengan subtitle Indonesia. Streaming drama Malaysia gratis dengan kualitas HD. Update episode terbaru setiap hari!",
+    "Nonton drama Malaysia terbaru dan terlengkap full episod. Streaming drama Malaysia gratis dengan kualitas HD. Update episode terbaru setiap hari.",
   keywords: [
     "nonton drama malaysia",
     "drama malaysia sub indo",
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Mangeakkk Drama - Nonton Drama Malaysia Sub Indo",
     description:
-      "Nonton drama Malaysia terbaru dengan subtitle Indonesia. Update setiap hari!",
+      "Nonton drama Malaysia terbaru full episod tanpa iklan. Update setiap hari!",
     type: "website",
     locale: "id_ID",
     siteName: "Mangeakkk Drama",

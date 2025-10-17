@@ -14,6 +14,8 @@ import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 import { getHomepageData } from "@/app/actions";
 import OngoingSection from "@/components/home/OnGoingSection";
 import CompletedSection from "@/components/home/CompletedSection";
+import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
+import { VideoObjectSchema } from "@/components/schema/VideoObjectSchema";
 
 // Generate static params for all episodes
 export async function generateStaticParams() {
@@ -45,9 +47,9 @@ export async function generateMetadata({
     description,
     keywords: [
       `${episode.drama.title} episode ${episode.episodeNum}`,
-      `nonton ${episode.drama.title}`,
-      `streaming ${episode.drama.title}`,
-      "drama malaysia sub indo",
+      `nonton ${episode.drama.title} full episod`,
+      `streaming ${episode.drama.title} free`,
+      "drama malaysia full episod",
       "nonton drama malaysia",
     ],
     openGraph: {
@@ -103,6 +105,24 @@ export default async function EpisodePlayerPage({
 
   return (
     <main className="min-h-screen bg-black">
+      {/* Breadcrumb Schema */}
+      <BreadcrumbSchema
+        items={[
+          { name: "Drama", url: "https://mangeakkk.my.id/drama" },
+          {
+            name: episode.drama.title,
+            url: `https://mangeakkk.my.id/drama/${episode.drama.slug}`,
+          },
+          {
+            name: `Episode ${episode.episodeNum}`,
+            url: `https://mangeakkk.my.id/${episode.slug}`,
+          },
+        ]}
+      />
+
+      {/* VideoObject Schema */}
+      <VideoObjectSchema episode={episode} />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Episode Info */}
         <EpisodeInfo episode={episode} />

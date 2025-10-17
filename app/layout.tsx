@@ -7,22 +7,23 @@ import { Providers } from "./providers";
 import { fontSans } from "@/config/fonts";
 import { ToastProvider } from "@heroui/toast";
 import AdSenseScript from "@/components/ads/AdsenseScript";
+import { BaseSchema } from "@/components/schema/BaseSchema";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://mangeakkk.my.id"),
   title: {
-    default: "Mangeakkk Drama - Nonton Drama Malaysia Sub Indo Terbaru",
-    template: "%s | Mangeakkk Drama",
+    default: "Mangeakkk Drama - Nonton Drama Malaysia Full Episod",
+    template: "%s Mangeakkk Drama",
   },
   description:
-    "Nonton drama Malaysia terbaru dan terlengkap dengan subtitle Indonesia. Streaming drama Malaysia gratis dengan kualitas HD. Update episode terbaru setiap hari!",
+    "Nonton drama Malaysia terbaru dan terlengkap full episod. Streaming drama Malaysia gratis dengan kualitas HD. Update episode terbaru setiap hari.",
   keywords: [
     "nonton drama malaysia",
-    "drama malaysia sub indo",
+    "drama malaysia full episod",
     "streaming drama malaysia",
     "drama malaysia terbaru",
     "nonton drama melayu",
-    "drama melayu subtitle indonesia",
+    "drama melayu free",
     "drama malaysia online",
     "tonton drama malaysia",
   ],
@@ -40,9 +41,9 @@ export const metadata: Metadata = {
     alternateLocale: ["ms_MY", "en_SG"],
     url: "https://mangeakkk.my.id",
     siteName: "Mangeakkk Drama",
-    title: "Mangeakkk Drama - Nonton Drama Malaysia Sub Indo",
+    title: "Mangeakkk Drama - Nonton Drama Malaysia full episod",
     description:
-      "Platform streaming drama Malaysia terlengkap dengan subtitle Indonesia. Update setiap hari!",
+      "Platform streaming drama Malaysia terlengkap tanpa iklan full HD. Update setiap hari",
     images: [
       {
         url: "/og-image.jpg",
@@ -57,7 +58,7 @@ export const metadata: Metadata = {
     title: "Mangeakkk Drama - Nonton Drama Malaysia Sub Indo",
     description:
       "Platform streaming drama Malaysia terlengkap dengan subtitle Indonesia.",
-    images: ["/og-image.jpg"],
+    images: ["/logo/logo.png"],
     creator: "@mangeakkk",
   },
   robots: {
@@ -75,7 +76,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    apple: "/favicon/apple-touch-icon.png",
   },
   alternates: {
     canonical: "https://mangeakkk.my.id",
@@ -89,7 +90,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html lang="my" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#000000" />
       </head>
@@ -107,6 +108,7 @@ export default async function RootLayout({
           }}
         >
           <ToastProvider />
+          <BaseSchema />
           {children}
           <AdSenseScript />
         </Providers>
