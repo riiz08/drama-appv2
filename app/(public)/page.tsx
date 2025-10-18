@@ -120,7 +120,7 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black">
       {/* Hero Section */}
       {homepageData.data.featured && (
         <HeroSection drama={homepageData.data.featured} />
@@ -198,6 +198,6 @@ export default async function HomePage() {
           />
         </div>
       </div>
-    </main>
+    </div>
   );
 }

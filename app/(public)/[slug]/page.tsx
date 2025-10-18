@@ -1,4 +1,4 @@
-// FILE: app/[slug]/page.tsx (UPDATED)
+// FILE: app/[slug]/page.tsx (SEO-OPTIMIZED)
 
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -150,17 +150,18 @@ export default async function EpisodePlayerPage({
   const allEpisodes = episodesResult.success ? episodesResult.episodes : [];
 
   return (
-    <main className="min-h-screen bg-black">
+    <>
       {/* Breadcrumb Schema */}
       <BreadcrumbSchema
         items={[
+          { name: "Laman Utama", url: "https://mangeakkk.my.id" },
           { name: "Drama", url: "https://mangeakkk.my.id/drama" },
           {
             name: episode.drama.title,
             url: `https://mangeakkk.my.id/drama/${episode.drama.slug}`,
           },
           {
-            name: `Episode ${episode.episodeNum}`,
+            name: `Episod ${episode.episodeNum}`,
             url: `https://mangeakkk.my.id/${episode.slug}`,
           },
         ]}
@@ -169,85 +170,101 @@ export default async function EpisodePlayerPage({
       {/* VideoObject Schema */}
       <VideoObjectSchema episode={episode} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Episode Info */}
-        <EpisodeInfo episode={episode} />
+      <div className="min-h-screen bg-black">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+          {/* Episode Info Header */}
+          <header>
+            <EpisodeInfo episode={episode} />
+          </header>
 
-        {/* Ad 1: Above Video Player */}
-        <div className="max-w-5xl mx-auto">
-          <AdUnit
-            slot={ADSENSE_CONFIG.slots.playerAboveVideo}
-            format="auto"
-            responsive={true}
-          />
-        </div>
+          {/* Ad 1: Above Video Player */}
+          <div className="max-w-5xl mx-auto">
+            <AdUnit
+              slot={ADSENSE_CONFIG.slots.playerAboveVideo}
+              format="auto"
+              responsive={true}
+            />
+          </div>
 
-        {/* Video Player */}
-        <VideoPlayer
-          videoUrl={episode.videoUrl}
-          title={`${episode.drama.title} - Episode ${episode.episodeNum}`}
-        />
+          {/* Video Player - Main Content */}
+          <article aria-label="Video player">
+            <VideoPlayer
+              videoUrl={episode.videoUrl}
+              title={`${episode.drama.title} - Episod ${episode.episodeNum}`}
+            />
+          </article>
 
-        {/* Navigation (Prev/Next) */}
-        <EpisodeNavigation
-          prev={prev}
-          next={next}
-          dramaSlug={episode.drama.slug}
-        />
+          {/* Navigation (Prev/Next) */}
+          <nav aria-label="Navigasi episod">
+            <EpisodeNavigation
+              prev={prev}
+              next={next}
+              dramaSlug={episode.drama.slug}
+            />
+          </nav>
 
-        {/* Ad 3: After Navigation */}
-        <div className="max-w-3xl mx-auto">
-          <AdUnit
-            slot={ADSENSE_CONFIG.slots.playerAfterNav}
-            format="auto"
-            responsive={true}
-          />
-        </div>
+          {/* Ad 3: After Navigation */}
+          <div className="max-w-3xl mx-auto">
+            <AdUnit
+              slot={ADSENSE_CONFIG.slots.playerAfterNav}
+              format="auto"
+              responsive={true}
+            />
+          </div>
 
-        {/* Episode List */}
-        {allEpisodes.length > 0 && (
-          <EpisodeListPlayer
-            episodes={allEpisodes}
-            currentEpisodeNum={episode.episodeNum}
-            dramaTitle={episode.drama.title}
-          />
-        )}
+          {/* Episode List */}
+          {allEpisodes.length > 0 && (
+            <section aria-labelledby="episode-list-heading">
+              <EpisodeListPlayer
+                episodes={allEpisodes}
+                currentEpisodeNum={episode.episodeNum}
+                dramaTitle={episode.drama.title}
+              />
+            </section>
+          )}
 
-        {/* Ad 4: After Episode List */}
-        <div className="max-w-3xl mx-auto">
-          <AdUnit
-            slot={ADSENSE_CONFIG.slots.playerAfterEpisodeList}
-            format="auto"
-            responsive={true}
-          />
-        </div>
+          {/* Ad 4: After Episode List */}
+          <div className="max-w-3xl mx-auto">
+            <AdUnit
+              slot={ADSENSE_CONFIG.slots.playerAfterEpisodeList}
+              format="auto"
+              responsive={true}
+            />
+          </div>
 
-        {/* Ongoing Dramas */}
-        {data.ongoing.length > 0 && <OngoingSection dramas={data.ongoing} />}
+          {/* Ongoing Dramas */}
+          {data.ongoing.length > 0 && (
+            <section aria-labelledby="ongoing-heading">
+              <OngoingSection dramas={data.ongoing} />
+            </section>
+          )}
 
-        {/* Ad 5: Bottom Banner */}
-        <div className="max-w-5xl mx-auto py-4">
-          <AdUnit
-            slot={ADSENSE_CONFIG.slots.playerBottomBanner}
-            format="auto"
-            responsive={true}
-          />
-        </div>
+          {/* Ad 5: Bottom Banner */}
+          <div className="max-w-5xl mx-auto py-4">
+            <AdUnit
+              slot={ADSENSE_CONFIG.slots.playerBottomBanner}
+              format="auto"
+              responsive={true}
+            />
+          </div>
 
-        {/* Completed Dramas */}
-        {data.completed.length > 0 && (
-          <CompletedSection dramas={data.completed} />
-        )}
+          {/* Completed Dramas */}
+          {data.completed.length > 0 && (
+            <section aria-labelledby="completed-heading">
+              <CompletedSection dramas={data.completed} />
+            </section>
+          )}
 
-        {/* Ad 5: After Completed Dramas */}
-        <div className="max-w-3xl mx-auto">
-          <AdUnit
-            slot={ADSENSE_CONFIG.slots.playerBelowVideo}
-            format="auto"
-            responsive={true}
-          />
+          {/* Ad 6: After Completed Dramas */}
+          <div className="max-w-3xl mx-auto">
+            <AdUnit
+              slot={ADSENSE_CONFIG.slots.playerBelowVideo}
+              format="auto"
+              responsive={true}
+            />
+          </div>
         </div>
       </div>
-    </main>
+    </>
   );
 }

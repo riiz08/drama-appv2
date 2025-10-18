@@ -7,7 +7,6 @@ import Image from "next/image";
 import { Calendar, Tv2, Clock, ImageOff, Hash } from "lucide-react";
 import { formatDate, getStatusLabel } from "@/lib/utils";
 import { Chip } from "@heroui/chip";
-import Link from "next/link";
 
 interface DramaHeroProps {
   drama: {
@@ -24,17 +23,18 @@ interface DramaHeroProps {
 
 export default function DramaHero({ drama }: DramaHeroProps) {
   const [imageError, setImageError] = useState(false);
+  const statusLabel = getStatusLabel(drama.status);
 
   return (
-    <section className="relative w-full bg-black">
+    <div className="relative w-full bg-black">
       {/* Background Blur Effect */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
         {!imageError && (
           <>
             <div className="absolute inset-0 scale-110 blur-2xl opacity-20">
               <Image
                 src={drama.thumbnail}
-                alt="Mangeakk Drama"
+                alt=""
                 fill
                 className="object-cover"
                 priority
@@ -51,26 +51,35 @@ export default function DramaHero({ drama }: DramaHeroProps) {
         <div className="flex flex-col md:flex-row gap-8">
           {/* Poster */}
           <div className="flex-shrink-0 mx-auto md:mx-0">
-            <div className="relative w-64 h-96 rounded-lg overflow-hidden shadow-2xl bg-zinc-900">
+            <figure className="relative w-64 h-96 rounded-lg overflow-hidden shadow-2xl bg-zinc-900">
               {!imageError ? (
                 <Image
                   src={drama.thumbnail}
-                  alt={drama.title}
+                  alt={`Poster ${drama.title} - Drama Melayu ${statusLabel}`}
+                  title={`Tonton ${drama.title} Online Percuma`}
                   fill
                   priority
+                  fetchPriority="high"
                   className="object-cover"
                   sizes="256px"
                   onError={() => setImageError(true)}
                 />
               ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-800">
-                  <ImageOff className="w-16 h-16 text-zinc-600 mb-2" />
+                <div
+                  className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-800"
+                  role="img"
+                  aria-label={`Poster ${drama.title} tidak tersedia`}
+                >
+                  <ImageOff
+                    className="w-16 h-16 text-zinc-600 mb-2"
+                    aria-hidden="true"
+                  />
                   <span className="text-sm text-zinc-500 text-center px-4">
                     {drama.title}
                   </span>
                 </div>
               )}
-            </div>
+            </figure>
           </div>
 
           {/* Info */}
@@ -85,34 +94,37 @@ export default function DramaHero({ drama }: DramaHeroProps) {
                   size="md"
                   color={drama.status === "ONGOING" ? "success" : "primary"}
                   variant="flat"
+                  aria-label={`Status: ${statusLabel}`}
                 >
-                  {getStatusLabel(drama.status)}
+                  {statusLabel}
                 </Chip>
               </div>
             </div>
 
             {/* Meta Information */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Release Date */}
               <div className="flex items-center gap-3 text-gray-300">
-                <Calendar className="w-5 h-5 text-red-500" />
+                <Calendar className="w-5 h-5 text-red-500" aria-hidden="true" />
                 <div>
-                  <p className="text-xs text-gray-500">Tanggal Rilis</p>
-                  <p className="text-sm font-medium">
-                    {formatDate(drama.releaseDate)}
-                  </p>
+                  <dt className="text-xs text-gray-500">Tarikh Tayangan</dt>
+                  <dd className="text-sm font-medium">
+                    <time dateTime={new Date(drama.releaseDate).toISOString()}>
+                      {formatDate(drama.releaseDate)}
+                    </time>
+                  </dd>
                 </div>
               </div>
 
               {/* Total Episodes */}
               {drama.totalEpisode && (
                 <div className="flex items-center gap-3 text-gray-300">
-                  <Tv2 className="w-5 h-5 text-red-500" />
+                  <Tv2 className="w-5 h-5 text-red-500" aria-hidden="true" />
                   <div>
-                    <p className="text-xs text-gray-500">Total Episode</p>
-                    <p className="text-sm font-medium">
-                      {drama.totalEpisode} Episode
-                    </p>
+                    <dt className="text-xs text-gray-500">Jumlah Episod</dt>
+                    <dd className="text-sm font-medium">
+                      {drama.totalEpisode} Episod
+                    </dd>
                   </div>
                 </div>
               )}
@@ -120,49 +132,55 @@ export default function DramaHero({ drama }: DramaHeroProps) {
               {/* Air Time */}
               {drama.airTime && (
                 <div className="flex items-center gap-3 text-gray-300">
-                  <Clock className="w-5 h-5 text-red-500" />
+                  <Clock className="w-5 h-5 text-red-500" aria-hidden="true" />
                   <div>
-                    <p className="text-xs text-gray-500">Jadwal Tayang</p>
-                    <p className="text-sm font-medium">{drama.airTime}</p>
+                    <dt className="text-xs text-gray-500">Jadual Tayangan</dt>
+                    <dd className="text-sm font-medium">{drama.airTime}</dd>
                   </div>
                 </div>
               )}
-            </div>
+            </dl>
 
-            {/* Tags */}
-            <div>
-              <Chip
-                as={Link}
-                href={`/drama/${drama.slug}`}
-                startContent={<Hash className="w-4 h-4" />}
-              >
-                {drama.title}
-              </Chip>
-              <Chip
-                as={Link}
-                startContent={<Hash className="w-4 h-4" />}
-                href={`/episode/${drama.slug}`}
-              >
-                {drama.title} full episod
-              </Chip>
-              <Chip
-                as={Link}
-                startContent={<Hash className="w-4 h-4" />}
-                href={`/`}
-              >
-                Kepala Bergetar
-              </Chip>
-              <Chip
-                as={Link}
-                startContent={<Hash className="w-4 h-4" />}
-                href={`/`}
-              >
-                Basah Jeruk
-              </Chip>
-            </div>
+            {/* Tags - SEO Keywords */}
+            <nav aria-label="Kata kunci berkaitan">
+              <div className="flex flex-wrap gap-2">
+                <Chip
+                  size="sm"
+                  variant="flat"
+                  startContent={<Hash className="w-3 h-3" aria-hidden="true" />}
+                  aria-label={`Tag: ${drama.title}`}
+                >
+                  {drama.title}
+                </Chip>
+                <Chip
+                  size="sm"
+                  variant="flat"
+                  startContent={<Hash className="w-3 h-3" aria-hidden="true" />}
+                  aria-label="Tag: drama melayu"
+                >
+                  Drama Melayu
+                </Chip>
+                <Chip
+                  size="sm"
+                  variant="flat"
+                  startContent={<Hash className="w-3 h-3" aria-hidden="true" />}
+                  aria-label="Tag: episod penuh"
+                >
+                  Episod Penuh
+                </Chip>
+                <Chip
+                  size="sm"
+                  variant="flat"
+                  startContent={<Hash className="w-3 h-3" aria-hidden="true" />}
+                  aria-label={`Tag: ${statusLabel.toLowerCase()}`}
+                >
+                  {statusLabel}
+                </Chip>
+              </div>
+            </nav>
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

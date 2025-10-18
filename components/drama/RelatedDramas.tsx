@@ -18,19 +18,27 @@ export default function RelatedDramas({ dramas }: RelatedDramasProps) {
   if (dramas.length === 0) return null;
 
   return (
-    <section className="space-y-4">
+    <div className="space-y-4">
       {/* Section Title */}
-      <div className="flex items-center gap-3">
-        <Sparkles className="w-6 h-6 text-yellow-500" />
-        <h2 className="text-2xl font-bold text-white">Drama Terkait</h2>
-      </div>
+      <header className="flex items-center gap-3">
+        <Sparkles className="w-6 h-6 text-yellow-500" aria-hidden="true" />
+        <h2 id="related-heading" className="text-2xl font-bold text-white">
+          Drama Berkaitan
+        </h2>
+      </header>
 
       {/* Drama Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <nav
+        aria-label="Drama yang mungkin anda suka"
+        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
+        role="list"
+      >
         {dramas.map((drama) => (
-          <DramaCard key={drama.id} drama={drama} />
+          <div key={drama.id} role="listitem">
+            <DramaCard drama={drama} />
+          </div>
         ))}
-      </div>
-    </section>
+      </nav>
+    </div>
   );
 }

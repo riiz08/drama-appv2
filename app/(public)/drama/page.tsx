@@ -90,17 +90,6 @@ export async function generateMetadata({
   };
 }
 
-// Helper function untuk generate title (optional)
-function generateBrowseTitle(status?: "ONGOING" | "TAMAT"): string {
-  if (status === "ONGOING") {
-    return "Drama Melayu Sedang Tayangan";
-  }
-  if (status === "TAMAT") {
-    return "Drama Melayu Sudah Tamat";
-  }
-  return "Senarai Drama Melayu Terkini";
-}
-
 export default async function BrowsePage({
   searchParams,
 }: {
@@ -126,10 +115,10 @@ export default async function BrowsePage({
     order = "desc";
   }
 
-  // Get dramas with filters - PERBAIKAN: pastikan status masuk ke parameter
+  // Get dramas with filters
   const result = await getDramasWithFilters({
     search: params?.q,
-    status: params?.status, // Ini yang tadinya tidak masuk!
+    status: params?.status,
     sortBy,
     order,
     limit,
@@ -141,33 +130,51 @@ export default async function BrowsePage({
   const hasMore = result.success ? result.hasMore : false;
 
   return (
-    <main className="min-h-screen bg-black">
+    <>
       <BreadcrumbSchema
-        items={[{ name: "Drama", url: "https://mangeakkk.my.id/drama" }]}
+        items={[
+          { name: "Laman Utama", url: "https://mangeakkk.my.id" },
+          { name: "Drama", url: "https://mangeakkk.my.id/drama" },
+        ]}
       />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        {/* Header */}
-        <BrowseHeader query={params?.q} status={params?.status} total={total} />
 
-        {/* Filters */}
-        <BrowseFilters
-          currentStatus={params?.status}
-          currentSort={params?.sort}
-        />
+      <div className="min-h-screen bg-black">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <header className="mb-6">
+            <BrowseHeader
+              query={params?.q}
+              status={params?.status}
+              total={total}
+            />
+          </header>
 
-        {/* Results Grid */}
-        <BrowseGrid dramas={dramas} query={params?.q} />
+          {/* Filters */}
+          <nav aria-label="Penapis drama" className="mb-6">
+            <BrowseFilters
+              currentStatus={params?.status}
+              currentSort={params?.sort}
+            />
+          </nav>
 
-        {/* Pagination */}
-        {total > limit && (
-          <BrowsePagination
-            currentPage={page}
-            totalItems={total}
-            itemsPerPage={limit}
-            hasMore={hasMore}
-          />
-        )}
+          {/* Results Grid */}
+          <section aria-label="Hasil carian drama">
+            <BrowseGrid dramas={dramas} query={params?.q} />
+          </section>
+
+          {/* Pagination */}
+          {total > limit && (
+            <nav aria-label="Navigasi halaman" className="mt-8">
+              <BrowsePagination
+                currentPage={page}
+                totalItems={total}
+                itemsPerPage={limit}
+                hasMore={hasMore}
+              />
+            </nav>
+          )}
+        </div>
       </div>
-    </main>
+    </>
   );
 }

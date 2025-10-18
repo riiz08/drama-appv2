@@ -64,12 +64,16 @@ export default function BrowseFilters({
   const hasFilters = currentStatus || currentSort;
 
   return (
-    <div className="bg-zinc-900 rounded-lg p-4">
-      <div className="flex flex-col sm:flex-row gap-4">
+    <div
+      className="bg-zinc-900 rounded-lg p-4"
+      role="search"
+      aria-label="Penapis dan pengurutan drama"
+    >
+      <form className="flex flex-col sm:flex-row gap-4">
         {/* Filter Icon & Label */}
         <div className="flex items-center gap-2 text-white">
-          <SlidersHorizontal className="w-5 h-5" />
-          <span className="font-semibold">Filter:</span>
+          <SlidersHorizontal className="w-5 h-5" aria-hidden="true" />
+          <span className="font-semibold">Penapis:</span>
         </div>
 
         {/* Status Filter */}
@@ -83,16 +87,17 @@ export default function BrowseFilters({
             trigger: "bg-zinc-800 border-zinc-700",
           }}
           disallowEmptySelection
+          aria-label="Pilih status drama"
         >
           <SelectItem key="all">Semua Status</SelectItem>
-          <SelectItem key="ONGOING">Sedang Tayang</SelectItem>
-          <SelectItem key="TAMAT">Selesai</SelectItem>
+          <SelectItem key="ONGOING">Sedang Tayangan</SelectItem>
+          <SelectItem key="TAMAT">Sudah Tamat</SelectItem>
         </Select>
 
         {/* Sort Filter */}
         <Select
-          label="Urutkan"
-          placeholder="Terbaru"
+          label="Urutan"
+          placeholder="Terkini"
           selectedKeys={new Set([currentSort || "latest"])}
           onSelectionChange={handleSortChange}
           className="max-w-xs"
@@ -100,10 +105,11 @@ export default function BrowseFilters({
             trigger: "bg-zinc-800 border-zinc-700",
           }}
           disallowEmptySelection
+          aria-label="Pilih urutan paparan"
         >
-          <SelectItem key="latest">Terbaru</SelectItem>
-          <SelectItem key="popular">Populer</SelectItem>
-          <SelectItem key="title">Judul A-Z</SelectItem>
+          <SelectItem key="latest">Terkini</SelectItem>
+          <SelectItem key="popular">Popular</SelectItem>
+          <SelectItem key="title">Tajuk A-Z</SelectItem>
         </Select>
 
         {/* Clear Filters Button */}
@@ -113,13 +119,14 @@ export default function BrowseFilters({
             color="danger"
             size="md"
             onPress={handleClearFilters}
-            startContent={<X className="w-4 h-4" />}
+            startContent={<X className="w-4 h-4" aria-hidden="true" />}
             className="sm:ml-auto"
+            aria-label="Kosongkan semua penapis"
           >
-            Reset Filter
+            Kosongkan Penapis
           </Button>
         )}
-      </div>
+      </form>
     </div>
   );
 }

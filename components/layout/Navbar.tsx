@@ -39,7 +39,7 @@ export default function Navbar() {
   ];
 
   return (
-    <>
+    <header>
       <HeroNavbar
         isMenuOpen={isMenuOpen}
         onMenuOpenChange={setIsMenuOpen}
@@ -133,6 +133,6 @@ export default function Navbar() {
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
       />
-    </>
+    </header>
   );
 }

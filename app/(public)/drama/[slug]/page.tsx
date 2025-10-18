@@ -1,4 +1,4 @@
-// FILE: app/drama/[slug]/page.tsx (UPDATED)
+// FILE: app/drama/[slug]/page.tsx (SEO-OPTIMIZED)
 
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -117,9 +117,10 @@ export default async function DramaDetailPage({
   const completedResult = await getHomepageData();
 
   return (
-    <main className="min-h-screen bg-black">
+    <>
       <BreadcrumbSchema
         items={[
+          { name: "Laman Utama", url: "https://mangeakkk.my.id" },
           { name: "Drama", url: "https://mangeakkk.my.id/drama" },
           {
             name: drama.title,
@@ -131,72 +132,86 @@ export default async function DramaDetailPage({
       {/* TVSeries Schema */}
       <TVSeriesSchema drama={drama} />
 
-      {/* Hero Section */}
-      <DramaHero drama={drama} />
+      <div className="min-h-screen bg-black">
+        {/* Hero Section */}
+        <header>
+          <DramaHero drama={drama} />
+        </header>
 
-      {/* Ad 1: After Hero */}
-      <div className="max-w-5xl mx-auto px-4 py-6">
-        <AdUnit
-          slot={ADSENSE_CONFIG.slots.dramaAfterHero}
-          format="auto"
-          responsive={true}
-        />
-      </div>
-
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
-        {/* Synopsis */}
-        <DramaSynopsis description={drama.description} />
-
-        {/* Ad 2: After Synopsis */}
-        <div className="max-w-3xl mx-auto">
+        {/* Ad 1: After Hero */}
+        <div className="max-w-5xl mx-auto px-4 py-6">
           <AdUnit
-            slot={ADSENSE_CONFIG.slots.dramaAfterSynopsis}
+            slot={ADSENSE_CONFIG.slots.dramaAfterHero}
             format="auto"
             responsive={true}
           />
         </div>
 
-        {/* Episode List */}
-        <EpisodeList episodes={drama.episodes} dramaTitle={drama.title} />
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+          {/* Synopsis */}
+          <section aria-labelledby="synopsis-heading">
+            <DramaSynopsis description={drama.description} />
+          </section>
 
-        {/* Ad 3: After Episode List */}
-        <div className="max-w-3xl mx-auto">
-          <AdUnit
-            slot={ADSENSE_CONFIG.slots.dramaAfterEpisodes}
-            format="auto"
-            responsive={true}
-          />
-        </div>
-
-        {/* Related Dramas */}
-        {relatedDramas.length > 0 && <RelatedDramas dramas={relatedDramas} />}
-
-        {/* Ad 4: After Related Dramas */}
-        {relatedDramas.length > 0 && (
+          {/* Ad 2: After Synopsis */}
           <div className="max-w-3xl mx-auto">
             <AdUnit
-              slot={ADSENSE_CONFIG.slots.dramaAfterRelated}
+              slot={ADSENSE_CONFIG.slots.dramaAfterSynopsis}
               format="auto"
               responsive={true}
             />
           </div>
-        )}
 
-        {/* Completed Dramas */}
-        {completedResult.data.completed.length > 0 && (
-          <CompletedSection dramas={completedResult.data.completed} />
-        )}
+          {/* Episode List */}
+          <section aria-labelledby="episodes-heading">
+            <EpisodeList episodes={drama.episodes} dramaTitle={drama.title} />
+          </section>
 
-        {/* Ad 5: Bottom Banner */}
-        <div className="max-w-5xl mx-auto py-4">
-          <AdUnit
-            slot={ADSENSE_CONFIG.slots.dramaBottomBanner}
-            format="auto"
-            responsive={true}
-          />
+          {/* Ad 3: After Episode List */}
+          <div className="max-w-3xl mx-auto">
+            <AdUnit
+              slot={ADSENSE_CONFIG.slots.dramaAfterEpisodes}
+              format="auto"
+              responsive={true}
+            />
+          </div>
+
+          {/* Related Dramas */}
+          {relatedDramas.length > 0 && (
+            <section aria-labelledby="related-heading">
+              <RelatedDramas dramas={relatedDramas} />
+            </section>
+          )}
+
+          {/* Ad 4: After Related Dramas */}
+          {relatedDramas.length > 0 && (
+            <div className="max-w-3xl mx-auto">
+              <AdUnit
+                slot={ADSENSE_CONFIG.slots.dramaAfterRelated}
+                format="auto"
+                responsive={true}
+              />
+            </div>
+          )}
+
+          {/* Completed Dramas */}
+          {completedResult.data.completed.length > 0 && (
+            <section aria-labelledby="completed-heading">
+              <CompletedSection dramas={completedResult.data.completed} />
+            </section>
+          )}
+
+          {/* Ad 5: Bottom Banner */}
+          <div className="max-w-5xl mx-auto py-4">
+            <AdUnit
+              slot={ADSENSE_CONFIG.slots.dramaBottomBanner}
+              format="auto"
+              responsive={true}
+            />
+          </div>
         </div>
       </div>
-    </main>
+    </>
   );
 }
