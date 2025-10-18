@@ -13,7 +13,7 @@ export function OrganizationSchema({
   name = "Mangeakkk Drama",
   url = "https://mangeakkk.my.id",
   logo = "https://mangeakkk.my.id/logo/logo.png",
-  description = "Nonton drama Malaysia terbaru dan terlengkap full episod. Streaming drama Malaysia gratis dengan kualitas HD.",
+  description = "Tonton drama Melayu terkini dan terlengkap episod penuh. Streaming drama Malaysia percuma dengan kualiti HD.",
   sameAs = [],
 }: OrganizationSchemaProps = {}) {
   const schema: WithContext<Organization> = {

@@ -10,6 +10,7 @@ interface TVSeriesSchemaProps {
     status: "ONGOING" | "TAMAT";
     releaseDate: Date | string;
     totalEpisode?: number | null;
+    endDate?: Date | string | null;
     airTime?: string | null;
   };
 }
@@ -20,6 +21,13 @@ export function TVSeriesSchema({ drama }: TVSeriesSchemaProps) {
       ? drama.releaseDate.toISOString().split("T")[0]
       : new Date(drama.releaseDate).toISOString().split("T")[0];
 
+  // Parse endDate jika ada
+  const endDate = drama.endDate
+    ? drama.endDate instanceof Date
+      ? drama.endDate.toISOString().split("T")[0]
+      : new Date(drama.endDate).toISOString().split("T")[0]
+    : undefined;
+
   const schema: WithContext<TVSeries> = {
     "@context": "https://schema.org",
     "@type": "TVSeries",
@@ -28,17 +36,18 @@ export function TVSeriesSchema({ drama }: TVSeriesSchemaProps) {
     image: drama.thumbnail,
     url: `https://mangeakkk.my.id/drama/${drama.slug}`,
     datePublished: releaseDate,
-    ...(drama.totalEpisode && {
-      numberOfEpisodes: drama.totalEpisode,
-    }),
-    ...(drama.status === "TAMAT" && {
-      endDate: releaseDate, // bisa diganti dengan tanggal tamat sebenarnya jika ada
-    }),
-    inLanguage: "ms", // Bahasa Malaysia
+    inLanguage: "ms-MY",
     countryOfOrigin: {
       "@type": "Country",
       name: "Malaysia",
     },
+    ...(drama.totalEpisode && {
+      numberOfEpisodes: drama.totalEpisode,
+    }),
+    ...(drama.status === "TAMAT" &&
+      endDate && {
+        endDate: endDate,
+      }),
   };
 
   return (

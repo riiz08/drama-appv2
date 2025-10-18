@@ -1,23 +1,4 @@
 // components/schema/video-object-schema.tsx
-import { VideoObject, WithContext } from "schema-dts";
-
-interface VideoObjectSchemaProps {
-  episode: {
-    slug: string;
-    episodeNum: number;
-    videoUrl: string;
-    releaseDate: Date | string;
-    drama: {
-      title: string;
-      slug: string;
-      description: string;
-      thumbnail: string;
-    };
-  };
-}
-
-// components/schema/video-object-schema.tsx
-// REMOVED: import { VideoObject, WithContext } from 'schema-dts'
 
 interface VideoObjectSchemaProps {
   episode: {
@@ -44,7 +25,7 @@ export function VideoObjectSchema({ episode }: VideoObjectSchemaProps) {
   const schema = {
     "@context": "https://schema.org",
     "@type": "VideoObject",
-    name: `${episode.drama.title} - Episode ${episode.episodeNum}`,
+    name: `${episode.drama.title} - Episod ${episode.episodeNum}`,
     description: episode.drama.description,
     thumbnailUrl: episode.drama.thumbnail,
     uploadDate: uploadDate,
@@ -73,8 +54,19 @@ export function VideoObjectSchema({ episode }: VideoObjectSchemaProps) {
     },
 
     // Additional properties
-    inLanguage: "ms",
+    inLanguage: "ms-MY",
     isFamilyFriendly: true,
+    potentialAction: {
+      "@type": "WatchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `https://mangeakkk.my.id/${episode.slug}`,
+        actionPlatform: [
+          "http://schema.org/DesktopWebPlatform",
+          "http://schema.org/MobileWebPlatform",
+        ],
+      },
+    },
   };
 
   return (

@@ -1,6 +1,6 @@
+// components/schema/website-schema.tsx
 import { WebSite, WithContext } from "schema-dts";
 
-// components/schema/website-schema.tsx
 interface WebsiteSchemaProps {
   name?: string;
   url?: string;
@@ -10,7 +10,7 @@ interface WebsiteSchemaProps {
 export function WebsiteSchema({
   name = "Mangeakkk Drama",
   url = "https://mangeakkk.my.id",
-  description = "Nonton drama Malaysia terbaru dan terlengkap full episod. Streaming drama Malaysia gratis dengan kualitas HD. Update episode terbaru setiap hari!",
+  description = "Tonton drama Melayu terkini dan terlengkap episod penuh. Streaming drama Malaysia percuma dengan kualiti HD. Kemaskini episod terkini setiap hari!",
 }: WebsiteSchemaProps = {}) {
   const schema: WithContext<WebSite> = {
     "@context": "https://schema.org",
@@ -18,6 +18,7 @@ export function WebsiteSchema({
     name,
     url,
     description,
+    inLanguage: "ms-MY",
     publisher: {
       "@type": "Organization",
       name,
