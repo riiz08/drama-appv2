@@ -35,44 +35,90 @@ export async function generateMetadata({
 
   if (!success || !episode) {
     return {
-      title: "Episode Tidak Ditemukan",
+      title: "Episod Tidak Dijumpai | Mangeakkk Drama",
+      description:
+        "Episod yang anda cari tidak dijumpai. Kembali ke halaman drama untuk melihat senarai episod.",
+      robots: {
+        index: false,
+        follow: true,
+      },
     };
   }
 
+  // Get adjacent episodes (prev/next)
+  const adjacentResult = await getAdjacentEpisodes(
+    episode.dramaId,
+    episode.episodeNum
+  );
+  const { prev, next } = adjacentResult.success
+    ? adjacentResult
+    : { prev: null, next: null };
+
   const title = generateEpisodeTitle(episode.drama.title, episode.episodeNum);
-  const description = generateMetaDescription(episode.drama.description);
+  const description = episode.drama.description
+    ? generateMetaDescription(episode.drama.description)
+    : `Tonton ${episode.drama.title} Episod ${episode.episodeNum} secara percuma dalam kualiti HD. Streaming tanpa iklan.`;
+
+  const canonicalUrl = `https://mangeakkk.my.id/${episode.slug}`;
+
+  // Generate dynamic keywords
+  const keywords = [
+    `${episode.drama.title} episod ${episode.episodeNum}`,
+    `tonton ${episode.drama.title} ep ${episode.episodeNum}`,
+    `${episode.drama.title} episod ${episode.episodeNum} HD`,
+    `streaming ${episode.drama.title} episod ${episode.episodeNum}`,
+    `${episode.drama.title} episod ${episode.episodeNum} percuma`,
+    "drama melayu episod penuh",
+    "tonton drama online",
+  ];
 
   return {
     title,
     description,
-    keywords: [
-      `${episode.drama.title} episode ${episode.episodeNum}`,
-      `nonton ${episode.drama.title} full episod`,
-      `streaming ${episode.drama.title} free`,
-      "drama malaysia full episod",
-      "nonton drama malaysia",
-    ],
+    keywords,
     openGraph: {
       title,
       description,
       type: "video.episode",
+      url: canonicalUrl,
+      siteName: "Mangeakkk Drama",
       images: [
         {
           url: episode.drama.thumbnail,
           width: 1200,
           height: 630,
-          alt: `${episode.drama.title} Episode ${episode.episodeNum}`,
+          alt: `${episode.drama.title} Episod ${episode.episodeNum} - Tonton Online`,
         },
       ],
+      ...(episode.drama.title && {
+        videoSeries: episode.drama.title,
+      }),
+      ...(episode.releaseDate && {
+        releaseDate: episode.releaseDate,
+      }),
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
       images: [episode.drama.thumbnail],
+      creator: "@mangeakkk",
     },
     alternates: {
-      canonical: `https://mangeakkk.my.id/${episode.slug}`,
+      canonical: canonicalUrl,
+      // Add prev/next episode links if available
+      ...(prev && {
+        prev: `https://mangeakkk.my.id/${prev?.slug}`,
+      }),
+      ...(next && {
+        next: `https://mangeakkk.my.id/${next.slug}`,
+      }),
+    },
+    robots: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
     },
   };
 }

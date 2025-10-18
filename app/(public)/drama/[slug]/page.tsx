@@ -2,11 +2,7 @@
 
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import {
-  getDramaBySlug,
-  getAllDramaSlugs,
-  getRelatedDramas,
-} from "@/app/actions/drama";
+import { getDramaBySlug, getRelatedDramas } from "@/app/actions/drama";
 import { generateDramaTitle, generateMetaDescription } from "@/lib/utils";
 import DramaHero from "@/components/drama/DramaHero";
 import DramaSynopsis from "@/components/drama/DramaSynopsis";
@@ -37,41 +33,68 @@ export async function generateMetadata({
 
   if (!success || !drama) {
     return {
-      title: "Drama Tidak Ditemukan",
+      title: "Drama Tidak Dijumpai | Mangeakkk Drama",
+      description:
+        "Drama yang anda cari tidak dijumpai. Kembali ke halaman utama untuk melihat senarai drama terkini.",
+      robots: {
+        index: false,
+        follow: true,
+      },
     };
   }
 
+  const title = generateDramaTitle(drama.title);
+  const description = generateMetaDescription(drama.description);
+  const canonicalUrl = `https://mangeakkk.my.id/drama/${drama.slug}`;
+
+  // Generate keywords based on drama data
+  const keywords = [
+    `tonton ${drama.title}`,
+    `${drama.title} episod penuh`,
+    `streaming ${drama.title} HD`,
+    `${drama.title} online percuma`,
+    "drama melayu",
+    "drama malaysia terkini",
+    "tonton drama percuma",
+  ];
+
   return {
-    title: generateDramaTitle(drama.title),
-    description: generateMetaDescription(drama.description),
-    keywords: [
-      `nonton ${drama.title}`,
-      `${drama.title} full episod`,
-      `streaming ${drama.title} HD`,
-      "drama malaysia",
-      "drama malaysia full episod",
-    ],
+    title,
+    description,
+    keywords,
     openGraph: {
-      title: generateDramaTitle(drama.title),
-      description: generateMetaDescription(drama.description),
+      title,
+      description,
       type: "video.tv_show",
+      url: canonicalUrl,
+      siteName: "Mangeakkk Drama",
       images: [
         {
           url: drama.thumbnail,
           width: 1200,
           height: 630,
-          alt: drama.title,
+          alt: `${drama.title} - Tonton Drama Melayu Online`,
         },
       ],
+      ...(drama.releaseDate && {
+        releaseDate: drama.releaseDate,
+      }),
     },
     twitter: {
       card: "summary_large_image",
-      title: generateDramaTitle(drama.title),
-      description: generateMetaDescription(drama.description),
+      title,
+      description,
       images: [drama.thumbnail],
+      creator: "@mangeakkk",
     },
     alternates: {
-      canonical: `https://mangeakkk.my.id/drama/${drama.slug}`,
+      canonical: canonicalUrl,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
     },
   };
 }

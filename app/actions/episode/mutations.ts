@@ -2,6 +2,35 @@
 
 import { prisma } from "@/lib/db";
 
+// Check if episode already exists for a drama
+export async function checkEpisodeExists(dramaId: string, episodeNum: number) {
+  try {
+    const existingEpisode = await prisma.episode.findFirst({
+      where: {
+        dramaId: dramaId,
+        episodeNum: episodeNum,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    return {
+      success: true,
+      exists: !!existingEpisode,
+      episodeId: existingEpisode?.id || null,
+    };
+  } catch (error) {
+    console.error("Error checking episode:", error);
+    return {
+      success: false,
+      exists: false,
+      episodeId: null,
+    };
+  }
+}
+
+// Updated createEpisode with duplicate check
 interface CreateEpisodeInput {
   videoUrl: string;
   dramaId: string;
@@ -10,9 +39,18 @@ interface CreateEpisodeInput {
   slug: string;
 }
 
-// Create new episode
 export async function createEpisode(data: CreateEpisodeInput) {
   try {
+    // Check if episode already exists
+    const checkResult = await checkEpisodeExists(data.dramaId, data.episodeNum);
+
+    if (checkResult.exists) {
+      return {
+        success: false,
+        error: `Episod ${data.episodeNum} untuk drama ini sudah wujud`,
+      };
+    }
+
     const episode = await prisma.episode.create({
       data: {
         ...data,
@@ -22,9 +60,10 @@ export async function createEpisode(data: CreateEpisodeInput) {
 
     return { success: true, episode };
   } catch (error) {
+    console.error("Error creating episode:", error);
     return {
       success: false,
-      error: "Failed to create episode",
+      error: "Gagal menambah episod",
     };
   }
 }

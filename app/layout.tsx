@@ -12,20 +12,22 @@ import { BaseSchema } from "@/components/schema/BaseSchema";
 export const metadata: Metadata = {
   metadataBase: new URL("https://mangeakkk.my.id"),
   title: {
-    default: "Mangeakkk Drama - Nonton Drama Malaysia Full Episod",
-    template: "%s Mangeakkk Drama",
+    default: "Tonton Drama Melayu Terkini 2025 - Episod Penuh HD Percuma",
+    template: "%s | Mangeakkk Drama",
   },
   description:
-    "Nonton drama Malaysia terbaru dan terlengkap full episod. Streaming drama Malaysia gratis dengan kualitas HD. Update episode terbaru setiap hari.",
+    "Tonton drama Melayu terkini dan terlengkap secara percuma. Streaming drama Malaysia HD dengan episod penuh. Kemaskini setiap hari tanpa iklan.",
   keywords: [
-    "nonton drama malaysia",
-    "drama malaysia full episod",
-    "streaming drama malaysia",
-    "drama malaysia terbaru",
-    "nonton drama melayu",
-    "drama melayu free",
-    "drama malaysia online",
-    "tonton drama malaysia",
+    "tonton drama melayu",
+    "drama melayu terkini",
+    "drama malaysia episod penuh",
+    "streaming drama melayu percuma",
+    "tonton drama online",
+    "drama melayu 2025",
+    "drama tv3 online",
+    "drama astro online",
+    "drama melayu best",
+    "tonton drama percuma",
   ],
   authors: [{ name: "Mangeakkk Drama" }],
   creator: "Mangeakkk Drama",
@@ -37,27 +39,27 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "id_ID",
-    alternateLocale: ["ms_MY", "en_SG"],
+    locale: "ms_MY",
+    alternateLocale: ["en_SG", "id_ID"],
     url: "https://mangeakkk.my.id",
     siteName: "Mangeakkk Drama",
-    title: "Mangeakkk Drama - Nonton Drama Malaysia full episod",
+    title: "Mangeakkk Drama - Tonton Drama Melayu Episod Penuh Percuma",
     description:
-      "Platform streaming drama Malaysia terlengkap tanpa iklan full HD. Update setiap hari",
+      "Platform streaming drama Melayu terlengkap tanpa iklan. Kualiti HD, kemaskini setiap hari. Tonton sekarang!",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/logo/logo.png",
         width: 1200,
         height: 630,
-        alt: "Mangeakkk Drama",
+        alt: "Mangeakkk Drama - Tonton Drama Melayu Online",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Mangeakkk Drama - Nonton Drama Malaysia Sub Indo",
+    title: "Mangeakkk Drama - Tonton Drama Melayu Terkini",
     description:
-      "Platform streaming drama Malaysia terlengkap dengan subtitle Indonesia.",
+      "Platform streaming drama Melayu terlengkap. Episod penuh HD percuma.",
     images: ["/logo/logo.png"],
     creator: "@mangeakkk",
   },
@@ -80,8 +82,17 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: "https://mangeakkk.my.id",
+    languages: {
+      "ms-MY": "https://mangeakkk.my.id",
+    },
   },
   category: "entertainment",
+  verification: {
+    google: "h32myJ_wYVqSb9E1wTlcWEX3wIzR3mazjJrZ1s8bfUU",
+  },
+  other: {
+    "google-site-verification": "h32myJ_wYVqSb9E1wTlcWEX3wIzR3mazjJrZ1s8bfUU",
+  },
 };
 
 export default async function RootLayout({

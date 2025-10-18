@@ -14,6 +14,7 @@ import { Select, SelectItem } from "@heroui/select";
 import { addToast } from "@heroui/toast";
 import { createEpisode, updateEpisode } from "@/app/actions/episode/mutations";
 import { getAllDramas } from "@/app/actions/drama";
+import { checkEpisodeExists } from "@/app/actions/episode"; // Add this action
 import { useRouter } from "next/navigation";
 
 type Episode = {
@@ -46,6 +47,7 @@ export default function EpisodeFormModal({
   const [isLoading, setIsLoading] = useState(false);
   const [dramas, setDramas] = useState<any[]>([]);
   const [loadingDramas, setLoadingDramas] = useState(false);
+  const [episodeError, setEpisodeError] = useState<string>("");
 
   const [formData, setFormData] = useState({
     videoUrl: "",
@@ -79,6 +81,7 @@ export default function EpisodeFormModal({
   // Reset form when modal opens/closes or episode changes
   useEffect(() => {
     if (isOpen) {
+      setEpisodeError(""); // Reset error
       if (mode === "edit" && episode) {
         setFormData({
           videoUrl: episode.videoUrl,
@@ -118,20 +121,66 @@ export default function EpisodeFormModal({
 
   const handleDramaChange = (value: string) => {
     setFormData((prev) => ({ ...prev, dramaId: value }));
+    setEpisodeError(""); // Clear error when drama changes
     if (formData.episodeNum) {
       generateUrls(value, formData.episodeNum);
+      checkDuplicateEpisode(value, formData.episodeNum);
     }
   };
 
-  const handleEpisodeNumChange = (value: string) => {
+  const handleEpisodeNumChange = async (value: string) => {
     setFormData((prev) => ({ ...prev, episodeNum: value }));
-    if (formData.dramaId) {
+    setEpisodeError(""); // Clear error
+
+    if (formData.dramaId && value) {
       generateUrls(formData.dramaId, value);
+      await checkDuplicateEpisode(formData.dramaId, value);
+    }
+  };
+
+  // Check if episode already exists
+  const checkDuplicateEpisode = async (dramaId: string, episodeNum: string) => {
+    if (!dramaId || !episodeNum) return;
+
+    try {
+      const result = await checkEpisodeExists(dramaId, parseInt(episodeNum));
+
+      // If in edit mode, ignore if it's the same episode being edited
+      if (
+        mode === "edit" &&
+        episode &&
+        result.exists &&
+        result.episodeId === episode.id
+      ) {
+        setEpisodeError("");
+        return;
+      }
+
+      if (result.exists) {
+        const drama = dramas.find((d) => d.id === dramaId);
+        setEpisodeError(
+          `Episod ${episodeNum} untuk ${drama?.title || "drama ini"} sudah ada!`
+        );
+      } else {
+        setEpisodeError("");
+      }
+    } catch (error) {
+      console.error("Failed to check episode:", error);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate if episode already exists
+    if (episodeError) {
+      addToast({
+        title: "Gagal!",
+        description: episodeError,
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -152,11 +201,11 @@ export default function EpisodeFormModal({
 
       if (result.success) {
         addToast({
-          title: "Berhasil!",
+          title: "Berjaya!",
           description:
             mode === "edit"
-              ? "Episode berhasil diupdate!"
-              : "Episode berhasil ditambahkan!",
+              ? "Episod berjaya dikemaskini!"
+              : "Episod berjaya ditambah!",
         });
         onClose();
         router.refresh();
@@ -169,7 +218,7 @@ export default function EpisodeFormModal({
     } catch (error) {
       addToast({
         title: "Error!",
-        description: "Terjadi kesalahan tidak terduga",
+        description: "Terjadi kesalahan tidak dijangka",
       });
     } finally {
       setIsLoading(false);
@@ -188,7 +237,7 @@ export default function EpisodeFormModal({
         <form onSubmit={handleSubmit}>
           <ModalHeader className="flex flex-col gap-1">
             <h2 className="text-xl font-bold text-white">
-              {mode === "edit" ? "Edit Episode" : "Tambah Episode Baru"}
+              {mode === "edit" ? "Edit Episod" : "Tambah Episod Baru"}
             </h2>
           </ModalHeader>
 
@@ -232,16 +281,20 @@ export default function EpisodeFormModal({
               {/* Episode Number */}
               <Input
                 type="number"
-                label="Nomor Episode"
+                label="Nombor Episod"
                 placeholder="Contoh: 1"
                 value={formData.episodeNum}
                 onValueChange={handleEpisodeNumChange}
                 isRequired
                 min={1}
+                isInvalid={!!episodeError}
+                errorMessage={episodeError}
                 classNames={{
                   label: "text-white",
                   input: "text-white",
-                  inputWrapper: "bg-zinc-800 border-zinc-700",
+                  inputWrapper: episodeError
+                    ? "bg-zinc-800 border-red-500"
+                    : "bg-zinc-800 border-zinc-700",
                 }}
               />
 
@@ -254,7 +307,7 @@ export default function EpisodeFormModal({
                   setFormData((prev) => ({ ...prev, videoUrl: value }))
                 }
                 isDisabled
-                description="Auto-generated, bisa diedit manual"
+                description="Auto-generated, boleh edit manual"
                 isRequired
                 classNames={{
                   label: "text-white",
@@ -273,7 +326,7 @@ export default function EpisodeFormModal({
                 onValueChange={(value) =>
                   setFormData((prev) => ({ ...prev, slug: value }))
                 }
-                description="Auto-generated, bisa diedit manual"
+                description="Auto-generated, boleh edit manual"
                 isRequired
                 classNames={{
                   label: "text-white",
@@ -286,7 +339,7 @@ export default function EpisodeFormModal({
               {/* Release Date */}
               <Input
                 type="date"
-                label="Tanggal Rilis"
+                label="Tarikh Tayangan"
                 value={formData.releaseDate}
                 onValueChange={(value) =>
                   setFormData((prev) => ({ ...prev, releaseDate: value }))
@@ -310,8 +363,13 @@ export default function EpisodeFormModal({
             >
               Batal
             </Button>
-            <Button color="primary" type="submit" isLoading={isLoading}>
-              {mode === "edit" ? "Update" : "Tambah"}
+            <Button
+              color="primary"
+              type="submit"
+              isLoading={isLoading}
+              isDisabled={!!episodeError}
+            >
+              {mode === "edit" ? "Kemaskini" : "Tambah"}
             </Button>
           </ModalFooter>
         </form>

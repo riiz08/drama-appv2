@@ -1,11 +1,17 @@
 import { Metadata } from "next";
 import { getDramasWithFilters } from "@/app/actions/drama";
-import { generateBrowseTitle } from "@/lib/utils";
 import BrowseHeader from "@/components/browse/BrowseHeader";
 import BrowseFilters from "@/components/browse/BrowseFilters";
 import BrowseGrid from "@/components/browse/BrowseGrid";
 import BrowsePagination from "@/components/browse/BrowsePagination";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
+
+// Generate static params for all episodes
+export async function generateStaticParams() {
+  return [];
+}
+
+export const revalidate = 259200;
 
 // Type for search params
 type SearchParams = Promise<{
@@ -22,22 +28,33 @@ export async function generateMetadata({
   searchParams: SearchParams;
 }): Promise<Metadata> {
   const params = await searchParams;
-  const status = params?.status as "ONGOING" | "TAMAT" | undefined;
+  const status = params?.status;
   const query = params?.q;
 
-  let title = generateBrowseTitle(status);
+  let title = "Senarai Drama Melayu Terkini - Episod Penuh HD";
   let description =
-    "Jelajahi koleksi drama Malaysia lengkap dengan subtitle Indonesia.";
+    "Terokai koleksi drama Melayu lengkap dengan kualiti HD. Tonton episod penuh percuma tanpa iklan.";
+  let canonical = "https://mangeakkk.my.id/drama";
 
+  // Search results page
   if (query) {
-    title = `Hasil Pencarian: ${query} Mangeakkk Drama`;
-    description = `Hasil pencarian untuk "${query}". Nonton drama Malaysia sub Indo terlengkap.`;
-  } else if (status === "ONGOING") {
+    title = `Carian: ${query} | Mangeakkk Drama`;
+    description = `Hasil carian untuk "${query}". Tonton drama Melayu terlengkap secara percuma dengan kualiti HD.`;
+    canonical = `https://mangeakkk.my.id/drama?q=${encodeURIComponent(query)}`;
+  }
+  // Ongoing dramas
+  else if (status === "ONGOING") {
+    title = "Drama Melayu Sedang Tayangan - Kemaskini Setiap Hari";
     description =
-      "Daftar drama Malaysia yang sedang tayang. Update episode terbaru setiap hari.";
-  } else if (status === "TAMAT") {
+      "Senarai drama Melayu yang sedang ditayangkan. Kemaskini episod terkini setiap hari. Tonton sekarang secara percuma!";
+    canonical = "https://mangeakkk.my.id/drama?status=ONGOING";
+  }
+  // Completed dramas
+  else if (status === "TAMAT") {
+    title = "Drama Melayu Sudah Tamat - Episod Lengkap";
     description =
-      "Daftar drama Malaysia yang sudah selesai tayang. Tonton semua episode lengkap.";
+      "Senarai drama Melayu yang sudah tamat. Tonton semua episod lengkap dari mula hingga akhir secara percuma.";
+    canonical = "https://mangeakkk.my.id/drama?status=TAMAT";
   }
 
   return {
@@ -46,11 +63,42 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
+      url: canonical,
+      type: "website",
+      images: [
+        {
+          url: "/og-image.jpg",
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/og-image.jpg"],
     },
     alternates: {
-      canonical: "https://mangeakkk.my.id/drama",
+      canonical,
+    },
+    robots: {
+      index: true,
+      follow: true,
     },
   };
+}
+
+// Helper function untuk generate title (optional)
+function generateBrowseTitle(status?: "ONGOING" | "TAMAT"): string {
+  if (status === "ONGOING") {
+    return "Drama Melayu Sedang Tayangan";
+  }
+  if (status === "TAMAT") {
+    return "Drama Melayu Sudah Tamat";
+  }
+  return "Senarai Drama Melayu Terkini";
 }
 
 export default async function BrowsePage({

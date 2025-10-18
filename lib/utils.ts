@@ -97,31 +97,83 @@ export function getStatusColor(status: "ONGOING" | "TAMAT"): string {
 
 export function generateMetaTitle(title: string, suffix?: string): string {
   const siteName = suffix || "Mangeakkk Drama";
-  return `${title} ${siteName}`;
+  return `${title} | ${siteName}`;
 }
 
 export function generateMetaDescription(
   description: string,
-  maxLength: number = 160
+  maxLength: number = 155
 ): string {
-  return truncate(description, maxLength);
+  if (!description) return "";
+
+  // Remove HTML tags
+  const cleanDesc = description.replace(/<[^>]*>/g, "").trim();
+
+  // Truncate if needed
+  if (cleanDesc.length <= maxLength) {
+    return cleanDesc;
+  }
+
+  return cleanDesc.substring(0, maxLength - 3) + "...";
 }
 
 export function generateDramaTitle(dramaTitle: string): string {
-  return generateMetaTitle(`Nonton ${dramaTitle} Full Episod]`);
+  return generateMetaTitle(`Tonton ${dramaTitle} Episod Penuh HD`);
 }
 
 export function generateEpisodeTitle(
   dramaTitle: string,
   episodeNum: number
 ): string {
-  return generateMetaTitle(`${dramaTitle} Episode ${episodeNum} FUll Episod`);
+  return generateMetaTitle(
+    `${dramaTitle} Episod ${episodeNum} - Tonton Online`
+  );
 }
 
 export function generateBrowseTitle(status?: "ONGOING" | "TAMAT"): string {
-  if (status === "ONGOING") return generateMetaTitle("Drama Sedang Tayang");
-  if (status === "TAMAT") return generateMetaTitle("Drama Selesai");
-  return generateMetaTitle("Jelajahi Drama Malaysia");
+  if (status === "ONGOING") return generateMetaTitle("Drama Sedang Tayangan");
+  if (status === "TAMAT") return generateMetaTitle("Drama Sudah Tamat");
+  return generateMetaTitle("Senarai Drama Melayu Terkini");
+}
+
+// Generate keywords for drama page
+export function generateDramaKeywords(
+  dramaTitle: string,
+  genre?: string[],
+  year?: number
+): string[] {
+  const keywords = [
+    `tonton ${dramaTitle}`,
+    `${dramaTitle} episod penuh`,
+    `streaming ${dramaTitle} HD`,
+    `${dramaTitle} online percuma`,
+    "drama melayu",
+    "drama malaysia terkini",
+  ];
+
+  if (genre && genre.length > 0) {
+    keywords.push(...genre.map((g) => `drama ${g.toLowerCase()}`));
+  }
+
+  if (year) {
+    keywords.push(`drama ${year}`);
+  }
+
+  return keywords;
+}
+
+// Generate keywords for episode page
+export function generateEpisodeKeywords(
+  dramaTitle: string,
+  episodeNum: number
+): string[] {
+  return [
+    `tonton ${dramaTitle} episod ${episodeNum}`,
+    `${dramaTitle} ep ${episodeNum}`,
+    `${dramaTitle} episod ${episodeNum} HD`,
+    `streaming ${dramaTitle} episod ${episodeNum}`,
+    "drama melayu episod penuh",
+  ];
 }
 
 // ============================================
