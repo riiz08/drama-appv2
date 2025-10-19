@@ -1,5 +1,3 @@
-//file app/layout.tsx
-
 import "@/styles/globals.css";
 import type { Metadata } from "next";
 import clsx from "clsx";
@@ -8,6 +6,7 @@ import { fontSans } from "@/config/fonts";
 import { ToastProvider } from "@heroui/toast";
 import AdSenseScript from "@/components/ads/AdsenseScript";
 import { BaseSchema } from "@/components/schema/BaseSchema";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://mangeakkk.my.id"),
@@ -90,9 +89,6 @@ export const metadata: Metadata = {
   verification: {
     google: "h32myJ_wYVqSb9E1wTlcWEX3wIzR3mazjJrZ1s8bfUU",
   },
-  other: {
-    "google-site-verification": "h32myJ_wYVqSb9E1wTlcWEX3wIzR3mazjJrZ1s8bfUU",
-  },
 };
 
 export default async function RootLayout({
@@ -101,9 +97,22 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="my" suppressHydrationWarning>
+    <html lang="ms-MY" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#000000" />
+
+        {/* ✅ Preconnect to external domains */}
+        <link rel="preconnect" href="https://cdn.mangeakkk.my.id" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+
+        {/* ✅ DNS Prefetch for analytics & ads */}
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
       </head>
       <body
         className={clsx(
@@ -123,6 +132,8 @@ export default async function RootLayout({
           {children}
           <AdSenseScript />
         </Providers>
+
+        <GoogleAnalytics gaId="G-MG1B3ZG1YZ" />
       </body>
     </html>
   );

@@ -26,17 +26,19 @@ interface EpisodeInfoProps {
 
 export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
   const [imageError, setImageError] = useState(false);
+  const statusLabel = getStatusLabel(episode.drama.status);
+  const dramaUrl = getDramaUrl(episode.drama.slug);
 
   return (
-    <section className="relative w-full bg-black">
+    <div className="relative w-full bg-black">
       {/* Background Blur Effect */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
         {!imageError && (
           <>
             <div className="absolute inset-0 scale-110 blur-2xl opacity-20">
               <Image
                 src={episode.drama.thumbnail}
-                alt="Mangeakk Drama"
+                alt=""
                 fill
                 className="object-cover"
                 priority
@@ -53,52 +55,69 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
         <div className="flex flex-col md:flex-row gap-8">
           {/* Poster */}
           <div className="flex-shrink-0 mx-auto md:mx-0">
-            <div className="relative w-64 h-96 rounded-lg overflow-hidden shadow-2xl bg-zinc-900">
+            <figure className="relative w-64 h-96 rounded-lg overflow-hidden shadow-2xl bg-zinc-900">
               {!imageError ? (
                 <Image
                   src={episode.drama.thumbnail}
-                  alt={episode.drama.title}
+                  alt={`Poster ${episode.drama.title} Episod ${episode.episodeNum}`}
+                  title={`Tonton ${episode.drama.title} Episod ${episode.episodeNum} Online`}
                   fill
                   priority
+                  fetchPriority="high"
                   className="object-cover"
                   sizes="256px"
                   onError={() => setImageError(true)}
                 />
               ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-800">
-                  <ImageOff className="w-16 h-16 text-zinc-600 mb-2" />
+                <div
+                  className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-800"
+                  role="img"
+                  aria-label={`Poster ${episode.drama.title} tidak tersedia`}
+                >
+                  <ImageOff
+                    className="w-16 h-16 text-zinc-600 mb-2"
+                    aria-hidden="true"
+                  />
                   <span className="text-sm text-zinc-500 text-center px-4">
                     {episode.drama.title}
                   </span>
                 </div>
               )}
-            </div>
+            </figure>
           </div>
 
           {/* Info */}
           <div className="flex-1 space-y-6">
             {/* Back Button */}
-            <div>
+            <nav aria-label="Kembali ke halaman drama">
               <Button
                 as={Link}
-                href={getDramaUrl(episode.drama.slug)}
+                href={dramaUrl}
                 variant="light"
                 size="sm"
-                startContent={<ArrowLeft className="w-4 h-4" />}
+                startContent={
+                  <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+                }
                 className="text-gray-400 hover:text-white"
+                aria-label={`Kembali ke halaman ${episode.drama.title}`}
               >
                 Kembali ke Drama
               </Button>
-            </div>
+            </nav>
 
             {/* Title & Episode Number */}
             <div className="space-y-3">
               <h1 className="text-3xl md:text-5xl font-bold text-white leading-tight">
-                {episode.drama.title}
+                {episode.drama.title} - Episod {episode.episodeNum}
               </h1>
               <div className="flex flex-wrap items-center gap-2">
-                <Chip size="md" color="danger" variant="solid">
-                  Episode {episode.episodeNum}
+                <Chip
+                  size="md"
+                  color="danger"
+                  variant="solid"
+                  aria-label={`Episod ${episode.episodeNum}`}
+                >
+                  Episod {episode.episodeNum}
                 </Chip>
                 <Chip
                   size="md"
@@ -106,84 +125,95 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
                     episode.drama.status === "ONGOING" ? "success" : "primary"
                   }
                   variant="flat"
+                  aria-label={`Status: ${statusLabel}`}
                 >
-                  {getStatusLabel(episode.drama.status)}
+                  {statusLabel}
                 </Chip>
               </div>
             </div>
 
             {/* Meta Information */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Release Date */}
               <div className="flex items-center gap-3 text-gray-300">
-                <Calendar className="w-5 h-5 text-red-500" />
+                <Calendar className="w-5 h-5 text-red-500" aria-hidden="true" />
                 <div>
-                  <p className="text-xs text-gray-500">Tanggal Rilis</p>
-                  <p className="text-sm font-medium">
-                    {formatDate(episode.releaseDate)}
-                  </p>
+                  <dt className="text-xs text-gray-500">Tarikh Tayangan</dt>
+                  <dd className="text-sm font-medium">
+                    <time
+                      dateTime={new Date(episode.releaseDate).toISOString()}
+                    >
+                      {formatDate(episode.releaseDate)}
+                    </time>
+                  </dd>
                 </div>
               </div>
 
               {/* Total Episodes */}
               {episode.drama.totalEpisode && (
                 <div className="flex items-center gap-3 text-gray-300">
-                  <Tv2 className="w-5 h-5 text-red-500" />
+                  <Tv2 className="w-5 h-5 text-red-500" aria-hidden="true" />
                   <div>
-                    <p className="text-xs text-gray-500">Total Episode</p>
-                    <p className="text-sm font-medium">
-                      {episode.episodeNum} dari {episode.drama.totalEpisode}{" "}
-                      Episode
-                    </p>
+                    <dt className="text-xs text-gray-500">Jumlah Episod</dt>
+                    <dd className="text-sm font-medium">
+                      {episode.episodeNum} daripada {episode.drama.totalEpisode}{" "}
+                      Episod
+                    </dd>
                   </div>
                 </div>
               )}
-            </div>
+            </dl>
 
             {/* Description */}
-            <div className="pt-2 border-t border-zinc-800">
-              <h3 className="text-sm font-semibold text-white mb-2">
+            <article className="pt-2 border-t border-zinc-800">
+              <h2 className="text-sm font-semibold text-white mb-2">
                 Tentang Drama
-              </h3>
+              </h2>
               <p className="text-gray-400 text-sm leading-relaxed">
                 {episode.drama.description}
               </p>
-            </div>
+            </article>
 
-            {/* Tags */}
-            <div className="flex flex-wrap gap-2">
-              <Chip
-                as={Link}
-                href={`/drama/${episode.drama.slug}`}
-                startContent={<Hash className="w-4 h-4" />}
-              >
-                {episode.drama.title}
-              </Chip>
-              <Chip
-                as={Link}
-                startContent={<Hash className="w-4 h-4" />}
-                href={`/episode/${episode.slug}`}
-              >
-                {episode.drama.title} episod {episode.episodeNum}
-              </Chip>
-              <Chip
-                as={Link}
-                startContent={<Hash className="w-4 h-4" />}
-                href={`/`}
-              >
-                Kepala Bergetar
-              </Chip>
-              <Chip
-                as={Link}
-                startContent={<Hash className="w-4 h-4" />}
-                href={`/`}
-              >
-                Basah Jeruk
-              </Chip>
-            </div>
+            {/* Tags - SEO Keywords */}
+            <nav aria-label="Kata kunci berkaitan">
+              <div className="flex flex-wrap gap-2">
+                <Chip
+                  size="sm"
+                  variant="flat"
+                  startContent={<Hash className="w-3 h-3" aria-hidden="true" />}
+                  aria-label={`Tag: ${episode.drama.title}`}
+                >
+                  {episode.drama.title}
+                </Chip>
+                <Chip
+                  size="sm"
+                  variant="flat"
+                  startContent={<Hash className="w-3 h-3" aria-hidden="true" />}
+                  aria-label={`Tag: episod ${episode.episodeNum}`}
+                >
+                  Episod {episode.episodeNum}
+                </Chip>
+                <Chip
+                  size="sm"
+                  variant="flat"
+                  startContent={<Hash className="w-3 h-3" aria-hidden="true" />}
+                  aria-label="Tag: drama melayu"
+                >
+                  Drama Melayu
+                </Chip>
+                <Chip
+                  size="sm"
+                  variant="flat"
+                  startContent={<Hash className="w-3 h-3" aria-hidden="true" />}
+                  aria-label={`Tag: ${statusLabel.toLowerCase()}`}
+                >
+                  {statusLabel}
+                </Chip>
+              </div>
+            </nav>
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

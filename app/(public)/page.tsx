@@ -101,7 +101,7 @@ export default async function HomePage() {
       return { success, data };
     },
     ["HomepageData"],
-    { revalidate: 60 }
+    { revalidate: 300 }
   );
 
   const homepageData = await getCachedHomePageData();
