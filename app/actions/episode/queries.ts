@@ -17,6 +17,70 @@ export async function getEpisodeBySlug(slug: string) {
             description: true,
             status: true,
             totalEpisode: true,
+            airTime: true,
+            production: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            casts: {
+              select: {
+                id: true,
+                character: true,
+                cast: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+            directors: {
+              select: {
+                id: true,
+                director: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+            writers: {
+              select: {
+                id: true,
+                writer: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+            novelAuthors: {
+              select: {
+                id: true,
+                novelTitle: true,
+                novelAuthor: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+            networks: {
+              select: {
+                id: true,
+                network: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -49,6 +113,7 @@ export async function getLatestEpisodes(limit?: number, offset?: number) {
         include: {
           drama: {
             select: {
+              id: true,
               title: true,
               slug: true,
               thumbnail: true,
@@ -123,7 +188,7 @@ export async function getAdjacentEpisodes(
   }
 }
 
-// Get all episodes for a drama
+// Get all episodes for a drama by ID
 export async function getEpisodesByDramaId(dramaId: string) {
   try {
     const episodes = await prisma.episode.findMany({
@@ -134,6 +199,45 @@ export async function getEpisodesByDramaId(dramaId: string) {
         slug: true,
         episodeNum: true,
         releaseDate: true,
+        videoUrl: true,
+      },
+    });
+
+    return { success: true, episodes };
+  } catch (error) {
+    return {
+      success: false,
+      episodes: [],
+      error: "Failed to fetch episodes",
+    };
+  }
+}
+
+// Get all episodes for a drama by SLUG (more user-friendly)
+export async function getEpisodesByDramaSlug(dramaSlug: string) {
+  try {
+    const drama = await prisma.drama.findUnique({
+      where: { slug: dramaSlug },
+      select: { id: true },
+    });
+
+    if (!drama) {
+      return {
+        success: false,
+        episodes: [],
+        error: "Drama not found",
+      };
+    }
+
+    const episodes = await prisma.episode.findMany({
+      where: { dramaId: drama.id },
+      orderBy: { episodeNum: "asc" },
+      select: {
+        id: true,
+        slug: true,
+        episodeNum: true,
+        releaseDate: true,
+        videoUrl: true,
       },
     });
 
@@ -260,6 +364,23 @@ export async function getAllEpisodes(page: number = 1, limit: number = 20) {
         hasMore: false,
       },
       error: "Failed to fetch episodes",
+    };
+  }
+}
+
+// Get episode count by drama
+export async function getEpisodeCountByDrama(dramaId: string) {
+  try {
+    const count = await prisma.episode.count({
+      where: { dramaId },
+    });
+
+    return { success: true, count };
+  } catch (error) {
+    return {
+      success: false,
+      count: 0,
+      error: "Failed to count episodes",
     };
   }
 }

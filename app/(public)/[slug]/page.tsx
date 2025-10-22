@@ -16,6 +16,7 @@ import OngoingSection from "@/components/home/OnGoingSection";
 import CompletedSection from "@/components/home/CompletedSection";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { VideoObjectSchema } from "@/components/schema/VideoObjectSchema";
+import { EpisodeSchema } from "@/components/schema/EpisodeSchema";
 
 // Generate static params for all episodes
 export async function generateStaticParams() {
@@ -55,13 +56,46 @@ export async function generateMetadata({
     : { prev: null, next: null };
 
   const title = generateEpisodeTitle(episode.drama.title, episode.episodeNum);
-  const description = episode.drama.description
-    ? generateMetaDescription(episode.drama.description)
-    : `Tonton ${episode.drama.title} Episod ${episode.episodeNum} secara percuma dalam kualiti HD. Streaming tanpa iklan.`;
+
+  // Build rich description with cast/director info
+  let description = `Tonton ${episode.drama.title} Episod ${episode.episodeNum} secara percuma dalam kualiti HD.`;
+
+  // Add cast info to description
+  if (episode.drama.casts && episode.drama.casts.length > 0) {
+    const topCast = episode.drama.casts
+      .slice(0, 3)
+      .map((c) => c.cast.name)
+      .join(", ");
+    description += ` Lakonan ${topCast}`;
+    if (episode.drama.casts.length > 3) {
+      description += ` dan lain-lain`;
+    }
+    description += `.`;
+  }
+
+  // Add director info
+  if (episode.drama.directors && episode.drama.directors.length > 0) {
+    const directorNames = episode.drama.directors
+      .map((d) => d.director.name)
+      .join(", ");
+    description += ` Diarahkan oleh ${directorNames}.`;
+  }
+
+  // Add production info
+  if (episode.drama.production) {
+    description += ` Produksi ${episode.drama.production.name}.`;
+  }
+
+  description += ` ${episode.drama.description || "Streaming tanpa iklan."}`;
+
+  // Truncate if too long
+  if (description.length > 160) {
+    description = description.substring(0, 157) + "...";
+  }
 
   const canonicalUrl = `https://mangeakkk.my.id/${episode.slug}`;
 
-  // Generate dynamic keywords
+  // Build dynamic keywords with cast/director/production
   const keywords = [
     `${episode.drama.title} episod ${episode.episodeNum}`,
     `tonton ${episode.drama.title} ep ${episode.episodeNum}`,
@@ -71,6 +105,32 @@ export async function generateMetadata({
     "drama melayu episod penuh",
     "tonton drama online",
   ];
+
+  // Add cast names to keywords
+  if (episode.drama.casts && episode.drama.casts.length > 0) {
+    episode.drama.casts.slice(0, 5).forEach((cast) => {
+      keywords.push(`${cast.cast.name} ${episode.drama.title}`);
+    });
+  }
+
+  // Add director names
+  if (episode.drama.directors && episode.drama.directors.length > 0) {
+    episode.drama.directors.forEach((director) => {
+      keywords.push(`${director.director.name} drama`);
+    });
+  }
+
+  // Add production company
+  if (episode.drama.production) {
+    keywords.push(`${episode.drama.production.name} drama`);
+  }
+
+  // Add network names
+  if (episode.drama.networks && episode.drama.networks.length > 0) {
+    episode.drama.networks.forEach((network) => {
+      keywords.push(`${network.network.name} drama`);
+    });
+  }
 
   return {
     title,
@@ -98,17 +158,23 @@ export async function generateMetadata({
       }),
     },
     twitter: {
-      card: "summary_large_image",
+      card: "player",
       title,
       description,
       images: [episode.drama.thumbnail],
       creator: "@mangeakkk",
+      players: {
+        playerUrl: `https://mangeakkk.my.id/${episode.slug}`,
+        streamUrl: episode.videoUrl,
+        width: 1280,
+        height: 720,
+      },
     },
     alternates: {
       canonical: canonicalUrl,
       // Add prev/next episode links if available
       ...(prev && {
-        prev: `https://mangeakkk.my.id/${prev?.slug}`,
+        prev: `https://mangeakkk.my.id/${prev.slug}`,
       }),
       ...(next && {
         next: `https://mangeakkk.my.id/${next.slug}`,
@@ -169,6 +235,7 @@ export default async function EpisodePlayerPage({
 
       {/* VideoObject Schema */}
       <VideoObjectSchema episode={episode} />
+      <EpisodeSchema episode={episode} />
 
       <div className="min-h-screen bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">

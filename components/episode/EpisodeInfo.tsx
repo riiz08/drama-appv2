@@ -3,10 +3,23 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Calendar, ArrowLeft, Hash, ImageOff, Tv2 } from "lucide-react";
+import {
+  Calendar,
+  ArrowLeft,
+  Hash,
+  ImageOff,
+  Tv2,
+  Users,
+  Clapperboard,
+  Pencil,
+  BookOpen,
+  Building2,
+  Tv as TvIcon,
+} from "lucide-react";
 import { getDramaUrl, formatDate, getStatusLabel } from "@/lib/utils";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
+import { Accordion, AccordionItem } from "@heroui/accordion";
 
 interface EpisodeInfoProps {
   episode: {
@@ -20,6 +33,48 @@ interface EpisodeInfoProps {
       status: "ONGOING" | "TAMAT";
       totalEpisode: number | null;
       thumbnail: string;
+      airTime?: string | null;
+      production?: {
+        id: string;
+        name: string;
+      } | null;
+      casts?: Array<{
+        id: string;
+        character: string | null;
+        cast: {
+          id: string;
+          name: string;
+        };
+      }>;
+      directors?: Array<{
+        id: string;
+        director: {
+          id: string;
+          name: string;
+        };
+      }>;
+      writers?: Array<{
+        id: string;
+        writer: {
+          id: string;
+          name: string;
+        };
+      }>;
+      novelAuthors?: Array<{
+        id: string;
+        novelTitle: string | null;
+        novelAuthor: {
+          id: string;
+          name: string;
+        };
+      }>;
+      networks?: Array<{
+        id: string;
+        network: {
+          id: string;
+          name: string;
+        };
+      }>;
     };
   };
 }
@@ -28,6 +83,15 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
   const [imageError, setImageError] = useState(false);
   const statusLabel = getStatusLabel(episode.drama.status);
   const dramaUrl = getDramaUrl(episode.drama.slug);
+
+  // Check if has credits
+  const hasCredits =
+    (episode.drama.casts && episode.drama.casts.length > 0) ||
+    (episode.drama.directors && episode.drama.directors.length > 0) ||
+    (episode.drama.writers && episode.drama.writers.length > 0) ||
+    (episode.drama.novelAuthors && episode.drama.novelAuthors.length > 0) ||
+    episode.drama.production ||
+    (episode.drama.networks && episode.drama.networks.length > 0);
 
   return (
     <div className="relative w-full bg-black">
@@ -162,6 +226,37 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
                   </div>
                 </div>
               )}
+
+              {/* Production */}
+              {episode.drama.production && (
+                <div className="flex items-center gap-3 text-gray-300">
+                  <Building2
+                    className="w-5 h-5 text-red-500"
+                    aria-hidden="true"
+                  />
+                  <div>
+                    <dt className="text-xs text-gray-500">Produksi</dt>
+                    <dd className="text-sm font-medium">
+                      {episode.drama.production.name}
+                    </dd>
+                  </div>
+                </div>
+              )}
+
+              {/* Networks */}
+              {episode.drama.networks && episode.drama.networks.length > 0 && (
+                <div className="flex items-center gap-3 text-gray-300">
+                  <TvIcon className="w-5 h-5 text-red-500" aria-hidden="true" />
+                  <div>
+                    <dt className="text-xs text-gray-500">Rangkaian</dt>
+                    <dd className="text-sm font-medium">
+                      {episode.drama.networks
+                        .map((n) => n.network.name)
+                        .join(", ")}
+                    </dd>
+                  </div>
+                </div>
+              )}
             </dl>
 
             {/* Description */}
@@ -173,6 +268,149 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
                 {episode.drama.description}
               </p>
             </article>
+
+            {/* Credits Accordion */}
+            {hasCredits && (
+              <div className="pt-2 border-t border-zinc-800">
+                <Accordion
+                  variant="bordered"
+                  className="px-0"
+                  itemClasses={{
+                    base: "bg-zinc-900/50 border-zinc-800",
+                    title: "text-white font-semibold text-sm",
+                    trigger: "py-3 px-4",
+                    content: "px-4 pb-4 text-sm",
+                  }}
+                >
+                  <AccordionItem
+                    key="credits"
+                    aria-label="Kredit & Pelakon"
+                    title="Kredit & Pelakon"
+                    startContent={<Users className="w-4 h-4 text-red-500" />}
+                  >
+                    <div className="space-y-4">
+                      {/* Cast */}
+                      {episode.drama.casts &&
+                        episode.drama.casts.length > 0 && (
+                          <div>
+                            <div className="flex items-center gap-2 mb-2">
+                              <Users
+                                className="w-4 h-4 text-red-500"
+                                aria-hidden="true"
+                              />
+                              <h3 className="font-semibold text-white">
+                                Pelakon
+                              </h3>
+                            </div>
+                            <div className="space-y-1 text-gray-400">
+                              {episode.drama.casts.map((item) => (
+                                <p key={item.id}>
+                                  <span className="text-white">
+                                    {item.cast.name}
+                                  </span>
+                                  {item.character && (
+                                    <span className="text-gray-500">
+                                      {" "}
+                                      sebagai {item.character}
+                                    </span>
+                                  )}
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                      {/* Directors */}
+                      {episode.drama.directors &&
+                        episode.drama.directors.length > 0 && (
+                          <div>
+                            <div className="flex items-center gap-2 mb-2">
+                              <Clapperboard
+                                className="w-4 h-4 text-red-500"
+                                aria-hidden="true"
+                              />
+                              <h3 className="font-semibold text-white">
+                                Pengarah
+                              </h3>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {episode.drama.directors.map((item) => (
+                                <Chip
+                                  key={item.id}
+                                  size="sm"
+                                  variant="flat"
+                                  className="bg-zinc-800 text-white"
+                                >
+                                  {item.director.name}
+                                </Chip>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                      {/* Writers */}
+                      {episode.drama.writers &&
+                        episode.drama.writers.length > 0 && (
+                          <div>
+                            <div className="flex items-center gap-2 mb-2">
+                              <Pencil
+                                className="w-4 h-4 text-red-500"
+                                aria-hidden="true"
+                              />
+                              <h3 className="font-semibold text-white">
+                                Penulis
+                              </h3>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {episode.drama.writers.map((item) => (
+                                <Chip
+                                  key={item.id}
+                                  size="sm"
+                                  variant="flat"
+                                  className="bg-zinc-800 text-white"
+                                >
+                                  {item.writer.name}
+                                </Chip>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                      {/* Novel Authors */}
+                      {episode.drama.novelAuthors &&
+                        episode.drama.novelAuthors.length > 0 && (
+                          <div>
+                            <div className="flex items-center gap-2 mb-2">
+                              <BookOpen
+                                className="w-4 h-4 text-red-500"
+                                aria-hidden="true"
+                              />
+                              <h3 className="font-semibold text-white">
+                                Penulis Novel
+                              </h3>
+                            </div>
+                            <div className="space-y-1 text-gray-400">
+                              {episode.drama.novelAuthors.map((item) => (
+                                <p key={item.id}>
+                                  <span className="text-white">
+                                    {item.novelAuthor.name}
+                                  </span>
+                                  {item.novelTitle && (
+                                    <span className="text-gray-500 italic">
+                                      {" "}
+                                      - "{item.novelTitle}"
+                                    </span>
+                                  )}
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                    </div>
+                  </AccordionItem>
+                </Accordion>
+              </div>
+            )}
 
             {/* Tags - SEO Keywords */}
             <nav aria-label="Kata kunci berkaitan">

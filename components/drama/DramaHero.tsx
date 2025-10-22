@@ -1,10 +1,16 @@
-//file DramaHero.tsx
-
 "use client";
 
 import { useState } from "react";
 import Image from "next/image";
-import { Calendar, Tv2, Clock, ImageOff, Hash } from "lucide-react";
+import {
+  Calendar,
+  Tv2,
+  Clock,
+  ImageOff,
+  Hash,
+  Building2,
+  Tv,
+} from "lucide-react";
 import { formatDate, getStatusLabel } from "@/lib/utils";
 import { Chip } from "@heroui/chip";
 
@@ -18,6 +24,17 @@ interface DramaHeroProps {
     totalEpisode: number | null;
     airTime: string | null;
     slug: string;
+    production?: {
+      id: string;
+      name: string;
+    } | null;
+    networks?: Array<{
+      id: string;
+      network: {
+        id: string;
+        name: string;
+      };
+    }>;
   };
 }
 
@@ -136,6 +153,35 @@ export default function DramaHero({ drama }: DramaHeroProps) {
                   <div>
                     <dt className="text-xs text-gray-500">Jadual Tayangan</dt>
                     <dd className="text-sm font-medium">{drama.airTime}</dd>
+                  </div>
+                </div>
+              )}
+
+              {/* Production */}
+              {drama.production && (
+                <div className="flex items-center gap-3 text-gray-300">
+                  <Building2
+                    className="w-5 h-5 text-red-500"
+                    aria-hidden="true"
+                  />
+                  <div>
+                    <dt className="text-xs text-gray-500">Produksi</dt>
+                    <dd className="text-sm font-medium">
+                      {drama.production.name}
+                    </dd>
+                  </div>
+                </div>
+              )}
+
+              {/* Networks */}
+              {drama.networks && drama.networks.length > 0 && (
+                <div className="flex items-center gap-3 text-gray-300">
+                  <Tv className="w-5 h-5 text-red-500" aria-hidden="true" />
+                  <div>
+                    <dt className="text-xs text-gray-500">Rangkaian</dt>
+                    <dd className="text-sm font-medium">
+                      {drama.networks.map((n) => n.network.name).join(", ")}
+                    </dd>
                   </div>
                 </div>
               )}

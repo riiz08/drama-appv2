@@ -1,4 +1,4 @@
-// components/schema/tvseries-schema.tsx
+// components/schema/TVSeriesSchema.tsx
 import { TVSeries, WithContext } from "schema-dts";
 
 interface TVSeriesSchemaProps {
@@ -12,6 +12,20 @@ interface TVSeriesSchemaProps {
     totalEpisode?: number | null;
     endDate?: Date | string | null;
     airTime?: string | null;
+    // Relations
+    casts?: Array<{
+      cast: { name: string };
+      character?: string | null;
+    }>;
+    directors?: Array<{
+      director: { name: string };
+    }>;
+    writers?: Array<{
+      writer: { name: string };
+    }>;
+    production?: {
+      name: string;
+    } | null;
   };
 }
 
@@ -27,6 +41,30 @@ export function TVSeriesSchema({ drama }: TVSeriesSchemaProps) {
       ? drama.endDate.toISOString().split("T")[0]
       : new Date(drama.endDate).toISOString().split("T")[0]
     : undefined;
+
+  // Build actors array
+  const actors = drama.casts?.map((item) => ({
+    "@type": "PerformanceRole" as const,
+    actor: {
+      "@type": "Person" as const,
+      name: item.cast.name,
+    },
+    ...(item.character && {
+      characterName: item.character,
+    }),
+  }));
+
+  // Build directors array
+  const directors = drama.directors?.map((item) => ({
+    "@type": "Person" as const,
+    name: item.director.name,
+  }));
+
+  // Build writers array (creators in schema.org)
+  const creators = drama.writers?.map((item) => ({
+    "@type": "Person" as const,
+    name: item.writer.name,
+  }));
 
   const schema: WithContext<TVSeries> = {
     "@context": "https://schema.org",
@@ -48,6 +86,24 @@ export function TVSeriesSchema({ drama }: TVSeriesSchemaProps) {
       endDate && {
         endDate: endDate,
       }),
+    ...(actors &&
+      actors.length > 0 && {
+        actor: actors,
+      }),
+    ...(directors &&
+      directors.length > 0 && {
+        director: directors,
+      }),
+    ...(creators &&
+      creators.length > 0 && {
+        creator: creators,
+      }),
+    ...(drama.production && {
+      productionCompany: {
+        "@type": "Organization",
+        name: drama.production.name,
+      },
+    }),
   };
 
   return (

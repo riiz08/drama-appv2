@@ -22,7 +22,19 @@ model Drama {
   updatedAt    DateTime  @updatedAt
   totalEpisode Int?      @db.SmallInt
   airTime      String?
+  
   episodes     Episode[]
+  casts        DramaCast[]
+  directors    DramaDirector[]
+  writers      DramaWriter[]
+  novelAuthors DramaNovelAuthor[]
+  networks     DramaNetwork[]
+  productionId String?
+  production   Production? @relation(fields: [productionId], references: [id])
+  
+  @@index([productionId])
+  @@index([status])
+  @@index([isPopular])
 }
 
 model Episode {
@@ -34,7 +46,119 @@ model Episode {
   releaseDate DateTime
   updatedAt   DateTime @updatedAt
   slug        String   @unique
-  drama       Drama    @relation(fields: [dramaId], references: [id])
+  drama       Drama    @relation(fields: [dramaId], references: [id], onDelete: Cascade)
+  
+  @@index([dramaId])
+  @@index([episodeNum])
+}
+
+// Cast - cuma nama
+model Cast {
+  id     String      @id @default(uuid())
+  name   String
+  dramas DramaCast[]
+}
+
+model DramaCast {
+  id        String  @id @default(uuid())
+  dramaId   String
+  castId    String
+  character String? // nama karakter (sebagai siapa)
+  
+  drama Drama @relation(fields: [dramaId], references: [id], onDelete: Cascade)
+  cast  Cast  @relation(fields: [castId], references: [id], onDelete: Cascade)
+  
+  @@unique([dramaId, castId])
+  @@index([dramaId])
+  @@index([castId])
+}
+
+// Director - cuma nama
+model Director {
+  id     String          @id @default(uuid())
+  name   String
+  dramas DramaDirector[]
+}
+
+model DramaDirector {
+  id         String @id @default(uuid())
+  dramaId    String
+  directorId String
+  
+  drama    Drama    @relation(fields: [dramaId], references: [id], onDelete: Cascade)
+  director Director @relation(fields: [directorId], references: [id], onDelete: Cascade)
+  
+  @@unique([dramaId, directorId])
+  @@index([dramaId])
+  @@index([directorId])
+}
+
+// Writer - cuma nama
+model Writer {
+  id     String        @id @default(uuid())
+  name   String
+  dramas DramaWriter[]
+}
+
+model DramaWriter {
+  id       String @id @default(uuid())
+  dramaId  String
+  writerId String
+  
+  drama  Drama  @relation(fields: [dramaId], references: [id], onDelete: Cascade)
+  writer Writer @relation(fields: [writerId], references: [id], onDelete: Cascade)
+  
+  @@unique([dramaId, writerId])
+  @@index([dramaId])
+  @@index([writerId])
+}
+
+// Novel Author - cuma nama + judul novel
+model NovelAuthor {
+  id     String             @id @default(uuid())
+  name   String
+  dramas DramaNovelAuthor[]
+}
+
+model DramaNovelAuthor {
+  id            String @id @default(uuid())
+  dramaId       String
+  novelAuthorId String
+  novelTitle    String? // judul novel asli
+  
+  drama       Drama       @relation(fields: [dramaId], references: [id], onDelete: Cascade)
+  novelAuthor NovelAuthor @relation(fields: [novelAuthorId], references: [id], onDelete: Cascade)
+  
+  @@unique([dramaId, novelAuthorId])
+  @@index([dramaId])
+  @@index([novelAuthorId])
+}
+
+// Production - cuma nama
+model Production {
+  id     String  @id @default(uuid())
+  name   String
+  dramas Drama[]
+}
+
+// Network/Rangkaian (BARU) - Astro Ria, Astro GO, sooka, dll
+model Network {
+  id     String         @id @default(uuid())
+  name   String
+  dramas DramaNetwork[]
+}
+
+model DramaNetwork {
+  id        String @id @default(uuid())
+  dramaId   String
+  networkId String
+  
+  drama   Drama   @relation(fields: [dramaId], references: [id], onDelete: Cascade)
+  network Network @relation(fields: [networkId], references: [id], onDelete: Cascade)
+  
+  @@unique([dramaId, networkId])
+  @@index([dramaId])
+  @@index([networkId])
 }
 
 enum Status {

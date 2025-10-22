@@ -10,6 +10,7 @@ export async function getAllDramas(options?: {
   offset?: number;
   orderBy?: "title" | "releaseDate" | "createdAt";
   order?: "asc" | "desc";
+  includeRelations?: boolean;
 }) {
   try {
     const dramas = await prisma.drama.findMany({
@@ -31,6 +32,24 @@ export async function getAllDramas(options?: {
         description: true,
         airTime: true,
         episodes: true,
+        ...(options?.includeRelations && {
+          production: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          networks: {
+            select: {
+              network: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        }),
       },
     });
 
@@ -44,7 +63,7 @@ export async function getAllDramas(options?: {
   }
 }
 
-// Get drama by slug with episodes
+// Get drama by slug with ALL relations
 export async function getDramaBySlug(slug: string) {
   try {
     const drama = await prisma.drama.findUnique({
@@ -52,6 +71,76 @@ export async function getDramaBySlug(slug: string) {
       include: {
         episodes: {
           orderBy: { episodeNum: "asc" },
+          select: {
+            id: true,
+            episodeNum: true,
+            slug: true,
+            releaseDate: true,
+            videoUrl: true,
+          },
+        },
+        casts: {
+          select: {
+            id: true,
+            character: true,
+            cast: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        directors: {
+          select: {
+            id: true,
+            director: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        writers: {
+          select: {
+            id: true,
+            writer: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        novelAuthors: {
+          select: {
+            id: true,
+            novelTitle: true,
+            novelAuthor: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        networks: {
+          select: {
+            id: true,
+            network: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        production: {
+          select: {
+            id: true,
+            name: true,
+          },
         },
         _count: {
           select: { episodes: true },
@@ -266,19 +355,84 @@ export async function getRecentlyCompleted(limit?: number) {
   }
 }
 
-// Get related dramas (exclude current drama)
+// Get related dramas (improved logic)
 export async function getRelatedDramas(dramaId: string, limit?: number) {
   try {
     const currentDrama = await prisma.drama.findUnique({
       where: { id: dramaId },
-      select: { releaseDate: true },
+      select: {
+        releaseDate: true,
+        productionId: true,
+        status: true,
+      },
     });
 
     if (!currentDrama) {
       return { success: false, dramas: [] };
     }
 
-    // Get dramas from same year or nearby years
+    // Priority 1: Same production company
+    if (currentDrama.productionId) {
+      const sameProduction = await prisma.drama.findMany({
+        where: {
+          id: { not: dramaId },
+          productionId: currentDrama.productionId,
+        },
+        take: limit || 6,
+        orderBy: {
+          releaseDate: "desc",
+        },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          thumbnail: true,
+          releaseDate: true,
+          status: true,
+          totalEpisode: true,
+        },
+      });
+
+      if (sameProduction.length >= (limit || 6)) {
+        return { success: true, dramas: sameProduction };
+      }
+
+      // If not enough, combine with dramas from same year
+      const year = currentDrama.releaseDate.getFullYear();
+      const startDate = new Date(year, 0, 1);
+      const endDate = new Date(year, 11, 31);
+
+      const sameYear = await prisma.drama.findMany({
+        where: {
+          id: { not: dramaId },
+          productionId: { not: currentDrama.productionId },
+          releaseDate: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+        take: (limit || 6) - sameProduction.length,
+        orderBy: {
+          releaseDate: "desc",
+        },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          thumbnail: true,
+          releaseDate: true,
+          status: true,
+          totalEpisode: true,
+        },
+      });
+
+      return {
+        success: true,
+        dramas: [...sameProduction, ...sameYear],
+      };
+    }
+
+    // Priority 2: Same year if no production
     const year = currentDrama.releaseDate.getFullYear();
     const startDate = new Date(year - 1, 0, 1);
     const endDate = new Date(year + 1, 11, 31);

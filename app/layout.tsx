@@ -7,6 +7,7 @@ import { ToastProvider } from "@heroui/toast";
 import AdSenseScript from "@/components/ads/AdsenseScript";
 import { BaseSchema } from "@/components/schema/BaseSchema";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import RouteLoadingIndicator from "@/components/RouteLoadingIndicator";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://mangeakkk.my.id"),
@@ -127,6 +128,7 @@ export default async function RootLayout({
             forcedTheme: "dark",
           }}
         >
+          <RouteLoadingIndicator />
           <ToastProvider />
           <BaseSchema />
           {children}

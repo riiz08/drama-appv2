@@ -6,6 +6,84 @@ export type IconSvgProps = SVGProps<SVGSVGElement> & {
 };
 
 // ============================================
+// Relation Types (NEW)
+// ============================================
+
+export interface CastInput {
+  name: string;
+  character?: string;
+}
+
+export interface DirectorInput {
+  name: string;
+}
+
+export interface WriterInput {
+  name: string;
+}
+
+export interface NovelAuthorInput {
+  name: string;
+  novelTitle?: string;
+}
+
+export interface NetworkInput {
+  name: string;
+}
+
+export interface ProductionInput {
+  name: string;
+}
+
+// Types for returned data from queries
+export interface CastWithCharacter {
+  id: string;
+  character: string | null;
+  cast: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface DirectorData {
+  id: string;
+  director: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface WriterData {
+  id: string;
+  writer: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface NovelAuthorData {
+  id: string;
+  novelTitle: string | null;
+  novelAuthor: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface NetworkData {
+  id: string;
+  network: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface ProductionData {
+  id: string;
+  name: string;
+}
+
+// ============================================
 // Drama Types
 // ============================================
 
@@ -19,6 +97,14 @@ export interface CreateDramaInput {
   totalEpisode?: number;
   airTime?: string;
   isPopular?: boolean;
+
+  // Relations (NEW)
+  casts?: CastInput[];
+  directors?: DirectorInput[];
+  writers?: WriterInput[];
+  novelAuthors?: NovelAuthorInput[];
+  networks?: NetworkInput[];
+  production?: ProductionInput;
 }
 
 export interface UpdateDramaInput extends Partial<CreateDramaInput> {
@@ -28,6 +114,26 @@ export interface UpdateDramaInput extends Partial<CreateDramaInput> {
 export interface DramaWithEpisodes extends Drama {
   episodes: Episode[];
   _count?: {
+    episodes: number;
+  };
+}
+
+// Drama with full relations (for detail page)
+export interface DramaWithFullRelations extends Drama {
+  episodes: {
+    id: string;
+    episodeNum: number;
+    slug: string;
+    releaseDate: Date;
+    videoUrl: string;
+  }[];
+  casts: CastWithCharacter[];
+  directors: DirectorData[];
+  writers: WriterData[];
+  novelAuthors: NovelAuthorData[];
+  networks: NetworkData[];
+  production: ProductionData | null;
+  _count: {
     episodes: number;
   };
 }
@@ -42,6 +148,11 @@ export interface DramaCard {
   totalEpisode: number | null;
   description?: string;
   isPopular?: boolean;
+  production?: {
+    id: string;
+    name: string;
+  };
+  networks?: NetworkData[];
 }
 
 export interface DramaFilters {
@@ -78,11 +189,14 @@ export interface EpisodeWithDrama extends Episode {
     description: string;
     status: Status;
     totalEpisode: number | null;
+    airTime: string | null;
+    production: ProductionData | null;
   };
 }
 
 export interface EpisodeCard extends Episode {
   drama: {
+    id: string;
     title: string;
     slug: string;
     thumbnail: string;
@@ -207,4 +321,36 @@ export interface PaginationOptions {
 export interface SortOptions {
   orderBy?: string;
   order?: "asc" | "desc";
+}
+
+// ============================================
+// Form Types (NEW - for UI components)
+// ============================================
+
+export interface DramaFormData {
+  title: string;
+  slug: string;
+  description: string;
+  thumbnail: string;
+  status: StatusType;
+  releaseDate: Date;
+  totalEpisode?: number;
+  airTime?: string;
+  isPopular: boolean;
+
+  // Relations
+  casts: CastInput[];
+  directors: DirectorInput[];
+  writers: WriterInput[];
+  novelAuthors: NovelAuthorInput[];
+  networks: NetworkInput[];
+  production?: ProductionInput;
+}
+
+export interface EpisodeFormData {
+  videoUrl: string;
+  dramaId: string;
+  episodeNum: number;
+  releaseDate: Date;
+  slug: string;
 }

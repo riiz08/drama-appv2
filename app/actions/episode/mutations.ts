@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { revalidatePath } from "next/cache";
 
 // Check if episode already exists for a drama
 export async function checkEpisodeExists(dramaId: string, episodeNum: number) {
@@ -12,6 +13,7 @@ export async function checkEpisodeExists(dramaId: string, episodeNum: number) {
       },
       select: {
         id: true,
+        slug: true,
       },
     });
 
@@ -19,6 +21,7 @@ export async function checkEpisodeExists(dramaId: string, episodeNum: number) {
       success: true,
       exists: !!existingEpisode,
       episodeId: existingEpisode?.id || null,
+      episodeSlug: existingEpisode?.slug || null,
     };
   } catch (error) {
     console.error("Error checking episode:", error);
@@ -26,12 +29,13 @@ export async function checkEpisodeExists(dramaId: string, episodeNum: number) {
       success: false,
       exists: false,
       episodeId: null,
+      episodeSlug: null,
     };
   }
 }
 
-// Updated createEpisode with duplicate check
-interface CreateEpisodeInput {
+// Types
+export interface CreateEpisodeInput {
   videoUrl: string;
   dramaId: string;
   episodeNum: number;
@@ -39,6 +43,7 @@ interface CreateEpisodeInput {
   slug: string;
 }
 
+// Create episode with duplicate check
 export async function createEpisode(data: CreateEpisodeInput) {
   try {
     // Check if episode already exists
@@ -47,9 +52,15 @@ export async function createEpisode(data: CreateEpisodeInput) {
     if (checkResult.exists) {
       return {
         success: false,
-        error: `Episod ${data.episodeNum} untuk drama ini sudah wujud`,
+        error: `Episode ${data.episodeNum} untuk drama ini sudah wujud`,
       };
     }
+
+    // Get drama info for revalidation
+    const drama = await prisma.drama.findUnique({
+      where: { id: data.dramaId },
+      select: { slug: true },
+    });
 
     const episode = await prisma.episode.create({
       data: {
@@ -58,22 +69,62 @@ export async function createEpisode(data: CreateEpisodeInput) {
       },
     });
 
+    // Revalidate paths
+    revalidatePath("/");
+    if (drama) {
+      revalidatePath(`/drama/${drama.slug}`);
+    }
+
     return { success: true, episode };
   } catch (error) {
     console.error("Error creating episode:", error);
     return {
       success: false,
-      error: "Gagal menambah episod",
+      error: "Gagal menambah episode",
     };
   }
 }
 
-// Update episode
+// Update episode with duplicate check
 export async function updateEpisode(
   id: string,
   data: Partial<CreateEpisodeInput>
 ) {
   try {
+    // Get current episode
+    const currentEpisode = await prisma.episode.findUnique({
+      where: { id },
+      select: {
+        dramaId: true,
+        episodeNum: true,
+        drama: {
+          select: { slug: true },
+        },
+      },
+    });
+
+    if (!currentEpisode) {
+      return {
+        success: false,
+        error: "Episode not found",
+      };
+    }
+
+    // Check for duplicate if episodeNum is being changed
+    if (data.episodeNum && data.episodeNum !== currentEpisode.episodeNum) {
+      const checkResult = await checkEpisodeExists(
+        currentEpisode.dramaId,
+        data.episodeNum
+      );
+
+      if (checkResult.exists) {
+        return {
+          success: false,
+          error: `Episode ${data.episodeNum} untuk drama ini sudah wujud`,
+        };
+      }
+    }
+
     const updateData: any = { ...data };
 
     if (data.releaseDate) {
@@ -85,8 +136,14 @@ export async function updateEpisode(
       data: updateData,
     });
 
+    // Revalidate paths
+    revalidatePath("/");
+    revalidatePath(`/drama/${currentEpisode.drama.slug}`);
+    revalidatePath(`/episode/${episode.slug}`);
+
     return { success: true, episode };
   } catch (error) {
+    console.error("Error updating episode:", error);
     return {
       success: false,
       error: "Failed to update episode",
@@ -97,12 +154,30 @@ export async function updateEpisode(
 // Delete episode
 export async function deleteEpisode(id: string) {
   try {
+    // Get episode info before deletion for revalidation
+    const episode = await prisma.episode.findUnique({
+      where: { id },
+      select: {
+        slug: true,
+        drama: {
+          select: { slug: true },
+        },
+      },
+    });
+
     await prisma.episode.delete({
       where: { id },
     });
 
+    // Revalidate paths
+    revalidatePath("/");
+    if (episode) {
+      revalidatePath(`/drama/${episode.drama.slug}`);
+    }
+
     return { success: true };
   } catch (error) {
+    console.error("Error deleting episode:", error);
     return {
       success: false,
       error: "Failed to delete episode",
@@ -113,6 +188,14 @@ export async function deleteEpisode(id: string) {
 // Bulk create episodes
 export async function bulkCreateEpisodes(episodes: CreateEpisodeInput[]) {
   try {
+    if (episodes.length === 0) {
+      return {
+        success: false,
+        count: 0,
+        error: "No episodes provided",
+      };
+    }
+
     const formattedEpisodes = episodes.map((ep) => ({
       ...ep,
       releaseDate: new Date(ep.releaseDate),
@@ -123,15 +206,112 @@ export async function bulkCreateEpisodes(episodes: CreateEpisodeInput[]) {
       skipDuplicates: true,
     });
 
+    // Get drama slug for revalidation
+    const drama = await prisma.drama.findUnique({
+      where: { id: episodes[0].dramaId },
+      select: { slug: true },
+    });
+
+    // Revalidate paths
+    revalidatePath("/");
+    if (drama) {
+      revalidatePath(`/drama/${drama.slug}`);
+    }
+
     return {
       success: true,
       count: result.count,
+      message: `Successfully created ${result.count} episode(s)`,
     };
   } catch (error) {
+    console.error("Error bulk creating episodes:", error);
     return {
       success: false,
       count: 0,
       error: "Failed to bulk create episodes",
+    };
+  }
+}
+
+// Bulk delete episodes by drama
+export async function bulkDeleteEpisodesByDrama(dramaId: string) {
+  try {
+    // Get drama info before deletion
+    const drama = await prisma.drama.findUnique({
+      where: { id: dramaId },
+      select: { slug: true },
+    });
+
+    const result = await prisma.episode.deleteMany({
+      where: { dramaId },
+    });
+
+    // Revalidate paths
+    revalidatePath("/");
+    if (drama) {
+      revalidatePath(`/drama/${drama.slug}`);
+    }
+
+    return {
+      success: true,
+      count: result.count,
+      message: `Successfully deleted ${result.count} episode(s)`,
+    };
+  } catch (error) {
+    console.error("Error bulk deleting episodes:", error);
+    return {
+      success: false,
+      count: 0,
+      error: "Failed to bulk delete episodes",
+    };
+  }
+}
+
+// Delete multiple episodes by IDs
+export async function bulkDeleteEpisodesByIds(episodeIds: string[]) {
+  try {
+    if (episodeIds.length === 0) {
+      return {
+        success: false,
+        count: 0,
+        error: "No episode IDs provided",
+      };
+    }
+
+    // Get unique drama slugs for revalidation
+    const episodes = await prisma.episode.findMany({
+      where: { id: { in: episodeIds } },
+      select: {
+        drama: {
+          select: { slug: true },
+        },
+      },
+    });
+
+    const result = await prisma.episode.deleteMany({
+      where: { id: { in: episodeIds } },
+    });
+
+    // Revalidate paths
+    revalidatePath("/");
+    const uniqueDramaSlugs = Array.from(
+      new Set(episodes.map((e) => e.drama.slug))
+    );
+    uniqueDramaSlugs.forEach((slug) => {
+      revalidatePath(`/drama/${slug}`);
+    });
+
+    return {
+      success: true,
+      count: result.count,
+      message: `Successfully deleted ${result.count} episode(s)`,
+    };
+  } catch (error) {
+    console.error("Error bulk deleting episodes:", error);
+    return {
+      success: false,
+      count: 0,
+      error: "Failed to bulk delete episodes",
     };
   }
 }
