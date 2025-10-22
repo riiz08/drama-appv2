@@ -282,14 +282,6 @@ export default async function DramaDetailPage({
             novelAuthors={drama.novelAuthors}
           />
 
-          <div className="max-w-5xl mx-auto py-4">
-            <AdUnit
-              slot={ADSENSE_CONFIG.slots.dramaBottomBanner}
-              format="auto"
-              responsive={true}
-            />
-          </div>
-
           {/* Episode List */}
           <section aria-labelledby="episodes-heading">
             <EpisodeList episodes={drama.episodes} dramaTitle={drama.title} />
@@ -328,6 +320,14 @@ export default async function DramaDetailPage({
               <CompletedSection dramas={completedResult.data.completed} />
             </section>
           )}
+
+          <div className="max-w-5xl mx-auto py-4">
+            <AdUnit
+              slot={ADSENSE_CONFIG.slots.dramaBottomBanner}
+              format="auto"
+              responsive={true}
+            />
+          </div>
         </div>
       </div>
     </>

@@ -8,6 +8,7 @@ import OngoingSection from "@/components/home/OnGoingSection";
 import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 import AdUnit from "@/components/ads/AdUnit";
 import { unstable_cache } from "next/cache";
+import SEOContentSection from "@/components/home/SeoContentSections";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://mangeakkk.my.id"),
@@ -101,7 +102,7 @@ export default async function HomePage() {
       return { success, data };
     },
     ["HomepageData"],
-    { revalidate: 300 }
+    { revalidate: 1500 }
   );
 
   const homepageData = await getCachedHomePageData();
@@ -197,6 +198,7 @@ export default async function HomePage() {
             className="max-w-3xl mx-auto"
           />
         </div>
+        <SEOContentSection />
       </div>
     </div>
   );
