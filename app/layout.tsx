@@ -8,6 +8,7 @@ import AdSenseScript from "@/components/ads/AdsenseScript";
 import { BaseSchema } from "@/components/schema/BaseSchema";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import RouteLoadingIndicator from "@/components/RouteLoadingIndicator";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://mangeakkk.my.id"),
@@ -104,16 +105,6 @@ export default async function RootLayout({
 
         {/* ✅ Preconnect to external domains */}
         <link rel="preconnect" href="https://cdn.mangeakkk.my.id" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-
-        {/* ✅ DNS Prefetch for analytics & ads */}
-        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
       </head>
       <body
         className={clsx(
@@ -136,6 +127,7 @@ export default async function RootLayout({
         </Providers>
 
         <GoogleAnalytics gaId="G-MG1B3ZG1YZ" />
+        <Analytics />
       </body>
     </html>
   );

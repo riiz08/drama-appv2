@@ -4,8 +4,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getEpisodeBySlug, getAdjacentEpisodes } from "@/app/actions/episode";
 import { getEpisodesByDramaId } from "@/app/actions/episode";
-import { generateEpisodeTitle, generateMetaDescription } from "@/lib/utils";
-import VideoPlayer from "@/components/episode/VideoPlayer";
+import { generateEpisodeTitle } from "@/lib/utils";
 import EpisodeInfo from "@/components/episode/EpisodeInfo";
 import EpisodeNavigation from "@/components/episode/EpisodeNavigation";
 import EpisodeListPlayer from "@/components/episode/EpisodeListPlayer";
@@ -16,6 +15,7 @@ import OngoingSection from "@/components/home/OnGoingSection";
 import CompletedSection from "@/components/home/CompletedSection";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { VideoObjectSchema } from "@/components/schema/VideoObjectSchema";
+import VideoPlayerWrapper from "@/components/episode/VideoPlayerWrapper";
 import { EpisodeSchema } from "@/components/schema/EpisodeSchema";
 
 // Generate static params for all episodes
@@ -255,7 +255,7 @@ export default async function EpisodePlayerPage({
 
           {/* Video Player - Main Content */}
           <article aria-label="Video player">
-            <VideoPlayer
+            <VideoPlayerWrapper
               videoUrl={episode.videoUrl}
               title={`${episode.drama.title} - Episod ${episode.episodeNum}`}
             />
