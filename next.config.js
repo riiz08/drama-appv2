@@ -81,6 +81,22 @@ const nextConfig = {
 
   async redirects() {
     return [
+      // Redirect old URL structures to new structure
+      {
+        source: "/drama/detail/:slug*",
+        destination: "/drama/:slug*",
+        permanent: true,
+      },
+      {
+        source: "/drama/watch/:slug*",
+        destination: "/:slug*",
+        permanent: true,
+      },
+      {
+        source: "/watch/:slug*",
+        destination: "/:slug*",
+        permanent: true,
+      },
       {
         source: "/latest-update",
         destination: "/drama?sort=latest",
