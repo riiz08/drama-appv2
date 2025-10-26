@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://mangeakkk.my.id"),
   title: {
     default: "Tonton Drama Melayu Terkini 2025 - Episod Penuh HD Percuma",
-    template: "%s | Mangeakkk Drama",
+    template: "%s",
   },
   description:
     "Tonton drama Melayu terkini dan terlengkap secara percuma. Streaming drama Malaysia HD dengan episod penuh. Kemaskini setiap hari tanpa iklan.",
