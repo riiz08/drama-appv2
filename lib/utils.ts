@@ -96,8 +96,8 @@ export function getStatusColor(status: "ONGOING" | "TAMAT"): string {
 // ============================================
 
 export function generateMetaTitle(title: string, suffix?: string): string {
-  const siteName = suffix || "Mangeakkk Drama";
-  return `${title} | ${siteName}`;
+  const siteName = suffix || "Mangeakkk";
+  return `${title} - ${siteName}`;
 }
 
 export function generateMetaDescription(
@@ -118,7 +118,7 @@ export function generateMetaDescription(
 }
 
 export function generateDramaTitle(dramaTitle: string): string {
-  return generateMetaTitle(`Tonton ${dramaTitle} Episod Penuh HD`);
+  return generateMetaTitle(`Tonton ${dramaTitle} Episod Penuh`);
 }
 
 export function generateEpisodeTitle(

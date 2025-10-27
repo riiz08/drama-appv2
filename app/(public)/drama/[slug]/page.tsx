@@ -34,7 +34,7 @@ export async function generateMetadata({
 
   if (!success || !drama) {
     return {
-      title: "Drama Tidak Dijumpai | Mangeakkk Drama",
+      title: "Drama Tidak Dijumpai - Mangeakkk Drama",
       description:
         "Drama yang anda cari tidak dijumpai. Kembali ke halaman utama untuk melihat senarai drama terkini.",
       robots: {

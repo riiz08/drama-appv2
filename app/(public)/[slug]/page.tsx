@@ -36,7 +36,7 @@ export async function generateMetadata({
 
   if (!success || !episode) {
     return {
-      title: "Episod Tidak Dijumpai | Mangeakkk Drama",
+      title: "Episod Tidak Dijumpai - Mangeakkk",
       description:
         "Episod yang anda cari tidak dijumpai. Kembali ke halaman drama untuk melihat senarai episod.",
       robots: {
