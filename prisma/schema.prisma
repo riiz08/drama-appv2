@@ -32,9 +32,15 @@ model Drama {
   productionId String?
   production   Production? @relation(fields: [productionId], references: [id])
   
+  // OPTIMIZED INDEXES FOR BROWSE PAGE PERFORMANCE
   @@index([productionId])
   @@index([status])
   @@index([isPopular])
+  @@index([releaseDate(sort: Desc)]) // Latest sorting
+  @@index([title]) // Search queries
+  @@index([status, releaseDate(sort: Desc)]) // Filter by status + sort
+  @@index([isPopular, releaseDate(sort: Desc)]) // Popular sorting
+  @@index([status, isPopular, releaseDate(sort: Desc)]) // Filtered popular
 }
 
 model Episode {
@@ -48,8 +54,12 @@ model Episode {
   slug        String   @unique
   drama       Drama    @relation(fields: [dramaId], references: [id], onDelete: Cascade)
   
+  // OPTIMIZED INDEXES
   @@index([dramaId])
   @@index([episodeNum])
+  @@index([dramaId, episodeNum]) // Composite for episode listing
+  @@index([releaseDate(sort: Desc)]) // Latest episodes
+  @@index([slug]) // Fast slug lookup (already unique but explicit index)
 }
 
 // Cast - cuma nama
@@ -57,6 +67,8 @@ model Cast {
   id     String      @id @default(uuid())
   name   String
   dramas DramaCast[]
+  
+  @@index([name]) // For cast search/autocomplete
 }
 
 model DramaCast {
@@ -78,6 +90,8 @@ model Director {
   id     String          @id @default(uuid())
   name   String
   dramas DramaDirector[]
+  
+  @@index([name]) // For director search
 }
 
 model DramaDirector {
@@ -98,6 +112,8 @@ model Writer {
   id     String        @id @default(uuid())
   name   String
   dramas DramaWriter[]
+  
+  @@index([name]) // For writer search
 }
 
 model DramaWriter {
@@ -118,6 +134,8 @@ model NovelAuthor {
   id     String             @id @default(uuid())
   name   String
   dramas DramaNovelAuthor[]
+  
+  @@index([name]) // For author search
 }
 
 model DramaNovelAuthor {
@@ -139,6 +157,8 @@ model Production {
   id     String  @id @default(uuid())
   name   String
   dramas Drama[]
+  
+  @@index([name]) // For production search
 }
 
 // Network/Rangkaian (BARU) - Astro Ria, Astro GO, sooka, dll
@@ -146,6 +166,8 @@ model Network {
   id     String         @id @default(uuid())
   name   String
   dramas DramaNetwork[]
+  
+  @@index([name]) // For network search
 }
 
 model DramaNetwork {
