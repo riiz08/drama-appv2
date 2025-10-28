@@ -86,32 +86,38 @@ const nextConfig = {
         source: "/drama/detail/:slug*",
         destination: "/drama/:slug*",
         permanent: true,
+        statusCode: 301,
       },
       {
         source: "/drama/watch/:slug*",
         destination: "/:slug*",
         permanent: true,
+        statusCode: 301,
       },
       {
         source: "/watch/:slug*",
         destination: "/:slug*",
         permanent: true,
+        statusCode: 301,
       },
       // BARU: Redirect /episode/* ke root
       {
         source: "/episode/:slug*",
         destination: "/:slug*",
         permanent: true,
+        statusCode: 301,
       },
       {
         source: "/latest-update",
         destination: "/drama?sort=latest",
         permanent: true,
+        statusCode: 301,
       },
       {
         source: "/popular",
         destination: "/drama?sort=popular",
         permanent: true,
+        statusCode: 301,
       },
     ];
   },
