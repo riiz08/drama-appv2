@@ -18,58 +18,97 @@ export const revalidate = 1500;
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://mangeakkk.my.id"),
-  title: {
-    default: "Tonton Drama Melayu Terkini 2025 - Episod Penuh HD Percuma",
-    template: "%s | Mangeakkk Drama",
-  },
+
+  // OPTIMIZED: No template, manual control for optimal length
+  title: "Tonton Drama Melayu Online Percuma - Full Episod HD Terkini",
+
+  // OPTIMIZED: More keyword variations + clearer value prop
   description:
-    "Tonton drama Melayu terkini dan terlengkap secara percuma. Streaming drama Malaysia HD dengan episod penuh. Kemaskini setiap hari tanpa iklan.",
+    "Tonton drama melayu terkini online percuma dalam kualiti HD. Streaming full episod drama Malaysia, drama Astro, dan telefilem terbaru di Mangeakkk. Kemaskini setiap hari!",
+
+  // EXPANDED: More keyword variations based on competitor
   keywords: [
-    "tonton drama melayu",
+    // Primary keywords (high priority)
+    "tonton drama melayu online",
     "drama melayu terkini",
-    "drama malaysia episod penuh",
     "streaming drama melayu percuma",
-    "tonton drama online",
+    "tonton drama online percuma",
+
+    // Secondary keywords
+    "drama melayu online percuma",
+    "drama malaysia terkini",
+    "full episod drama melayu",
     "drama melayu 2025",
-    "drama tv3 online",
+
+    // Network-specific
     "drama astro online",
-    "drama melayu best",
+    "drama tv3 online",
+    "drama tv9 terkini",
+
+    // Long-tail keywords
+    "tonton drama melayu full episod",
+    "streaming drama malaysia percuma",
+    "drama sedang tayang",
+    "drama melayu popular",
+    "telefilem melayu terbaru",
+
+    // Genre-specific
+    "drama romantis melayu",
+    "drama keluarga malaysia",
+
+    // Action keywords
     "tonton drama percuma",
+    "download drama melayu", // Even if not supported, captures intent
+    "streaming drama hd",
   ],
-  authors: [{ name: "Mangeakkk Drama" }],
-  creator: "Mangeakkk Drama",
-  publisher: "Mangeakkk Drama",
+
+  authors: [{ name: "Mangeakkk" }],
+  creator: "Mangeakkk",
+  publisher: "Mangeakkk",
+
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
+
+  // OPTIMIZED: Clearer messaging
   openGraph: {
     type: "website",
     locale: "ms_MY",
-    alternateLocale: ["en_SG", "id_ID"],
+    alternateLocale: ["en_MY", "id_ID"], // Changed en_SG to en_MY (more relevant)
     url: "https://mangeakkk.my.id",
-    siteName: "Mangeakkk Drama",
-    title: "Mangeakkk Drama - Tonton Drama Melayu Episod Penuh Percuma",
+    siteName: "Mangeakkk",
+
+    // OPTIMIZED: Keyword-rich title
+    title: "Tonton Drama Melayu Online Percuma - Full Episod HD | Mangeakkk",
+
+    // OPTIMIZED: More compelling description
     description:
-      "Platform streaming drama Melayu terlengkap tanpa iklan. Kualiti HD, kemaskini setiap hari. Tonton sekarang!",
+      "Platform streaming drama melayu terkini. Tonton full episod drama Malaysia, drama Astro, dan telefilem dalam kualiti HD secara percuma. Kemaskini setiap hari!",
+
     images: [
       {
-        url: "/logo/logo.png",
+        url: "/logo/logo.png", // Make sure this is 1200x630 OG image
         width: 1200,
         height: 630,
-        alt: "Mangeakkk Drama - Tonton Drama Melayu Online",
+        alt: "Mangeakkk - Streaming Drama Melayu Terkini Online Percuma",
       },
     ],
   },
+
+  // OPTIMIZED: Twitter metadata
   twitter: {
     card: "summary_large_image",
-    title: "Mangeakkk Drama - Tonton Drama Melayu Terkini",
+    title: "Tonton Drama Melayu Online Percuma - Full Episod HD",
     description:
-      "Platform streaming drama Melayu terlengkap. Episod penuh HD percuma.",
+      "Streaming drama melayu terkini dalam HD. Full episod percuma, kemaskini setiap hari!",
     images: ["/logo/logo.png"],
     creator: "@mangeakkk",
+    site: "@mangeakkk",
   },
+
+  // OPTIMIZED: More specific robots directives
   robots: {
     index: true,
     follow: true,
@@ -83,20 +122,30 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+
   icons: {
     icon: "/favicon.ico",
     apple: "/favicon/apple-touch-icon.png",
   },
+
   alternates: {
     canonical: "https://mangeakkk.my.id",
     languages: {
       "ms-MY": "https://mangeakkk.my.id",
+      "en-MY": "https://mangeakkk.my.id", // Keep same URL, different locale
     },
   },
+
   category: "entertainment",
+
   verification: {
     google: "h32myJ_wYVqSb9E1wTlcWEX3wIzR3mazjJrZ1s8bfUU",
   },
+
+  // ADDED: Additional metadata for better discovery
+  applicationName: "Mangeakkk",
+  referrer: "origin-when-cross-origin",
+
   other: {
     "google-site-verification": "h32myJ_wYVqSb9E1wTlcWEX3wIzR3mazjJrZ1s8bfUU",
   },

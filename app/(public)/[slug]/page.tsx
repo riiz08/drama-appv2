@@ -104,6 +104,8 @@ export async function generateMetadata({
     `${episode.drama.title} episod ${episode.episodeNum} percuma`,
     "drama melayu episod penuh",
     "tonton drama online",
+    `${episode.drama.title} full episode`, // ← ADD
+    `drama melayu online percuma`,
   ];
 
   // Add cast names to keywords

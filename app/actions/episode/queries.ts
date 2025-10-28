@@ -251,23 +251,35 @@ export async function getEpisodesByDramaSlug(dramaSlug: string) {
   }
 }
 
-// Get all episode slugs for static generation
+// app/actions/episode.ts (atau di file yang sesuai)
+
 export async function getAllEpisodeSlugs() {
   try {
     const episodes = await prisma.episode.findMany({
       select: {
         slug: true,
+        updatedAt: true, // Added for sitemap lastModified
+      },
+      orderBy: {
+        updatedAt: "desc", // Newest episodes first
       },
     });
 
     return {
       success: true,
-      slugs: episodes.map((e) => e.slug),
+      slugs: episodes.map((e) => e.slug), // Keep for backwards compatibility
+      episodes: episodes.map((e) => ({
+        // Added for sitemap
+        slug: e.slug,
+        updatedAt: e.updatedAt,
+      })),
     };
   } catch (error) {
+    console.error("Error fetching episode slugs:", error);
     return {
       success: false,
       slugs: [],
+      episodes: [],
       error: "Failed to fetch episode slugs",
     };
   }

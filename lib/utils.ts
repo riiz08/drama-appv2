@@ -125,9 +125,7 @@ export function generateEpisodeTitle(
   dramaTitle: string,
   episodeNum: number
 ): string {
-  return generateMetaTitle(
-    `${dramaTitle} Episod ${episodeNum} - Tonton Online`
-  );
+  return `Tonton ${dramaTitle} Episod ${episodeNum} Online - Mangeakkk`;
 }
 
 export function generateBrowseTitle(status?: "ONGOING" | "TAMAT"): string {
