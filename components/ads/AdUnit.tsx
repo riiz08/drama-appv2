@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 
 type AdUnitProps = {
-  slot: string; // Slot ID dari AdSense dashboard
+  slot: string;
   format?: "auto" | "rectangle" | "vertical" | "horizontal";
   responsive?: boolean;
   style?: React.CSSProperties;
@@ -16,11 +17,12 @@ export default function AdUnit({
   responsive,
   className,
 }: AdUnitProps) {
-  const adRef = useRef(null);
+  const adRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const pathname = usePathname();
 
+  // Intersection Observer - lazy load
   useEffect(() => {
-    // Intersection Observer - load ads only when visible
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -30,9 +32,7 @@ export default function AdUnit({
           }
         });
       },
-      {
-        rootMargin: "200px", // Load 200px before visible
-      }
+      { rootMargin: "200px" }
     );
 
     if (adRef.current) {
@@ -42,20 +42,31 @@ export default function AdUnit({
     return () => observer.disconnect();
   }, []);
 
+  // Ad refresh on route change
   useEffect(() => {
-    if (isVisible) {
+    if (isVisible && adRef.current) {
+      const ins = adRef.current.querySelector(".adsbygoogle");
+
+      if (ins) {
+        // Clear previous ad
+        ins.innerHTML = "";
+        ins.removeAttribute("data-adsbygoogle-status");
+      }
+
+      // Push fresh ad request
       try {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
       } catch (e) {
-        console.error("Ad failed", e);
+        console.error(`Ad push failed for slot ${slot}:`, e);
       }
     }
-  }, [isVisible]);
+  }, [isVisible, pathname, slot]);
 
   return (
     <div ref={adRef} className={className}>
       {isVisible ? (
         <ins
+          key={`${pathname}-${slot}`}
           className="adsbygoogle"
           style={{ display: "block" }}
           data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}

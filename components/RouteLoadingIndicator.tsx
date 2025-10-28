@@ -39,7 +39,7 @@ export default function RouteLoadingIndicator() {
           size="lg"
           color="danger"
           label="Loading..."
-          labelColor="danger"
+          labelColor="secondary"
         />
       </div>
     </div>
