@@ -97,6 +97,12 @@ const nextConfig = {
         destination: "/:slug*",
         permanent: true,
       },
+      // BARU: Redirect /episode/* ke root
+      {
+        source: "/episode/:slug*",
+        destination: "/:slug*",
+        permanent: true,
+      },
       {
         source: "/latest-update",
         destination: "/drama?sort=latest",
