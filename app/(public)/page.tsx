@@ -76,7 +76,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "ms_MY",
-    alternateLocale: ["en_MY", "id_ID"], // Changed en_SG to en_MY (more relevant)
+    alternateLocale: ["en_SG", "id_ID"], // Changed en_SG to en_MY (more relevant)
     url: "https://mangeakkk.my.id",
     siteName: "Mangeakkk",
 
