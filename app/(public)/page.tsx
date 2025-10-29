@@ -14,7 +14,7 @@ export async function generateStaticParams() {
   return [];
 }
 
-export const revalidate = 1500;
+export const revalidate = 600;
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://mangeakkk.my.id"),
@@ -157,7 +157,7 @@ export default async function HomePage() {
       return { success, data };
     },
     ["HomepageData"],
-    { revalidate: 1500 }
+    { revalidate: 600 }
   );
 
   const homepageData = await getCachedHomePageData();

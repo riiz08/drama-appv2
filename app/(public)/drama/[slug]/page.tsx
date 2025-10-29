@@ -21,7 +21,7 @@ export async function generateStaticParams() {
   return [];
 }
 
-export const revalidate = 259200;
+export const revalidate = 3600;
 
 // Generate metadata for SEO
 export async function generateMetadata({

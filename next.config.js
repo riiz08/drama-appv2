@@ -31,6 +31,7 @@ const nextConfig = {
 
   async headers() {
     return [
+      // Cache untuk static assets (gambar)
       {
         source: "/:all*(svg|jpg|jpeg|png|webp|avif|gif|ico)",
         headers: [
@@ -40,6 +41,7 @@ const nextConfig = {
           },
         ],
       },
+      // Cache untuk fonts
       {
         source: "/:all*(woff|woff2|ttf|otf|eot)",
         headers: [
@@ -49,6 +51,7 @@ const nextConfig = {
           },
         ],
       },
+      // Cache untuk Next.js optimized images
       {
         source: "/_next/image",
         headers: [
@@ -59,20 +62,11 @@ const nextConfig = {
         ],
       },
       {
-        source: "/drama/:slug*",
+        source: "/_next/static/:path*",
         headers: [
           {
             key: "Cache-Control",
-            value: "public, s-maxage=259200, stale-while-revalidate=604800",
-          },
-        ],
-      },
-      {
-        source: "/:slug((?!api|_next|static).*)",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, s-maxage=259200, stale-while-revalidate=604800",
+            value: "public, max-age=31536000, immutable",
           },
         ],
       },

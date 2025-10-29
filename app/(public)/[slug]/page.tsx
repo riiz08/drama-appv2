@@ -1,9 +1,12 @@
-// FILE: app/[slug]/page.tsx (SEO-OPTIMIZED)
+// FILE: app/[slug]/page.tsx (OPTIMIZED)
 
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getEpisodeBySlug, getAdjacentEpisodes } from "@/app/actions/episode";
-import { getEpisodesByDramaId } from "@/app/actions/episode";
+import { Suspense } from "react";
+import {
+  getEpisodeFullData,
+  getPopularEpisodeSlugs,
+} from "@/app/actions/episode/queries";
 import { generateEpisodeTitle } from "@/lib/utils";
 import EpisodeInfo from "@/components/episode/EpisodeInfo";
 import EpisodeNavigation from "@/components/episode/EpisodeNavigation";
@@ -18,121 +21,67 @@ import { VideoObjectSchema } from "@/components/schema/VideoObjectSchema";
 import VideoPlayerWrapper from "@/components/episode/VideoPlayerWrapper";
 import { EpisodeSchema } from "@/components/schema/EpisodeSchema";
 
-// Generate static params for all episodes
+// ============================================
+// 1. GENERATE STATIC PARAMS (CRITICAL!)
+// Pre-render 50 most popular episodes at build time
+// ============================================
 export async function generateStaticParams() {
-  return [];
+  const slugs = await getPopularEpisodeSlugs(50); // Start conservative
+  return slugs.map((slug) => ({ slug }));
 }
 
-export const revalidate = 259200;
+// ============================================
+// 2. ISR REVALIDATION (Conservative start)
+// ============================================
+export const revalidate = 3600; // 1 hour
 
-// Generate metadata for SEO
+// ============================================
+// 3. OPTIMIZED METADATA GENERATION
+// ============================================
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const { success, episode } = await getEpisodeBySlug(slug);
 
-  if (!success || !episode) {
+  // Use optimized single query
+  const data = await getEpisodeFullData(slug);
+
+  if (!data.success || !data.episode) {
     return {
       title: "Episod Tidak Dijumpai - Mangeakkk",
-      description:
-        "Episod yang anda cari tidak dijumpai. Kembali ke halaman drama untuk melihat senarai episod.",
-      robots: {
-        index: false,
-        follow: true,
-      },
+      description: "Episod yang anda cari tidak dijumpai.",
+      robots: { index: false, follow: true },
     };
   }
 
-  // Get adjacent episodes (prev/next)
-  const adjacentResult = await getAdjacentEpisodes(
-    episode.dramaId,
-    episode.episodeNum
-  );
-  const { prev, next } = adjacentResult.success
-    ? adjacentResult
-    : { prev: null, next: null };
-
+  const { episode, prev, next } = data;
   const title = generateEpisodeTitle(episode.drama.title, episode.episodeNum);
 
-  // Build rich description with cast/director info
-  let description = `Tonton ${episode.drama.title} Episod ${episode.episodeNum} secara percuma dalam kualiti HD.`;
+  // Build description
+  let description = `Tonton ${episode.drama.title} Episod ${episode.episodeNum} HD.`;
 
-  // Add cast info to description
-  if (episode.drama.casts && episode.drama.casts.length > 0) {
+  if (episode.drama.casts?.[0]) {
     const topCast = episode.drama.casts
       .slice(0, 3)
       .map((c) => c.cast.name)
       .join(", ");
-    description += ` Lakonan ${topCast}`;
-    if (episode.drama.casts.length > 3) {
-      description += ` dan lain-lain`;
-    }
-    description += `.`;
+    description += ` Lakonan ${topCast}.`;
   }
 
-  // Add director info
-  if (episode.drama.directors && episode.drama.directors.length > 0) {
-    const directorNames = episode.drama.directors
-      .map((d) => d.director.name)
-      .join(", ");
-    description += ` Diarahkan oleh ${directorNames}.`;
-  }
-
-  // Add production info
-  if (episode.drama.production) {
-    description += ` Produksi ${episode.drama.production.name}.`;
-  }
-
-  description += ` ${episode.drama.description || "Streaming tanpa iklan."}`;
-
-  // Truncate if too long
-  if (description.length > 160) {
-    description = description.substring(0, 157) + "...";
+  if (episode.drama.directors?.[0]) {
+    description += ` Diarahkan oleh ${episode.drama.directors[0].director.name}.`;
   }
 
   const canonicalUrl = `https://mangeakkk.my.id/${episode.slug}`;
 
-  // Build dynamic keywords with cast/director/production
+  // Minimal but effective keywords
   const keywords = [
     `${episode.drama.title} episod ${episode.episodeNum}`,
-    `tonton ${episode.drama.title} ep ${episode.episodeNum}`,
-    `${episode.drama.title} episod ${episode.episodeNum} HD`,
-    `streaming ${episode.drama.title} episod ${episode.episodeNum}`,
-    `${episode.drama.title} episod ${episode.episodeNum} percuma`,
-    "drama melayu episod penuh",
-    "tonton drama online",
-    `${episode.drama.title} full episode`, // ← ADD
-    `drama melayu online percuma`,
+    `tonton ${episode.drama.title}`,
+    "drama melayu online",
   ];
-
-  // Add cast names to keywords
-  if (episode.drama.casts && episode.drama.casts.length > 0) {
-    episode.drama.casts.slice(0, 5).forEach((cast) => {
-      keywords.push(`${cast.cast.name} ${episode.drama.title}`);
-    });
-  }
-
-  // Add director names
-  if (episode.drama.directors && episode.drama.directors.length > 0) {
-    episode.drama.directors.forEach((director) => {
-      keywords.push(`${director.director.name} drama`);
-    });
-  }
-
-  // Add production company
-  if (episode.drama.production) {
-    keywords.push(`${episode.drama.production.name} drama`);
-  }
-
-  // Add network names
-  if (episode.drama.networks && episode.drama.networks.length > 0) {
-    episode.drama.networks.forEach((network) => {
-      keywords.push(`${network.network.name} drama`);
-    });
-  }
 
   return {
     title,
@@ -149,38 +98,20 @@ export async function generateMetadata({
           url: episode.drama.thumbnail,
           width: 1200,
           height: 630,
-          alt: `${episode.drama.title} Episod ${episode.episodeNum} - Tonton Online`,
+          alt: title,
         },
       ],
-      ...(episode.drama.title && {
-        videoSeries: episode.drama.title,
-      }),
-      ...(episode.releaseDate && {
-        releaseDate: episode.releaseDate,
-      }),
     },
     twitter: {
       card: "player",
       title,
       description,
       images: [episode.drama.thumbnail],
-      creator: "@mangeakkk",
-      players: {
-        playerUrl: `https://mangeakkk.my.id/${episode.slug}`,
-        streamUrl: episode.videoUrl,
-        width: 1280,
-        height: 720,
-      },
     },
     alternates: {
       canonical: canonicalUrl,
-      // Add prev/next episode links if available
-      ...(prev && {
-        prev: `https://mangeakkk.my.id/${prev.slug}`,
-      }),
-      ...(next && {
-        next: `https://mangeakkk.my.id/${next.slug}`,
-      }),
+      ...(prev && { prev: `https://mangeakkk.my.id/${prev.slug}` }),
+      ...(next && { next: `https://mangeakkk.my.id/${next.slug}` }),
     },
     robots: {
       index: true,
@@ -191,35 +122,31 @@ export async function generateMetadata({
   };
 }
 
+// ============================================
+// 4. OPTIMIZED PAGE COMPONENT
+// ============================================
 export default async function EpisodePlayerPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const { success, episode } = await getEpisodeBySlug(slug);
-  const { data } = await getHomepageData();
 
-  if (!success || !episode) {
+  // OPTIMIZATION: Single optimized query
+  const data = await getEpisodeFullData(slug);
+
+  if (!data.success || !data.episode) {
     notFound();
   }
 
-  // Get adjacent episodes (prev/next)
-  const adjacentResult = await getAdjacentEpisodes(
-    episode.dramaId,
-    episode.episodeNum
-  );
-  const { prev, next } = adjacentResult.success
-    ? adjacentResult
-    : { prev: null, next: null };
+  const { episode, prev, next, allEpisodes } = data;
 
-  // Get all episodes from this drama
-  const episodesResult = await getEpisodesByDramaId(episode.dramaId);
-  const allEpisodes = episodesResult.success ? episodesResult.episodes : [];
+  // OPTIMIZATION: Start fetching homepage data (don't await yet)
+  const homeDataPromise = getHomepageData();
 
   return (
     <>
-      {/* Breadcrumb Schema */}
+      {/* Schemas - minimal overhead */}
       <BreadcrumbSchema
         items={[
           { name: "Laman Utama", url: "https://mangeakkk.my.id" },
@@ -234,13 +161,13 @@ export default async function EpisodePlayerPage({
           },
         ]}
       />
-
-      {/* VideoObject Schema */}
       <VideoObjectSchema episode={episode} />
       <EpisodeSchema episode={episode} />
 
       <div className="min-h-screen bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+          {/* CRITICAL CONTENT - Render immediately */}
+
           {/* Episode Info Header */}
           <header>
             <EpisodeInfo episode={episode} />
@@ -272,7 +199,7 @@ export default async function EpisodePlayerPage({
             />
           </nav>
 
-          {/* Ad 3: After Navigation */}
+          {/* Ad 2: After Navigation */}
           <div className="max-w-3xl mx-auto">
             <AdUnit
               slot={ADSENSE_CONFIG.slots.playerAfterNav}
@@ -292,7 +219,7 @@ export default async function EpisodePlayerPage({
             </section>
           )}
 
-          {/* Ad 4: After Episode List */}
+          {/* Ad 3: After Episode List */}
           <div className="max-w-3xl mx-auto">
             <AdUnit
               slot={ADSENSE_CONFIG.slots.playerAfterEpisodeList}
@@ -301,39 +228,71 @@ export default async function EpisodePlayerPage({
             />
           </div>
 
-          {/* Ongoing Dramas */}
-          {data.ongoing.length > 0 && (
-            <section aria-labelledby="ongoing-heading">
-              <OngoingSection dramas={data.ongoing} />
-            </section>
-          )}
-
-          {/* Ad 5: Bottom Banner */}
-          <div className="max-w-5xl mx-auto py-4">
-            <AdUnit
-              slot={ADSENSE_CONFIG.slots.playerBottomBanner}
-              format="auto"
-              responsive={true}
-            />
-          </div>
-
-          {/* Completed Dramas */}
-          {data.completed.length > 0 && (
-            <section aria-labelledby="completed-heading">
-              <CompletedSection dramas={data.completed} />
-            </section>
-          )}
-
-          {/* Ad 6: After Completed Dramas */}
-          <div className="max-w-3xl mx-auto">
-            <AdUnit
-              slot={ADSENSE_CONFIG.slots.playerBelowVideo}
-              format="auto"
-              responsive={true}
-            />
-          </div>
+          {/* NON-CRITICAL - Lazy load with Suspense */}
+          <Suspense fallback={<LoadingSkeleton />}>
+            <BelowFoldContent homeDataPromise={homeDataPromise} />
+          </Suspense>
         </div>
       </div>
     </>
+  );
+}
+
+// ============================================
+// 5. LAZY LOADED BELOW-THE-FOLD CONTENT
+// ============================================
+async function BelowFoldContent({
+  homeDataPromise,
+}: {
+  homeDataPromise: Promise<any>;
+}) {
+  const { data } = await homeDataPromise;
+
+  return (
+    <>
+      {/* Ongoing Dramas */}
+      {data.ongoing.length > 0 && (
+        <section aria-labelledby="ongoing-heading">
+          <OngoingSection dramas={data.ongoing} />
+        </section>
+      )}
+
+      {/* Ad 4: Bottom Banner */}
+      <div className="max-w-5xl mx-auto py-4">
+        <AdUnit
+          slot={ADSENSE_CONFIG.slots.playerBottomBanner}
+          format="auto"
+          responsive={true}
+        />
+      </div>
+
+      {/* Completed Dramas */}
+      {data.completed.length > 0 && (
+        <section aria-labelledby="completed-heading">
+          <CompletedSection dramas={data.completed} />
+        </section>
+      )}
+
+      {/* Ad 5: After Completed Dramas */}
+      <div className="max-w-3xl mx-auto">
+        <AdUnit
+          slot={ADSENSE_CONFIG.slots.playerBelowVideo}
+          format="auto"
+          responsive={true}
+        />
+      </div>
+    </>
+  );
+}
+
+// ============================================
+// 6. LOADING SKELETON
+// ============================================
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="h-64 bg-zinc-900 animate-pulse rounded-lg" />
+      <div className="h-64 bg-zinc-900 animate-pulse rounded-lg" />
+    </div>
   );
 }

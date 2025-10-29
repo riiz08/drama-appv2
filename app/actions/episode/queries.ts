@@ -1,104 +1,263 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { unstable_cache } from "next/cache";
+
+export const getEpisodeFullData = unstable_cache(
+  async (slug: string) => {
+    try {
+      const episode = await prisma.episode.findUnique({
+        where: { slug },
+        include: {
+          drama: {
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              thumbnail: true,
+              description: true,
+              status: true,
+              totalEpisode: true,
+              airTime: true,
+              production: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+              casts: {
+                take: 5, // Limit for performance
+                select: {
+                  id: true,
+                  character: true,
+                  cast: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
+                },
+              },
+              directors: {
+                take: 2, // Limit for performance
+                select: {
+                  id: true,
+                  director: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
+                },
+              },
+              writers: {
+                take: 2,
+                select: {
+                  id: true,
+                  writer: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
+                },
+              },
+              novelAuthors: {
+                take: 1,
+                select: {
+                  id: true,
+                  novelTitle: true,
+                  novelAuthor: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
+                },
+              },
+              networks: {
+                take: 2,
+                select: {
+                  id: true,
+                  network: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
+                },
+              },
+              // Get ALL episodes for this drama in single query
+              episodes: {
+                select: {
+                  id: true,
+                  slug: true,
+                  episodeNum: true,
+                  releaseDate: true,
+                  videoUrl: true,
+                },
+                orderBy: { episodeNum: "asc" },
+              },
+            },
+          },
+        },
+      });
+
+      if (!episode) {
+        return {
+          success: false,
+          episode: null,
+          prev: null,
+          next: null,
+          allEpisodes: [],
+        };
+      }
+
+      // Calculate prev/next in-memory (fast!)
+      const allEpisodes = episode.drama.episodes;
+      const currentIndex = allEpisodes.findIndex(
+        (ep) => ep.episodeNum === episode.episodeNum
+      );
+
+      const prev = currentIndex > 0 ? allEpisodes[currentIndex - 1] : null;
+      const next =
+        currentIndex < allEpisodes.length - 1
+          ? allEpisodes[currentIndex + 1]
+          : null;
+
+      return {
+        success: true,
+        episode,
+        prev,
+        next,
+        allEpisodes,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        episode: null,
+        prev: null,
+        next: null,
+        allEpisodes: [],
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  },
+  ["episode-full-data"],
+  {
+    revalidate: 3600, // 1 hour (conservative start)
+    tags: ["episodes"],
+  }
+);
+
+// ============================================
+// EXISTING FUNCTIONS - WITH CACHE
+// ============================================
 
 // Get episode by slug with drama info
-export async function getEpisodeBySlug(slug: string) {
-  try {
-    const episode = await prisma.episode.findUnique({
-      where: { slug },
-      include: {
-        drama: {
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-            thumbnail: true,
-            description: true,
-            status: true,
-            totalEpisode: true,
-            airTime: true,
-            production: {
-              select: {
-                id: true,
-                name: true,
+export const getEpisodeBySlug = unstable_cache(
+  async (slug: string) => {
+    try {
+      const episode = await prisma.episode.findUnique({
+        where: { slug },
+        include: {
+          drama: {
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              thumbnail: true,
+              description: true,
+              status: true,
+              totalEpisode: true,
+              airTime: true,
+              production: {
+                select: {
+                  id: true,
+                  name: true,
+                },
               },
-            },
-            casts: {
-              select: {
-                id: true,
-                character: true,
-                cast: {
-                  select: {
-                    id: true,
-                    name: true,
+              casts: {
+                select: {
+                  id: true,
+                  character: true,
+                  cast: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
                   },
                 },
               },
-            },
-            directors: {
-              select: {
-                id: true,
-                director: {
-                  select: {
-                    id: true,
-                    name: true,
+              directors: {
+                select: {
+                  id: true,
+                  director: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
                   },
                 },
               },
-            },
-            writers: {
-              select: {
-                id: true,
-                writer: {
-                  select: {
-                    id: true,
-                    name: true,
+              writers: {
+                select: {
+                  id: true,
+                  writer: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
                   },
                 },
               },
-            },
-            novelAuthors: {
-              select: {
-                id: true,
-                novelTitle: true,
-                novelAuthor: {
-                  select: {
-                    id: true,
-                    name: true,
+              novelAuthors: {
+                select: {
+                  id: true,
+                  novelTitle: true,
+                  novelAuthor: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
                   },
                 },
               },
-            },
-            networks: {
-              select: {
-                id: true,
-                network: {
-                  select: {
-                    id: true,
-                    name: true,
+              networks: {
+                select: {
+                  id: true,
+                  network: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
                   },
                 },
               },
             },
           },
         },
-      },
-    });
+      });
 
-    if (!episode) {
-      return { success: false, episode: null };
+      if (!episode) {
+        return { success: false, episode: null };
+      }
+
+      return { success: true, episode };
+    } catch (error) {
+      return {
+        success: false,
+        episode: null,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
     }
-
-    return { success: true, episode };
-  } catch (error) {
-    return {
-      success: false,
-      episode: null,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+  },
+  ["episode-by-slug"],
+  {
+    revalidate: 3600,
+    tags: ["episodes"],
   }
-}
+);
 
 // Get latest episodes across all dramas
 export async function getLatestEpisodes(limit?: number, offset?: number) {
@@ -213,7 +372,7 @@ export async function getEpisodesByDramaId(dramaId: string) {
   }
 }
 
-// Get all episodes for a drama by SLUG (more user-friendly)
+// Get all episodes for a drama by SLUG
 export async function getEpisodesByDramaSlug(dramaSlug: string) {
   try {
     const drama = await prisma.drama.findUnique({
@@ -251,25 +410,23 @@ export async function getEpisodesByDramaSlug(dramaSlug: string) {
   }
 }
 
-// app/actions/episode.ts (atau di file yang sesuai)
-
+// Get all episode slugs (for sitemap/generateStaticParams)
 export async function getAllEpisodeSlugs() {
   try {
     const episodes = await prisma.episode.findMany({
       select: {
         slug: true,
-        updatedAt: true, // Added for sitemap lastModified
+        updatedAt: true,
       },
       orderBy: {
-        updatedAt: "desc", // Newest episodes first
+        updatedAt: "desc",
       },
     });
 
     return {
       success: true,
-      slugs: episodes.map((e) => e.slug), // Keep for backwards compatibility
+      slugs: episodes.map((e) => e.slug),
       episodes: episodes.map((e) => ({
-        // Added for sitemap
         slug: e.slug,
         updatedAt: e.updatedAt,
       })),
@@ -282,6 +439,24 @@ export async function getAllEpisodeSlugs() {
       episodes: [],
       error: "Failed to fetch episode slugs",
     };
+  }
+}
+
+// ============================================
+// NEW: Get popular episode slugs for generateStaticParams
+// ============================================
+export async function getPopularEpisodeSlugs(limit: number = 50) {
+  try {
+    const episodes = await prisma.episode.findMany({
+      select: { slug: true },
+      orderBy: { createdAt: "desc" }, // Latest episodes
+      take: limit,
+    });
+
+    return episodes.map((ep) => ep.slug);
+  } catch (error) {
+    console.error("Error fetching popular episodes:", error);
+    return [];
   }
 }
 

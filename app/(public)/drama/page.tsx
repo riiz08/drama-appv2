@@ -11,7 +11,7 @@ export async function generateStaticParams() {
   return [];
 }
 
-export const revalidate = 259200;
+export const revalidate = 900;
 
 // Type for search params
 type SearchParams = Promise<{
