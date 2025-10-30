@@ -7,7 +7,6 @@ import AdSenseScript from "@/components/ads/AdsenseScript";
 import { BaseSchema } from "@/components/schema/BaseSchema";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import RouteLoadingIndicator from "@/components/RouteLoadingIndicator";
-import { Analytics } from "@vercel/analytics/next";
 
 export default async function RootLayout({
   children,
@@ -43,7 +42,6 @@ export default async function RootLayout({
         </Providers>
 
         <GoogleAnalytics gaId="G-MG1B3ZG1YZ" />
-        <Analytics />
       </body>
     </html>
   );

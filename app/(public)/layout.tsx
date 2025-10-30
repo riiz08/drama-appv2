@@ -4,7 +4,6 @@ import "@/styles/globals.css";
 import type { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://mangeakkk.my.id"),
@@ -100,10 +99,7 @@ export default async function RootLayout({
   return (
     <div className="relative flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-grow pt-16 md:pt-20">
-        {children}
-        <SpeedInsights />
-      </main>
+      <main className="flex-grow pt-16 md:pt-20">{children}</main>
       <Footer />
     </div>
   );
