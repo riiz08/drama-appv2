@@ -2,9 +2,13 @@
 
 import { prisma } from "@/lib/db";
 
-// Get all homepage data in one optimized query
 export async function getHomepageData() {
   try {
+    // Test connection dulu
+    console.log("Testing database connection...");
+    await prisma.$connect();
+    console.log("Database connected!");
+
     const [
       featuredDrama,
       popularDramas,
@@ -12,7 +16,6 @@ export async function getHomepageData() {
       completedDramas,
       latestEpisodes,
     ] = await Promise.all([
-      // Featured drama for hero banner (random popular)
       prisma.drama
         .findMany({
           where: { isPopular: true },
@@ -31,11 +34,11 @@ export async function getHomepageData() {
           },
         })
         .then((dramas) => {
+          console.log("Featured dramas found:", dramas.length);
           if (dramas.length === 0) return null;
           return dramas[Math.floor(Math.random() * dramas.length)];
         }),
 
-      // Popular dramas section
       prisma.drama.findMany({
         where: { isPopular: true },
         take: 10,
@@ -52,7 +55,6 @@ export async function getHomepageData() {
         },
       }),
 
-      // Ongoing dramas section
       prisma.drama.findMany({
         where: { status: "ONGOING" },
         take: 10,
@@ -70,7 +72,6 @@ export async function getHomepageData() {
         },
       }),
 
-      // Recently completed dramas section
       prisma.drama.findMany({
         where: { status: "TAMAT" },
         take: 10,
@@ -87,7 +88,6 @@ export async function getHomepageData() {
         },
       }),
 
-      // Latest episodes section
       prisma.episode.findMany({
         take: 12,
         orderBy: { releaseDate: "desc" },
@@ -104,6 +104,14 @@ export async function getHomepageData() {
       }),
     ]);
 
+    console.log("Data fetched successfully:", {
+      featured: !!featuredDrama,
+      popular: popularDramas.length,
+      ongoing: ongoingDramas.length,
+      completed: completedDramas.length,
+      episodes: latestEpisodes.length,
+    });
+
     return {
       success: true,
       data: {
@@ -115,6 +123,12 @@ export async function getHomepageData() {
       },
     };
   } catch (error) {
+    console.error("Homepage data error:", error);
+    console.error("Error details:", {
+      message: error instanceof Error ? error.message : "Unknown error",
+      name: error instanceof Error ? error.name : "Unknown",
+    });
+
     return {
       success: false,
       data: {
@@ -124,12 +138,14 @@ export async function getHomepageData() {
         completed: [],
         latestEpisodes: [],
       },
-      error: "Failed to fetch homepage data",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch homepage data",
     };
   }
 }
 
-// Get site statistics
 export async function getSiteStats() {
   try {
     const [totalDramas, totalEpisodes, ongoingCount, completedCount] =
@@ -150,6 +166,7 @@ export async function getSiteStats() {
       },
     };
   } catch (error) {
+    console.error("Site stats error:", error);
     return {
       success: false,
       stats: {
@@ -158,7 +175,8 @@ export async function getSiteStats() {
         ongoingCount: 0,
         completedCount: 0,
       },
-      error: "Failed to fetch site stats",
+      error:
+        error instanceof Error ? error.message : "Failed to fetch site stats",
     };
   }
 }
