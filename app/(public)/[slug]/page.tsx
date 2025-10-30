@@ -22,20 +22,6 @@ import VideoPlayerWrapper from "@/components/episode/VideoPlayerWrapper";
 import { EpisodeSchema } from "@/components/schema/EpisodeSchema";
 
 // ============================================
-// 1. GENERATE STATIC PARAMS (CRITICAL!)
-// Pre-render 50 most popular episodes at build time
-// ============================================
-export async function generateStaticParams() {
-  const slugs = await getPopularEpisodeSlugs(50); // Start conservative
-  return slugs.map((slug) => ({ slug }));
-}
-
-// ============================================
-// 2. ISR REVALIDATION (Conservative start)
-// ============================================
-export const revalidate = 3600; // 1 hour
-
-// ============================================
 // 3. OPTIMIZED METADATA GENERATION
 // ============================================
 export async function generateMetadata({

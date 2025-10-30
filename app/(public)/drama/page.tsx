@@ -6,13 +6,6 @@ import BrowseGrid from "@/components/browse/BrowseGrid";
 import BrowsePagination from "@/components/browse/BrowsePagination";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
-// Generate static params for all episodes
-export async function generateStaticParams() {
-  return [];
-}
-
-export const revalidate = 900;
-
 // Type for search params
 type SearchParams = Promise<{
   page?: string;

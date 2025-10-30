@@ -16,13 +16,6 @@ import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { TVSeriesSchema } from "@/components/schema/TvSeriesSchema";
 import DramaCredits from "@/components/drama/DramaCredits";
 
-// Generate static params for all dramas
-export async function generateStaticParams() {
-  return [];
-}
-
-export const revalidate = 3600;
-
 // Generate metadata for SEO
 export async function generateMetadata({
   params,
