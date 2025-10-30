@@ -6,14 +6,25 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-// Fungsi helper untuk dapetin env dari platform
 function getDatabaseUrl(): string {
-  // Try different ways to get env
-  // @ts-ignore - Cloudflare env binding
-  if (typeof DATABASE_URL !== "undefined") return DATABASE_URL;
+  console.log("=== Checking DATABASE_URL ===");
 
-  // Fallback ke process.env (untuk local dev)
+  // Check process.env
+  console.log(
+    "process.env.DATABASE_URL:",
+    process.env.DATABASE_URL ? "FOUND" : "NOT FOUND"
+  );
   if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
+
+  // Debug: log all available env keys
+  console.log("Available env keys:", Object.keys(process.env));
+
+  // Check globalThis
+  const allKeys = Object.keys(globalThis);
+  console.log(
+    "globalThis DATABASE keys:",
+    allKeys.filter((k) => k.toUpperCase().includes("DATABASE"))
+  );
 
   throw new Error("DATABASE_URL not found in environment");
 }
