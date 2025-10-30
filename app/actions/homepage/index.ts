@@ -1,13 +1,13 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import { createPrismaClient } from "@/lib/db";
 
 export async function getHomepageData() {
+  // Create fresh client per request
+  const prisma = createPrismaClient();
+
   try {
-    // Test connection dulu
-    console.log("Testing database connection...");
-    await prisma.$connect();
-    console.log("Database connected!");
+    console.log("Fetching homepage data with fresh client...");
 
     const [
       featuredDrama,
@@ -16,6 +16,7 @@ export async function getHomepageData() {
       completedDramas,
       latestEpisodes,
     ] = await Promise.all([
+      // ... queries sama seperti sebelumnya
       prisma.drama
         .findMany({
           where: { isPopular: true },
@@ -34,7 +35,6 @@ export async function getHomepageData() {
           },
         })
         .then((dramas) => {
-          console.log("Featured dramas found:", dramas.length);
           if (dramas.length === 0) return null;
           return dramas[Math.floor(Math.random() * dramas.length)];
         }),
@@ -104,13 +104,7 @@ export async function getHomepageData() {
       }),
     ]);
 
-    console.log("Data fetched successfully:", {
-      featured: !!featuredDrama,
-      popular: popularDramas.length,
-      ongoing: ongoingDramas.length,
-      completed: completedDramas.length,
-      episodes: latestEpisodes.length,
-    });
+    console.log("Data fetched successfully");
 
     return {
       success: true,
@@ -124,11 +118,6 @@ export async function getHomepageData() {
     };
   } catch (error) {
     console.error("Homepage data error:", error);
-    console.error("Error details:", {
-      message: error instanceof Error ? error.message : "Unknown error",
-      name: error instanceof Error ? error.name : "Unknown",
-    });
-
     return {
       success: false,
       data: {
@@ -143,10 +132,14 @@ export async function getHomepageData() {
           ? error.message
           : "Failed to fetch homepage data",
     };
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 export async function getSiteStats() {
+  const prisma = createPrismaClient();
+
   try {
     const [totalDramas, totalEpisodes, ongoingCount, completedCount] =
       await Promise.all([
@@ -178,5 +171,7 @@ export async function getSiteStats() {
       error:
         error instanceof Error ? error.message : "Failed to fetch site stats",
     };
+  } finally {
+    await prisma.$disconnect();
   }
 }
