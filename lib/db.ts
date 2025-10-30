@@ -1,6 +1,6 @@
 import { PrismaClient } from "@/app/generated/prisma";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { Pool } from "pg";
+import { PrismaNeon } from "@prisma/adapter-neon";
+import { Pool } from "@neondatabase/serverless";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -9,11 +9,10 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma =
   globalForPrisma.prisma ??
   (() => {
-    const pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
-      max: 1, // wajib untuk pgbouncer transaction mode
-    });
-    const adapter = new PrismaPg(pool);
+    const connectionString = process.env.DATABASE_URL!;
+    const pool = new Pool({ connectionString });
+    // @ts-ignore - Neon Pool compatible with PrismaNeon
+    const adapter = new PrismaNeon(pool);
     return new PrismaClient({ adapter });
   })();
 
