@@ -7,36 +7,39 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 function getDatabaseUrl(): string {
-  console.log("=== Checking DATABASE_URL ===");
+  console.log("=== DATABASE_URL Check ===");
+  const dbUrl = process.env.DATABASE_URL;
+  console.log("Type:", typeof dbUrl);
+  console.log("Value length:", dbUrl?.length);
+  console.log("Value preview:", dbUrl?.substring(0, 30)); // First 30 chars only
 
-  // Check process.env
-  console.log(
-    "process.env.DATABASE_URL:",
-    process.env.DATABASE_URL ? "FOUND" : "NOT FOUND"
-  );
-  if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
+  if (!dbUrl || dbUrl.trim() === "") {
+    throw new Error("DATABASE_URL is empty or undefined");
+  }
 
-  // Debug: log all available env keys
-  console.log("Available env keys:", Object.keys(process.env));
-
-  // Check globalThis
-  const allKeys = Object.keys(globalThis);
-  console.log(
-    "globalThis DATABASE keys:",
-    allKeys.filter((k) => k.toUpperCase().includes("DATABASE"))
-  );
-
-  throw new Error("DATABASE_URL not found in environment");
+  return dbUrl;
 }
 
 export const prisma =
   globalForPrisma.prisma ??
   (() => {
     const connectionString = getDatabaseUrl();
+    console.log(
+      "Creating Pool with connection string length:",
+      connectionString.length
+    );
+
     const pool = new Pool({ connectionString });
+    console.log("Pool created successfully");
+
     // @ts-ignore
     const adapter = new PrismaNeon(pool);
-    return new PrismaClient({ adapter });
+    console.log("Adapter created successfully");
+
+    const client = new PrismaClient({ adapter });
+    console.log("PrismaClient created successfully");
+
+    return client;
   })();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
