@@ -13,36 +13,30 @@ export async function getAllDramas(options?: {
   includeRelations?: boolean;
 }) {
   try {
-    let query = supabase.from("Drama").select(
-      `
+    // Always select basic fields + relations (simpler approach)
+    let query = supabase.from("Drama").select(`
+      id,
+      title,
+      slug,
+      thumbnail,
+      releaseDate,
+      status,
+      totalEpisode,
+      isPopular,
+      description,
+      airTime,
+      episodes:Episode(*),
+      production:Production(
         id,
-        title,
-        slug,
-        thumbnail,
-        releaseDate,
-        status,
-        totalEpisode,
-        isPopular,
-        description,
-        airTime,
-        episodes:Episode(*)
-        ${
-          options?.includeRelations
-            ? `,
-        production:Production(
+        name
+      ),
+      networks:DramaNetwork(
+        network:Network(
           id,
           name
-        ),
-        networks:DramaNetwork(
-          network:Network(
-            id,
-            name
-          )
-        )`
-            : ""
-        }
-      `
-    );
+        )
+      )
+    `);
 
     // Apply filters
     if (options?.status) {
@@ -65,8 +59,9 @@ export async function getAllDramas(options?: {
 
     if (error) throw error;
 
-    return { success: true, dramas: dramas || [] };
+    return { success: true, dramas: (dramas || []) as any[] };
   } catch (error) {
+    console.error("Error fetching dramas:", error);
     return {
       success: false,
       dramas: [],

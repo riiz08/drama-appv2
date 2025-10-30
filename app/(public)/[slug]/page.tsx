@@ -53,7 +53,7 @@ export async function generateMetadata({
   if (episode.drama.casts?.[0]) {
     const topCast = episode.drama.casts
       .slice(0, 3)
-      .map((c) => c.cast.name)
+      .map((c: any) => c.cast.name)
       .join(", ");
     description += ` Lakonan ${topCast}.`;
   }
