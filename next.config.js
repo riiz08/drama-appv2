@@ -18,15 +18,6 @@ const nextConfig = {
     minimumCacheTTL: 31536000,
   },
 
-  compiler: {
-    removeConsole:
-      process.env.NODE_ENV === "production"
-        ? {
-            exclude: ["error", "warn"],
-          }
-        : false,
-  },
-
   reactStrictMode: true,
   poweredByHeader: false,
 
