@@ -41,36 +41,65 @@ export async function generateMetadata({
 
   const title = generateDramaTitle(drama.title);
 
+  // Cast drama ke any untuk akses nested data dari Supabase
+  const dramaData = drama as any;
+
   // Build rich description with cast/director/production info
   let description = `Tonton ${drama.title} online secara percuma dalam kualiti HD.`;
 
   // Add cast info
-  if (drama.casts && drama.casts.length > 0) {
-    const topCast = drama.casts
+  if (
+    dramaData.casts &&
+    Array.isArray(dramaData.casts) &&
+    dramaData.casts.length > 0
+  ) {
+    const topCast = dramaData.casts
       .slice(0, 4)
-      .map((c) => c.cast.name)
+      .map((c: any) => c.cast?.name)
+      .filter(Boolean)
       .join(", ");
-    description += ` Lakonan ${topCast}`;
-    if (drama.casts.length > 4) {
-      description += ` dan lain-lain`;
+
+    if (topCast) {
+      description += ` Lakonan ${topCast}`;
+      if (dramaData.casts.length > 4) {
+        description += ` dan lain-lain`;
+      }
+      description += `.`;
     }
-    description += `.`;
   }
 
   // Add director info
-  if (drama.directors && drama.directors.length > 0) {
-    const directorNames = drama.directors
-      .map((d) => d.director.name)
+  if (
+    dramaData.directors &&
+    Array.isArray(dramaData.directors) &&
+    dramaData.directors.length > 0
+  ) {
+    const directorNames = dramaData.directors
+      .map((d: any) => d.director?.name)
+      .filter(Boolean)
       .join(", ");
-    description += ` Diarahkan oleh ${directorNames}.`;
+
+    if (directorNames) {
+      description += ` Diarahkan oleh ${directorNames}.`;
+    }
   }
 
   // Add production & network info
-  if (drama.production) {
-    description += ` Produksi ${drama.production.name}`;
-    if (drama.networks && drama.networks.length > 0) {
-      const networkNames = drama.networks.map((n) => n.network.name).join(", ");
-      description += ` untuk ${networkNames}`;
+  if (dramaData.production?.name) {
+    description += ` Produksi ${dramaData.production.name}`;
+    if (
+      dramaData.networks &&
+      Array.isArray(dramaData.networks) &&
+      dramaData.networks.length > 0
+    ) {
+      const networkNames = dramaData.networks
+        .map((n: any) => n.network?.name)
+        .filter(Boolean)
+        .join(", ");
+
+      if (networkNames) {
+        description += ` untuk ${networkNames}`;
+      }
     }
     description += `.`;
   }
@@ -99,39 +128,63 @@ export async function generateMetadata({
   ];
 
   // Add cast names to keywords
-  if (drama.casts && drama.casts.length > 0) {
-    drama.casts.slice(0, 6).forEach((cast) => {
-      keywords.push(`${cast.cast.name} drama`);
-      keywords.push(`${cast.cast.name} ${drama.title}`);
+  if (
+    dramaData.casts &&
+    Array.isArray(dramaData.casts) &&
+    dramaData.casts.length > 0
+  ) {
+    dramaData.casts.slice(0, 6).forEach((cast: any) => {
+      if (cast.cast?.name) {
+        keywords.push(`${cast.cast.name} drama`);
+        keywords.push(`${cast.cast.name} ${drama.title}`);
+      }
     });
   }
 
   // Add director names
-  if (drama.directors && drama.directors.length > 0) {
-    drama.directors.forEach((director) => {
-      keywords.push(`${director.director.name} drama`);
-      keywords.push(`drama arahan ${director.director.name}`);
+  if (
+    dramaData.directors &&
+    Array.isArray(dramaData.directors) &&
+    dramaData.directors.length > 0
+  ) {
+    dramaData.directors.forEach((director: any) => {
+      if (director.director?.name) {
+        keywords.push(`${director.director.name} drama`);
+        keywords.push(`drama arahan ${director.director.name}`);
+      }
     });
   }
 
   // Add writer names
-  if (drama.writers && drama.writers.length > 0) {
-    drama.writers.forEach((writer) => {
-      keywords.push(`${writer.writer.name} penulis`);
+  if (
+    dramaData.writers &&
+    Array.isArray(dramaData.writers) &&
+    dramaData.writers.length > 0
+  ) {
+    dramaData.writers.forEach((writer: any) => {
+      if (writer.writer?.name) {
+        keywords.push(`${writer.writer.name} penulis`);
+      }
     });
   }
 
   // Add production company
-  if (drama.production) {
-    keywords.push(`${drama.production.name} drama`);
-    keywords.push(`drama ${drama.production.name}`);
+  if (dramaData.production?.name) {
+    keywords.push(`${dramaData.production.name} drama`);
+    keywords.push(`drama ${dramaData.production.name}`);
   }
 
   // Add network names
-  if (drama.networks && drama.networks.length > 0) {
-    drama.networks.forEach((network) => {
-      keywords.push(`drama ${network.network.name}`);
-      keywords.push(`${network.network.name} ${drama.title}`);
+  if (
+    dramaData.networks &&
+    Array.isArray(dramaData.networks) &&
+    dramaData.networks.length > 0
+  ) {
+    dramaData.networks.forEach((network: any) => {
+      if (network.network?.name) {
+        keywords.push(`drama ${network.network.name}`);
+        keywords.push(`${network.network.name} ${drama.title}`);
+      }
     });
   }
 
@@ -143,6 +196,24 @@ export async function generateMetadata({
     keywords.push(`${drama.title} tamat`);
     keywords.push(`${drama.title} full episode`);
   }
+
+  // Prepare video metadata
+  const videoActors =
+    dramaData.casts && Array.isArray(dramaData.casts)
+      ? dramaData.casts
+          .slice(0, 5)
+          .map((c: any) => c.cast?.name)
+          .filter(Boolean)
+          .join(", ")
+      : undefined;
+
+  const videoDirectors =
+    dramaData.directors && Array.isArray(dramaData.directors)
+      ? dramaData.directors
+          .map((d: any) => d.director?.name)
+          .filter(Boolean)
+          .join(", ")
+      : undefined;
 
   return {
     title,
@@ -163,7 +234,7 @@ export async function generateMetadata({
         },
       ],
       ...(drama.releaseDate && {
-        releaseDate: drama.releaseDate,
+        releaseDate: new Date(drama.releaseDate).toISOString(),
       }),
     },
     twitter: {
@@ -184,21 +255,18 @@ export async function generateMetadata({
     },
     other: {
       // Additional metadata for better indexing
-      "article:published_time": drama.releaseDate?.toISOString(),
-      "article:modified_time": drama.updatedAt?.toISOString(),
-      ...(drama.casts &&
-        drama.casts.length > 0 && {
-          "video:actor": drama.casts
-            .slice(0, 5)
-            .map((c) => c.cast.name)
-            .join(", "),
-        }),
-      ...(drama.directors &&
-        drama.directors.length > 0 && {
-          "video:director": drama.directors
-            .map((d) => d.director.name)
-            .join(", "),
-        }),
+      ...(drama.releaseDate && {
+        "article:published_time": new Date(drama.releaseDate).toISOString(),
+      }),
+      ...(drama.updatedAt && {
+        "article:modified_time": new Date(drama.updatedAt).toISOString(),
+      }),
+      ...(videoActors && {
+        "video:actor": videoActors,
+      }),
+      ...(videoDirectors && {
+        "video:director": videoDirectors,
+      }),
       ...(drama.totalEpisode && {
         "video:series": drama.title,
       }),
@@ -217,6 +285,9 @@ export default async function DramaDetailPage({
   if (!success || !drama) {
     notFound();
   }
+
+  // Cast to any for accessing nested Supabase data
+  const dramaData = drama as any;
 
   // Get related dramas
   const relatedResult = await getRelatedDramas(drama.id, 6);
@@ -271,15 +342,18 @@ export default async function DramaDetailPage({
           </div>
 
           <DramaCredits
-            casts={drama.casts}
-            directors={drama.directors}
-            writers={drama.writers}
-            novelAuthors={drama.novelAuthors}
+            casts={dramaData.casts || []}
+            directors={dramaData.directors || []}
+            writers={dramaData.writers || []}
+            novelAuthors={dramaData.novelAuthors || []}
           />
 
           {/* Episode List */}
           <section aria-labelledby="episodes-heading">
-            <EpisodeList episodes={drama.episodes} dramaTitle={drama.title} />
+            <EpisodeList
+              episodes={dramaData.episodes || []}
+              dramaTitle={drama.title}
+            />
           </section>
 
           {/* Ad 3: After Episode List */}

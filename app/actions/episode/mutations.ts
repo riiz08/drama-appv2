@@ -1,21 +1,17 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import { supabase } from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
 
 // Check if episode already exists for a drama
 export async function checkEpisodeExists(dramaId: string, episodeNum: number) {
   try {
-    const existingEpisode = await prisma.episode.findFirst({
-      where: {
-        dramaId: dramaId,
-        episodeNum: episodeNum,
-      },
-      select: {
-        id: true,
-        slug: true,
-      },
-    });
+    const { data: existingEpisode, error } = await supabase
+      .from("Episode")
+      .select("id, slug")
+      .eq("dramaId", dramaId)
+      .eq("episodeNum", episodeNum)
+      .maybeSingle(); // Gunakan maybeSingle() agar tidak throw error jika tidak ada data
 
     return {
       success: true,
@@ -57,17 +53,22 @@ export async function createEpisode(data: CreateEpisodeInput) {
     }
 
     // Get drama info for revalidation
-    const drama = await prisma.drama.findUnique({
-      where: { id: data.dramaId },
-      select: { slug: true },
-    });
+    const { data: drama } = await supabase
+      .from("Drama")
+      .select("slug")
+      .eq("id", data.dramaId)
+      .single();
 
-    const episode = await prisma.episode.create({
-      data: {
+    const { data: episode, error } = await supabase
+      .from("Episode")
+      .insert({
         ...data,
-        releaseDate: new Date(data.releaseDate),
-      },
-    });
+        releaseDate: new Date(data.releaseDate).toISOString(),
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
 
     // Revalidate paths
     revalidatePath("/");
@@ -92,23 +93,27 @@ export async function updateEpisode(
 ) {
   try {
     // Get current episode
-    const currentEpisode = await prisma.episode.findUnique({
-      where: { id },
-      select: {
-        dramaId: true,
-        episodeNum: true,
-        drama: {
-          select: { slug: true },
-        },
-      },
-    });
+    const { data: currentEpisode, error: fetchError } = await supabase
+      .from("Episode")
+      .select(
+        `
+        dramaId,
+        episodeNum,
+        drama:Drama!inner(slug)
+      `
+      )
+      .eq("id", id)
+      .single();
 
-    if (!currentEpisode) {
+    if (fetchError || !currentEpisode) {
       return {
         success: false,
         error: "Episode not found",
       };
     }
+
+    // Type assertion untuk drama karena Supabase mengembalikan object, bukan array
+    const dramaSlug = (currentEpisode.drama as any).slug;
 
     // Check for duplicate if episodeNum is being changed
     if (data.episodeNum && data.episodeNum !== currentEpisode.episodeNum) {
@@ -128,17 +133,21 @@ export async function updateEpisode(
     const updateData: any = { ...data };
 
     if (data.releaseDate) {
-      updateData.releaseDate = new Date(data.releaseDate);
+      updateData.releaseDate = new Date(data.releaseDate).toISOString();
     }
 
-    const episode = await prisma.episode.update({
-      where: { id },
-      data: updateData,
-    });
+    const { data: episode, error } = await supabase
+      .from("Episode")
+      .update(updateData)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
 
     // Revalidate paths
     revalidatePath("/");
-    revalidatePath(`/drama/${currentEpisode.drama.slug}`);
+    revalidatePath(`/drama/${dramaSlug}`);
     revalidatePath(`/episode/${episode.slug}`);
 
     return { success: true, episode };
@@ -155,24 +164,26 @@ export async function updateEpisode(
 export async function deleteEpisode(id: string) {
   try {
     // Get episode info before deletion for revalidation
-    const episode = await prisma.episode.findUnique({
-      where: { id },
-      select: {
-        slug: true,
-        drama: {
-          select: { slug: true },
-        },
-      },
-    });
+    const { data: episode } = await supabase
+      .from("Episode")
+      .select(
+        `
+        slug,
+        drama:Drama!inner(slug)
+      `
+      )
+      .eq("id", id)
+      .single();
 
-    await prisma.episode.delete({
-      where: { id },
-    });
+    const { error } = await supabase.from("Episode").delete().eq("id", id);
+
+    if (error) throw error;
 
     // Revalidate paths
     revalidatePath("/");
     if (episode) {
-      revalidatePath(`/drama/${episode.drama.slug}`);
+      const dramaSlug = (episode.drama as any).slug;
+      revalidatePath(`/drama/${dramaSlug}`);
     }
 
     return { success: true };
@@ -198,19 +209,22 @@ export async function bulkCreateEpisodes(episodes: CreateEpisodeInput[]) {
 
     const formattedEpisodes = episodes.map((ep) => ({
       ...ep,
-      releaseDate: new Date(ep.releaseDate),
+      releaseDate: new Date(ep.releaseDate).toISOString(),
     }));
 
-    const result = await prisma.episode.createMany({
-      data: formattedEpisodes,
-      skipDuplicates: true,
-    });
+    const { data, error } = await supabase
+      .from("Episode")
+      .insert(formattedEpisodes)
+      .select();
+
+    if (error) throw error;
 
     // Get drama slug for revalidation
-    const drama = await prisma.drama.findUnique({
-      where: { id: episodes[0].dramaId },
-      select: { slug: true },
-    });
+    const { data: drama } = await supabase
+      .from("Drama")
+      .select("slug")
+      .eq("id", episodes[0].dramaId)
+      .single();
 
     // Revalidate paths
     revalidatePath("/");
@@ -220,8 +234,8 @@ export async function bulkCreateEpisodes(episodes: CreateEpisodeInput[]) {
 
     return {
       success: true,
-      count: result.count,
-      message: `Successfully created ${result.count} episode(s)`,
+      count: data?.length || 0,
+      message: `Successfully created ${data?.length || 0} episode(s)`,
     };
   } catch (error) {
     console.error("Error bulk creating episodes:", error);
@@ -237,14 +251,24 @@ export async function bulkCreateEpisodes(episodes: CreateEpisodeInput[]) {
 export async function bulkDeleteEpisodesByDrama(dramaId: string) {
   try {
     // Get drama info before deletion
-    const drama = await prisma.drama.findUnique({
-      where: { id: dramaId },
-      select: { slug: true },
-    });
+    const { data: drama } = await supabase
+      .from("Drama")
+      .select("slug")
+      .eq("id", dramaId)
+      .single();
 
-    const result = await prisma.episode.deleteMany({
-      where: { dramaId },
-    });
+    // Get count before deletion
+    const { count: beforeCount } = await supabase
+      .from("Episode")
+      .select("*", { count: "exact", head: true })
+      .eq("dramaId", dramaId);
+
+    const { error } = await supabase
+      .from("Episode")
+      .delete()
+      .eq("dramaId", dramaId);
+
+    if (error) throw error;
 
     // Revalidate paths
     revalidatePath("/");
@@ -254,8 +278,8 @@ export async function bulkDeleteEpisodesByDrama(dramaId: string) {
 
     return {
       success: true,
-      count: result.count,
-      message: `Successfully deleted ${result.count} episode(s)`,
+      count: beforeCount || 0,
+      message: `Successfully deleted ${beforeCount || 0} episode(s)`,
     };
   } catch (error) {
     console.error("Error bulk deleting episodes:", error);
@@ -279,23 +303,32 @@ export async function bulkDeleteEpisodesByIds(episodeIds: string[]) {
     }
 
     // Get unique drama slugs for revalidation
-    const episodes = await prisma.episode.findMany({
-      where: { id: { in: episodeIds } },
-      select: {
-        drama: {
-          select: { slug: true },
-        },
-      },
-    });
+    const { data: episodes } = await supabase
+      .from("Episode")
+      .select(
+        `
+        drama:Drama!inner(slug)
+      `
+      )
+      .in("id", episodeIds);
 
-    const result = await prisma.episode.deleteMany({
-      where: { id: { in: episodeIds } },
-    });
+    // Get count before deletion
+    const { count: beforeCount } = await supabase
+      .from("Episode")
+      .select("*", { count: "exact", head: true })
+      .in("id", episodeIds);
+
+    const { error } = await supabase
+      .from("Episode")
+      .delete()
+      .in("id", episodeIds);
+
+    if (error) throw error;
 
     // Revalidate paths
     revalidatePath("/");
     const uniqueDramaSlugs = Array.from(
-      new Set(episodes.map((e) => e.drama.slug))
+      new Set(episodes?.map((e) => (e.drama as any).slug) || [])
     );
     uniqueDramaSlugs.forEach((slug) => {
       revalidatePath(`/drama/${slug}`);
@@ -303,8 +336,8 @@ export async function bulkDeleteEpisodesByIds(episodeIds: string[]) {
 
     return {
       success: true,
-      count: result.count,
-      message: `Successfully deleted ${result.count} episode(s)`,
+      count: beforeCount || 0,
+      message: `Successfully deleted ${beforeCount || 0} episode(s)`,
     };
   } catch (error) {
     console.error("Error bulk deleting episodes:", error);
