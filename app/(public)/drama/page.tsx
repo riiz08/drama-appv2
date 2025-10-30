@@ -6,6 +6,8 @@ import BrowseGrid from "@/components/browse/BrowseGrid";
 import BrowsePagination from "@/components/browse/BrowsePagination";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 
+export const runtime = "edge";
+
 // Type for search params
 type SearchParams = Promise<{
   page?: string;

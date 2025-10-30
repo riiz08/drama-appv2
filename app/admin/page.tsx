@@ -10,6 +10,8 @@ import AdminHeader from "@/components/admin/AdminHeader";
 
 export const dynamic = "force-dynamic";
 
+export const runtime = "edge";
+
 export const metadata: Metadata = {
   title: "Dashboard Admin | Mangeakkk Drama",
   robots: {

@@ -10,6 +10,8 @@ import AdUnit from "@/components/ads/AdUnit";
 import { unstable_cache } from "next/cache";
 import SEOContentSection from "@/components/home/SeoContentSections";
 
+export const runtime = "edge";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://mangeakkk.my.id"),
 

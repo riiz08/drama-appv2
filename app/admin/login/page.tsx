@@ -1,6 +1,8 @@
 import { Metadata } from "next";
 import LoginForm from "@/components/admin/LoginForm";
 
+export const runtime = "edge";
+
 export const metadata: Metadata = {
   title: "Admin Login | Mangeakkk Drama",
   robots: {

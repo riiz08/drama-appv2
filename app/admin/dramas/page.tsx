@@ -7,6 +7,8 @@ import { getAllDramas } from "@/app/actions/drama";
 
 export const dynamic = "force-dynamic";
 
+export const runtime = "edge";
+
 export const metadata: Metadata = {
   title: "Kelola Drama | Admin Dashboard",
   robots: {

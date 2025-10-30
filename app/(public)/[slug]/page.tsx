@@ -21,6 +21,8 @@ import { VideoObjectSchema } from "@/components/schema/VideoObjectSchema";
 import VideoPlayerWrapper from "@/components/episode/VideoPlayerWrapper";
 import { EpisodeSchema } from "@/components/schema/EpisodeSchema";
 
+export const runtime = "edge";
+
 // ============================================
 // 3. OPTIMIZED METADATA GENERATION
 // ============================================

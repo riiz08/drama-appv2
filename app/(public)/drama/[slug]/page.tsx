@@ -16,6 +16,8 @@ import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { TVSeriesSchema } from "@/components/schema/TvSeriesSchema";
 import DramaCredits from "@/components/drama/DramaCredits";
 
+export const runtime = "edge";
+
 // Generate metadata for SEO
 export async function generateMetadata({
   params,
