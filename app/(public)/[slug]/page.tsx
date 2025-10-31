@@ -161,7 +161,12 @@ export default async function EpisodePlayerPage({
 
           {/* Ad 1: Above Video Player */}
           <div className="max-w-5xl mx-auto">
-            <AdSlot slot={ADSENSE_CONFIG.slots.playerAboveVideo} />
+            <AdSlot
+              slot={ADSENSE_CONFIG.slots.playerAboveVideo}
+              format="auto"
+              responsive={true}
+              className="max-w-5xl mx-auto"
+            />
           </div>
 
           {/* Video Player - Main Content */}
@@ -203,10 +208,12 @@ export default async function EpisodePlayerPage({
 
           {/* Ad 3: After Episode List */}
           <div className="max-w-3xl mx-auto">
-            <AdUnit
+            <AdSlot
               slot={ADSENSE_CONFIG.slots.playerAfterEpisodeList}
               format="auto"
               responsive={true}
+              className="max-w-5xl mx-auto"
+              lazy
             />
           </div>
 
@@ -241,10 +248,11 @@ async function BelowFoldContent({
 
       {/* Ad 4: Bottom Banner */}
       <div className="max-w-5xl mx-auto py-4">
-        <AdUnit
+        <AdSlot
           slot={ADSENSE_CONFIG.slots.playerBottomBanner}
           format="auto"
           responsive={true}
+          className="max-w-5xl mx-auto"
         />
       </div>
 

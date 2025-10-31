@@ -319,7 +319,12 @@ export default async function DramaDetailPage({
 
         {/* Ad 1: After Hero */}
         <div className="max-w-5xl mx-auto px-4 py-6">
-          <AdSlot slot={ADSENSE_CONFIG.slots.dramaAfterHero} />
+          <AdSlot
+            slot={ADSENSE_CONFIG.slots.dramaAfterHero}
+            format="auto"
+            responsive={true}
+            className="max-w-5xl mx-auto"
+          />
         </div>
 
         {/* Main Content */}
@@ -355,7 +360,12 @@ export default async function DramaDetailPage({
 
           {/* Ad 3: After Episode List */}
           <div className="max-w-3xl mx-auto">
-            <AdSlot slot={ADSENSE_CONFIG.slots.dramaAfterEpisodes} />
+            <AdSlot
+              slot={ADSENSE_CONFIG.slots.dramaAfterEpisodes}
+              format="auto"
+              responsive={true}
+              className="max-w-5xl mx-auto"
+            />
           </div>
 
           {/* Related Dramas */}
@@ -368,10 +378,12 @@ export default async function DramaDetailPage({
           {/* Ad 4: After Related Dramas */}
           {relatedDramas.length > 0 && (
             <div className="max-w-3xl mx-auto">
-              <AdUnit
+              <AdSlot
                 slot={ADSENSE_CONFIG.slots.dramaAfterRelated}
                 format="auto"
                 responsive={true}
+                className="max-w-5xl mx-auto"
+                lazy
               />
             </div>
           )}
@@ -384,10 +396,12 @@ export default async function DramaDetailPage({
           )}
 
           <div className="max-w-5xl mx-auto py-4">
-            <AdUnit
+            <AdSlot
               slot={ADSENSE_CONFIG.slots.dramaBottomBanner}
               format="auto"
               responsive={true}
+              className="max-w-5xl mx-auto"
+              lazy
             />
           </div>
         </div>
