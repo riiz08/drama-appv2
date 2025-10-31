@@ -15,6 +15,7 @@ import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { TVSeriesSchema } from "@/components/schema/TvSeriesSchema";
 import DramaCredits from "@/components/drama/DramaCredits";
+import AdSlot from "@/components/ads/AdSlot";
 
 export const runtime = "edge";
 
@@ -318,11 +319,7 @@ export default async function DramaDetailPage({
 
         {/* Ad 1: After Hero */}
         <div className="max-w-5xl mx-auto px-4 py-6">
-          <AdUnit
-            slot={ADSENSE_CONFIG.slots.dramaAfterHero}
-            format="auto"
-            responsive={true}
-          />
+          <AdSlot slot={ADSENSE_CONFIG.slots.dramaAfterHero} />
         </div>
 
         {/* Main Content */}
@@ -334,9 +331,9 @@ export default async function DramaDetailPage({
 
           {/* Ad 2: After Synopsis */}
           <div className="max-w-3xl mx-auto">
-            <AdUnit
+            <AdSlot
               slot={ADSENSE_CONFIG.slots.dramaAfterSynopsis}
-              format="auto"
+              format="autorelaxed"
               responsive={true}
             />
           </div>
@@ -358,11 +355,7 @@ export default async function DramaDetailPage({
 
           {/* Ad 3: After Episode List */}
           <div className="max-w-3xl mx-auto">
-            <AdUnit
-              slot={ADSENSE_CONFIG.slots.dramaAfterEpisodes}
-              format="auto"
-              responsive={true}
-            />
+            <AdSlot slot={ADSENSE_CONFIG.slots.dramaAfterEpisodes} />
           </div>
 
           {/* Related Dramas */}

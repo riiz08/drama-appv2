@@ -3,10 +3,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import {
-  getEpisodeFullData,
-  getPopularEpisodeSlugs,
-} from "@/app/actions/episode/queries";
+import { getEpisodeFullData } from "@/app/actions/episode/queries";
 import { generateEpisodeTitle } from "@/lib/utils";
 import EpisodeInfo from "@/components/episode/EpisodeInfo";
 import EpisodeNavigation from "@/components/episode/EpisodeNavigation";
@@ -20,6 +17,7 @@ import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { VideoObjectSchema } from "@/components/schema/VideoObjectSchema";
 import VideoPlayerWrapper from "@/components/episode/VideoPlayerWrapper";
 import { EpisodeSchema } from "@/components/schema/EpisodeSchema";
+import AdSlot from "@/components/ads/AdSlot";
 
 export const runtime = "edge";
 
@@ -163,11 +161,7 @@ export default async function EpisodePlayerPage({
 
           {/* Ad 1: Above Video Player */}
           <div className="max-w-5xl mx-auto">
-            <AdUnit
-              slot={ADSENSE_CONFIG.slots.playerAboveVideo}
-              format="auto"
-              responsive={true}
-            />
+            <AdSlot slot={ADSENSE_CONFIG.slots.playerAboveVideo} />
           </div>
 
           {/* Video Player - Main Content */}
@@ -189,9 +183,9 @@ export default async function EpisodePlayerPage({
 
           {/* Ad 2: After Navigation */}
           <div className="max-w-3xl mx-auto">
-            <AdUnit
+            <AdSlot
               slot={ADSENSE_CONFIG.slots.playerAfterNav}
-              format="auto"
+              format="autorelaxed"
               responsive={true}
             />
           </div>
@@ -264,7 +258,7 @@ async function BelowFoldContent({
       {/* Ad 5: After Completed Dramas */}
       <div className="max-w-3xl mx-auto">
         <AdUnit
-          slot={ADSENSE_CONFIG.slots.playerBelowVideo}
+          slot={ADSENSE_CONFIG.slots.playerBelowVideos}
           format="auto"
           responsive={true}
         />

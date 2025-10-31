@@ -4,8 +4,6 @@ import { supabase } from "@/lib/supabase";
 
 export async function getHomepageData() {
   try {
-    console.log("Fetching homepage data with Supabase...");
-
     // Fetch all data in parallel
     const [
       { data: allPopular },
@@ -78,14 +76,6 @@ export async function getHomepageData() {
         ? allPopular[Math.floor(Math.random() * allPopular.length)]
         : null;
 
-    console.log("Data fetched successfully:", {
-      featured: !!featuredDrama,
-      popular: popularDramas?.length || 0,
-      ongoing: ongoingDramas?.length || 0,
-      completed: completedDramas?.length || 0,
-      episodes: latestEpisodes?.length || 0,
-    });
-
     return {
       success: true,
       data: {
@@ -97,7 +87,6 @@ export async function getHomepageData() {
       },
     };
   } catch (error) {
-    console.error("Homepage data error:", error);
     return {
       success: false,
       data: {

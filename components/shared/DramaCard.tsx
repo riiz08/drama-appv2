@@ -1,16 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { Play, ImageOff } from "lucide-react";
-import {
-  getDramaUrl,
-  getStatusLabel,
-  truncate,
-  getPlaceholderImage,
-} from "@/lib/utils";
+import { getDramaUrl, getStatusLabel, truncate } from "@/lib/utils";
 import { Chip } from "@heroui/chip";
+import Link from "next/link";
 
 interface DramaCardProps {
   drama: {

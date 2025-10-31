@@ -9,6 +9,7 @@ import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 import AdUnit from "@/components/ads/AdUnit";
 import { unstable_cache } from "next/cache";
 import SEOContentSection from "@/components/home/SeoContentSections";
+import AdSlot from "@/components/ads/AdSlot";
 
 export const runtime = "edge";
 
@@ -180,7 +181,7 @@ export default async function HomePage() {
 
       {/* Ad 1: Hero Banner (After Hero) */}
       <div className="container mx-auto px-4 py-6">
-        <AdUnit
+        <AdSlot
           slot={ADSENSE_CONFIG.slots.homepageHeroBanner}
           format="auto"
           responsive={true}
@@ -197,11 +198,11 @@ export default async function HomePage() {
 
         {/* Ad 2: After Popular Section */}
         <div className="container mx-auto px-4">
-          <AdUnit
+          <AdSlot
             slot={ADSENSE_CONFIG.slots.homepageAfterPopular}
-            format="auto"
+            format="autorelaxed"
             responsive={true}
-            className="max-w-3xl mx-auto"
+            className="max-w-5xl mx-auto"
           />
         </div>
 
@@ -212,11 +213,11 @@ export default async function HomePage() {
 
         {/* Ad 3: After Latest Episodes */}
         <div className="container mx-auto px-4">
-          <AdUnit
+          <AdSlot
             slot={ADSENSE_CONFIG.slots.homepageAfterEpisodes}
             format="auto"
             responsive={true}
-            className="max-w-3xl mx-auto"
+            className="max-w-5xl mx-auto"
           />
         </div>
 
@@ -227,11 +228,12 @@ export default async function HomePage() {
 
         {/* Ad 4: After Ongoing Section */}
         <div className="container mx-auto px-4">
-          <AdUnit
+          <AdSlot
             slot={ADSENSE_CONFIG.slots.homepageAfterOngoing}
             format="auto"
             responsive={true}
             className="max-w-3xl mx-auto"
+            lazy={true}
           />
         </div>
 
@@ -242,11 +244,12 @@ export default async function HomePage() {
 
         {/* Ad 5: Bottom Banner (Before Footer) */}
         <div className="container mx-auto px-4 py-6">
-          <AdUnit
+          <AdSlot
             slot={ADSENSE_CONFIG.slots.homepageBottomBanner}
             format="auto"
             responsive={true}
             className="max-w-3xl mx-auto"
+            lazy={true}
           />
         </div>
         <SEOContentSection />

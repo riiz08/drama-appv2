@@ -3,6 +3,19 @@
 import { supabase } from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
 
+// Types
+export interface CreateEpisodeInput {
+  videoUrl: string;
+  dramaId: string;
+  episodeNum: number;
+  releaseDate: string | Date;
+  slug: string;
+}
+
+function generateUUID(): string {
+  return crypto.randomUUID();
+}
+
 // Check if episode already exists for a drama
 export async function checkEpisodeExists(dramaId: string, episodeNum: number) {
   try {
@@ -11,7 +24,7 @@ export async function checkEpisodeExists(dramaId: string, episodeNum: number) {
       .select("id, slug")
       .eq("dramaId", dramaId)
       .eq("episodeNum", episodeNum)
-      .maybeSingle(); // Gunakan maybeSingle() agar tidak throw error jika tidak ada data
+      .maybeSingle();
 
     return {
       success: true,
@@ -62,6 +75,7 @@ export async function createEpisode(data: CreateEpisodeInput) {
     const { data: episode, error } = await supabase
       .from("Episode")
       .insert({
+        id: generateUUID(), // ✅ Tambahkan ini
         ...data,
         releaseDate: new Date(data.releaseDate).toISOString(),
       })
@@ -85,7 +99,6 @@ export async function createEpisode(data: CreateEpisodeInput) {
     };
   }
 }
-
 // Update episode with duplicate check
 export async function updateEpisode(
   id: string,
