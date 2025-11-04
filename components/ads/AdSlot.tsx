@@ -15,7 +15,7 @@ declare global {
   }
 }
 
-export default function AdsenseSlot({
+export default function AdSlot({
   slot,
   style = { display: "block" },
   format = "auto",

@@ -179,13 +179,11 @@ export default async function HomePage() {
       )}
 
       {/* Ad 1: Hero Banner (After Hero) */}
-      <div className="container mx-auto px-4 py-6">
-        <AdSlot
-          slot={ADSENSE_CONFIG.slots.homepageHeroBanner}
-          format="auto"
-          responsive={true}
-        />
-      </div>
+      <AdSlot
+        slot={ADSENSE_CONFIG.slots.homepageHeroBanner}
+        format="auto"
+        responsive={true}
+      />
 
       {/* Content Sections */}
       <div className="space-y-12 pb-20">
@@ -195,13 +193,11 @@ export default async function HomePage() {
         )}
 
         {/* Ad 2: After Popular Section */}
-        <div className="container mx-auto px-4">
-          <AdSlot
-            slot={ADSENSE_CONFIG.slots.homepageAfterPopular}
-            format="autorelaxed"
-            responsive={true}
-          />
-        </div>
+        <AdSlot
+          slot={ADSENSE_CONFIG.slots.homepageAfterPopular}
+          format="autorelaxed"
+          responsive={true}
+        />
 
         {/* Latest Episodes */}
         {homepageData.data.latestEpisodes.length > 0 && (
@@ -209,13 +205,11 @@ export default async function HomePage() {
         )}
 
         {/* Ad 3: After Latest Episodes */}
-        <div className="container mx-auto px-4">
-          <AdSlot
-            slot={ADSENSE_CONFIG.slots.homepageAfterEpisodes}
-            format="auto"
-            responsive={true}
-          />
-        </div>
+        <AdSlot
+          slot={ADSENSE_CONFIG.slots.homepageAfterEpisodes}
+          format="auto"
+          responsive={true}
+        />
 
         {/* Ongoing Dramas */}
         {homepageData.data.ongoing.length > 0 && (
@@ -223,13 +217,11 @@ export default async function HomePage() {
         )}
 
         {/* Ad 4: After Ongoing Section */}
-        <div className="container mx-auto px-4">
-          <AdSlot
-            slot={ADSENSE_CONFIG.slots.homepageAfterOngoing}
-            format="auto"
-            responsive={true}
-          />
-        </div>
+        <AdSlot
+          slot={ADSENSE_CONFIG.slots.homepageAfterOngoing}
+          format="auto"
+          responsive={true}
+        />
 
         {/* Completed Dramas */}
         {homepageData.data.completed.length > 0 && (
@@ -237,13 +229,11 @@ export default async function HomePage() {
         )}
 
         {/* Ad 5: Bottom Banner (Before Footer) */}
-        <div className="container mx-auto px-4 py-6">
-          <AdSlot
-            slot={ADSENSE_CONFIG.slots.homepageBottomBanner}
-            format="auto"
-            responsive={true}
-          />
-        </div>
+        <AdSlot
+          slot={ADSENSE_CONFIG.slots.homepageBottomBanner}
+          format="auto"
+          responsive={true}
+        />
         <SEOContentSection />
       </div>
     </div>

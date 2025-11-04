@@ -17,7 +17,7 @@ export default async function RootLayout({
     <html lang="ms-MY" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#000000" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <script
           async
           crossOrigin="anonymous"
