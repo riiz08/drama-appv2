@@ -16,19 +16,19 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://mangeakkk.my.id"),
 
   // OPTIMIZED: No template, manual control for optimal length
-  title: "Tonton Drama Melayu Online Percuma - Full Episod HD Terkini",
+  title: "Mangeakkk Drama - Tonton Drama Melayu HD Percuma Terkini",
 
   // OPTIMIZED: More keyword variations + clearer value prop
   description:
-    "Tonton drama melayu terkini online percuma dalam kualiti HD. Streaming full episod drama Malaysia, drama Astro, dan telefilem terbaru di Mangeakkk. Kemaskini setiap hari!",
+    "Tonton drama melayu terkini di Mangeakkk Drama. Streaming percuma full episod HD drama Malaysia, Astro & telefilem terbaru. Kemaskini setiap hari!",
 
-  // EXPANDED: More keyword variations based on competitor
   keywords: [
     // Primary keywords (high priority)
     "tonton drama melayu online",
     "drama melayu terkini",
     "streaming drama melayu percuma",
     "tonton drama online percuma",
+    "mangeakkk drama",
 
     // Secondary keywords
     "drama melayu online percuma",

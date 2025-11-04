@@ -10,6 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useEffect, useState } from "react";
 
 // Mock data - nanti ganti dengan real data
 const mockTrafficData = [
@@ -23,6 +24,20 @@ const mockTrafficData = [
 ];
 
 export default function TrafficChart() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="h-64 flex items-center justify-center">
+        <p className="text-gray-400">Loading chart...</p>
+      </div>
+    );
+  }
+
   return (
     <div>
       {/* Summary Stats */}

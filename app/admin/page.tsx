@@ -15,7 +15,9 @@ import {
 } from "lucide-react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import TrafficChart from "@/components/admin/TrafficChart";
+import { getTopDramas, getRecentActivities } from "@/app/actions/dashboard";
 import TopDramasList from "@/components/admin/TopDramaList";
+import RecentActivity from "@/components/admin/RecentActicity";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +41,17 @@ export default async function AdminDashboard() {
   // Get statistics
   const statsResult = await getSiteStats();
   const stats = statsResult.success ? statsResult.stats : null;
+
+  // Get dashboard data
+  const [topDramasResult, recentActivitiesResult] = await Promise.all([
+    getTopDramas(5),
+    getRecentActivities(5),
+  ]);
+
+  const topDramas = topDramasResult.success ? topDramasResult.dramas : [];
+  const recentActivities = recentActivitiesResult.success
+    ? recentActivitiesResult.activities
+    : [];
 
   const statCards = [
     {
@@ -128,7 +141,7 @@ export default async function AdminDashboard() {
                 <h2 className="text-xl font-bold text-white mb-4">
                   Drama Terpopuler
                 </h2>
-                <TopDramasList />
+                <TopDramasList dramas={topDramas} />
               </CardBody>
             </Card>
           </div>
@@ -185,35 +198,13 @@ export default async function AdminDashboard() {
               </CardBody>
             </Card>
 
-            {/* Recent Activity (Optional) */}
+            {/* Recent Activity */}
             <Card className="bg-zinc-900 border-none">
               <CardBody className="p-6">
                 <h2 className="text-xl font-bold text-white mb-4">
                   Aktivitas Terbaru
                 </h2>
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-start gap-3 text-gray-400">
-                    <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-gray-300">Drama baru ditambahkan</p>
-                      <p className="text-xs text-gray-500">2 jam yang lalu</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 text-gray-400">
-                    <div className="w-2 h-2 rounded-full bg-green-500 mt-1.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-gray-300">Episode baru di-upload</p>
-                      <p className="text-xs text-gray-500">5 jam yang lalu</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 text-gray-400">
-                    <div className="w-2 h-2 rounded-full bg-purple-500 mt-1.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-gray-300">Drama selesai tayang</p>
-                      <p className="text-xs text-gray-500">1 hari yang lalu</p>
-                    </div>
-                  </div>
-                </div>
+                <RecentActivity activities={recentActivities} />
               </CardBody>
             </Card>
           </div>
