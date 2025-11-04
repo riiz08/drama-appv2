@@ -69,6 +69,18 @@ const nextConfig = {
     return [
       // Redirect old URL structures to new structure
       {
+        source: "/watch/:slug(.*)-full-episod-:episode",
+        destination: "/:slug-episod-:episode",
+        permanent: true,
+        statusCode: 301,
+      },
+      {
+        source: "/:slug(.*)-full-episod-:episode",
+        destination: "/:slug-episod-:episode",
+        permanent: true,
+        statusCode: 301,
+      },
+      {
         source: "/drama/detail/:slug*",
         destination: "/drama/:slug*",
         permanent: true,

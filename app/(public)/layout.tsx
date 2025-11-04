@@ -8,11 +8,11 @@ import Footer from "@/components/layout/Footer";
 export const metadata: Metadata = {
   metadataBase: new URL("https://mangeakkk.my.id"),
   title: {
-    default: "Tonton Drama Melayu Terkini 2025 - Episod Penuh HD Percuma",
+    default: "Tonton Drama Melayu HD Percuma Terkini - Mangeakkk Drama",
     template: "",
   },
   description:
-    "Tonton drama Melayu terkini dan terlengkap secara percuma. Streaming drama Malaysia HD dengan episod penuh. Kemaskini setiap hari tanpa iklan.",
+    "Tonton drama melayu terkini di Mangeakkk Drama. Streaming percuma full episod HD drama Malaysia, Astro & telefilem terbaru. Kemaskini setiap hari!",
   keywords: [
     "tonton drama melayu",
     "drama melayu terkini",

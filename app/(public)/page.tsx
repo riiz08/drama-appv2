@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://mangeakkk.my.id"),
 
   // OPTIMIZED: No template, manual control for optimal length
-  title: "Mangeakkk Drama - Tonton Drama Melayu HD Percuma Terkini",
+  title: "Tonton Drama Melayu HD Percuma Terkini - Mangeakkk Drama",
 
   // OPTIMIZED: More keyword variations + clearer value prop
   description:
