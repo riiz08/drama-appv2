@@ -165,7 +165,6 @@ export default async function EpisodePlayerPage({
               slot={ADSENSE_CONFIG.slots.playerAboveVideo}
               format="auto"
               responsive={true}
-              className="max-w-5xl mx-auto"
             />
           </div>
 
@@ -212,8 +211,6 @@ export default async function EpisodePlayerPage({
               slot={ADSENSE_CONFIG.slots.playerAfterEpisodeList}
               format="auto"
               responsive={true}
-              className="max-w-5xl mx-auto"
-              lazy
             />
           </div>
 
@@ -252,7 +249,6 @@ async function BelowFoldContent({
           slot={ADSENSE_CONFIG.slots.playerBottomBanner}
           format="auto"
           responsive={true}
-          className="max-w-5xl mx-auto"
         />
       </div>
 

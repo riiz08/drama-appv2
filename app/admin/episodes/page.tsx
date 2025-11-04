@@ -17,14 +17,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function EpisodesPage({ searchParams }: any) {
+export default async function EpisodesPage({
+  params,
+}: {
+  params: Promise<{ searchParams: number }>;
+}) {
   const session = await auth();
 
   if (!session) {
     redirect("/admin/login");
   }
 
-  const currentPage = Number(searchParams.page) || 1;
+  const { searchParams } = await params;
+
+  const currentPage = Number(searchParams) || 1;
 
   // Fetch episodes with pagination
   const result = await getAllEpisodes(currentPage, 20);

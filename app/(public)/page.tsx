@@ -6,7 +6,6 @@ import CompletedSection from "@/components/home/CompletedSection";
 import LatestEpisodesSection from "@/components/home/LatestEpisodesSection";
 import OngoingSection from "@/components/home/OnGoingSection";
 import { ADSENSE_CONFIG } from "@/lib/adsense-config";
-import AdUnit from "@/components/ads/AdUnit";
 import { unstable_cache } from "next/cache";
 import SEOContentSection from "@/components/home/SeoContentSections";
 import AdSlot from "@/components/ads/AdSlot";
@@ -185,7 +184,6 @@ export default async function HomePage() {
           slot={ADSENSE_CONFIG.slots.homepageHeroBanner}
           format="auto"
           responsive={true}
-          className="max-w-5xl mx-auto"
         />
       </div>
 
@@ -202,7 +200,6 @@ export default async function HomePage() {
             slot={ADSENSE_CONFIG.slots.homepageAfterPopular}
             format="autorelaxed"
             responsive={true}
-            className="max-w-5xl mx-auto"
           />
         </div>
 
@@ -217,7 +214,6 @@ export default async function HomePage() {
             slot={ADSENSE_CONFIG.slots.homepageAfterEpisodes}
             format="auto"
             responsive={true}
-            className="max-w-5xl mx-auto"
           />
         </div>
 
@@ -232,8 +228,6 @@ export default async function HomePage() {
             slot={ADSENSE_CONFIG.slots.homepageAfterOngoing}
             format="auto"
             responsive={true}
-            className="max-w-3xl mx-auto"
-            lazy={true}
           />
         </div>
 
@@ -248,8 +242,6 @@ export default async function HomePage() {
             slot={ADSENSE_CONFIG.slots.homepageBottomBanner}
             format="auto"
             responsive={true}
-            className="max-w-3xl mx-auto"
-            lazy={true}
           />
         </div>
         <SEOContentSection />

@@ -10,7 +10,6 @@ import EpisodeList from "@/components/drama/EpisodeList";
 import RelatedDramas from "@/components/drama/RelatedDramas";
 import CompletedSection from "@/components/home/CompletedSection";
 import { getHomepageData } from "@/app/actions";
-import AdUnit from "@/components/ads/AdUnit";
 import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { TVSeriesSchema } from "@/components/schema/TvSeriesSchema";
@@ -323,7 +322,6 @@ export default async function DramaDetailPage({
             slot={ADSENSE_CONFIG.slots.dramaAfterHero}
             format="auto"
             responsive={true}
-            className="max-w-5xl mx-auto"
           />
         </div>
 
@@ -364,7 +362,6 @@ export default async function DramaDetailPage({
               slot={ADSENSE_CONFIG.slots.dramaAfterEpisodes}
               format="auto"
               responsive={true}
-              className="max-w-5xl mx-auto"
             />
           </div>
 
@@ -382,8 +379,6 @@ export default async function DramaDetailPage({
                 slot={ADSENSE_CONFIG.slots.dramaAfterRelated}
                 format="auto"
                 responsive={true}
-                className="max-w-5xl mx-auto"
-                lazy
               />
             </div>
           )}
@@ -400,8 +395,6 @@ export default async function DramaDetailPage({
               slot={ADSENSE_CONFIG.slots.dramaBottomBanner}
               format="auto"
               responsive={true}
-              className="max-w-5xl mx-auto"
-              lazy
             />
           </div>
         </div>
