@@ -311,19 +311,16 @@ export default async function DramaDetailPage({
       <TVSeriesSchema drama={drama} />
 
       <div className="min-h-screen bg-black">
+        <AdSlot
+          slot={ADSENSE_CONFIG.slots.hads1}
+          format="auto"
+          responsive={true}
+        />
+
         {/* Hero Section */}
         <header>
           <DramaHero drama={drama} />
         </header>
-
-        {/* Ad 1: After Hero */}
-        <div className="max-w-5xl mx-auto px-4 py-6">
-          <AdSlot
-            slot={ADSENSE_CONFIG.slots.dramaAfterHero}
-            format="auto"
-            responsive={true}
-          />
-        </div>
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
@@ -332,20 +329,17 @@ export default async function DramaDetailPage({
             <DramaSynopsis description={drama.description} />
           </section>
 
-          {/* Ad 2: After Synopsis */}
-          <div className="max-w-3xl mx-auto">
-            <AdSlot
-              slot={ADSENSE_CONFIG.slots.dramaAfterSynopsis}
-              format="autorelaxed"
-              responsive={true}
-            />
-          </div>
-
           <DramaCredits
             casts={dramaData.casts || []}
             directors={dramaData.directors || []}
             writers={dramaData.writers || []}
             novelAuthors={dramaData.novelAuthors || []}
+          />
+
+          <AdSlot
+            slot={ADSENSE_CONFIG.slots.hads2}
+            format="auto"
+            responsive={true}
           />
 
           {/* Episode List */}
@@ -355,15 +349,6 @@ export default async function DramaDetailPage({
               dramaTitle={drama.title}
             />
           </section>
-
-          {/* Ad 3: After Episode List */}
-          <div className="max-w-3xl mx-auto">
-            <AdSlot
-              slot={ADSENSE_CONFIG.slots.dramaAfterEpisodes}
-              format="auto"
-              responsive={true}
-            />
-          </div>
 
           {/* Related Dramas */}
           {relatedDramas.length > 0 && (
@@ -389,14 +374,6 @@ export default async function DramaDetailPage({
               <CompletedSection dramas={completedResult.data.completed} />
             </section>
           )}
-
-          <div className="max-w-5xl mx-auto py-4">
-            <AdSlot
-              slot={ADSENSE_CONFIG.slots.dramaBottomBanner}
-              format="auto"
-              responsive={true}
-            />
-          </div>
         </div>
       </div>
     </>

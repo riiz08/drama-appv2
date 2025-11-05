@@ -152,21 +152,22 @@ export default async function EpisodePlayerPage({
 
       <div className="min-h-screen bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+          <AdSlot
+            slot={ADSENSE_CONFIG.slots.hads1}
+            format="auto"
+            responsive={true}
+          />
           {/* CRITICAL CONTENT - Render immediately */}
 
           {/* Episode Info Header */}
           <header>
             <EpisodeInfo episode={episode} />
           </header>
-
-          {/* Ad 1: Above Video Player */}
-          <div className="max-w-5xl mx-auto">
-            <AdSlot
-              slot={ADSENSE_CONFIG.slots.playerAboveVideo}
-              format="auto"
-              responsive={true}
-            />
-          </div>
+          <AdSlot
+            slot={ADSENSE_CONFIG.slots.multiplex}
+            format="auto"
+            responsive={true}
+          />
 
           {/* Video Player - Main Content */}
           <article aria-label="Video player">
@@ -184,15 +185,11 @@ export default async function EpisodePlayerPage({
               dramaSlug={episode.drama.slug}
             />
           </nav>
-
-          {/* Ad 2: After Navigation */}
-          <div className="max-w-3xl mx-auto">
-            <AdSlot
-              slot={ADSENSE_CONFIG.slots.playerAfterNav}
-              format="autorelaxed"
-              responsive={true}
-            />
-          </div>
+          <AdSlot
+            slot={ADSENSE_CONFIG.slots.hads2}
+            format="auto"
+            responsive={true}
+          />
 
           {/* Episode List */}
           {allEpisodes.length > 0 && (
@@ -204,15 +201,6 @@ export default async function EpisodePlayerPage({
               />
             </section>
           )}
-
-          {/* Ad 3: After Episode List */}
-          <div className="max-w-3xl mx-auto">
-            <AdSlot
-              slot={ADSENSE_CONFIG.slots.playerAfterEpisodeList}
-              format="auto"
-              responsive={true}
-            />
-          </div>
 
           {/* NON-CRITICAL - Lazy load with Suspense */}
           <Suspense fallback={<LoadingSkeleton />}>

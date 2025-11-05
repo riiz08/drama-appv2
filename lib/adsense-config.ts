@@ -2,6 +2,14 @@ export const ADSENSE_CONFIG = {
   publisherId: process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID, // GANTI dengan ID kamu
 
   slots: {
+    //horizontal ads
+    hads1: "3453782357",
+    hads2: "5978949902",
+    hads3: "3927501637",
+
+    //multiplex ads
+    multiplex: "2317483012",
+
     // Homepage Slots
     homepageHeroBanner: "3106377852",
     homepageAfterPopular: "6560337826", //multiplex

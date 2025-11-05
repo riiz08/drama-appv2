@@ -173,17 +173,16 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-black">
+      <AdSlot
+        slot={ADSENSE_CONFIG.slots.hads1}
+        format="auto"
+        responsive={true}
+      />
+
       {/* Hero Section */}
       {homepageData.data.featured && (
         <HeroSection drama={homepageData.data.featured} />
       )}
-
-      {/* Ad 1: Hero Banner (After Hero) */}
-      <AdSlot
-        slot={ADSENSE_CONFIG.slots.homepageHeroBanner}
-        format="auto"
-        responsive={true}
-      />
 
       {/* Content Sections */}
       <div className="space-y-12 pb-20">
@@ -192,10 +191,9 @@ export default async function HomePage() {
           <PopularSection dramas={homepageData.data.popular} />
         )}
 
-        {/* Ad 2: After Popular Section */}
         <AdSlot
-          slot={ADSENSE_CONFIG.slots.homepageAfterPopular}
-          format="autorelaxed"
+          slot={ADSENSE_CONFIG.slots.hads2}
+          format="auto"
           responsive={true}
         />
 
@@ -204,36 +202,16 @@ export default async function HomePage() {
           <LatestEpisodesSection episodes={homepageData.data.latestEpisodes} />
         )}
 
-        {/* Ad 3: After Latest Episodes */}
-        <AdSlot
-          slot={ADSENSE_CONFIG.slots.homepageAfterEpisodes}
-          format="auto"
-          responsive={true}
-        />
-
         {/* Ongoing Dramas */}
         {homepageData.data.ongoing.length > 0 && (
           <OngoingSection dramas={homepageData.data.ongoing} />
         )}
-
-        {/* Ad 4: After Ongoing Section */}
-        <AdSlot
-          slot={ADSENSE_CONFIG.slots.homepageAfterOngoing}
-          format="auto"
-          responsive={true}
-        />
 
         {/* Completed Dramas */}
         {homepageData.data.completed.length > 0 && (
           <CompletedSection dramas={homepageData.data.completed} />
         )}
 
-        {/* Ad 5: Bottom Banner (Before Footer) */}
-        <AdSlot
-          slot={ADSENSE_CONFIG.slots.homepageBottomBanner}
-          format="auto"
-          responsive={true}
-        />
         <SEOContentSection />
       </div>
     </div>

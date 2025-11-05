@@ -5,6 +5,8 @@ import BrowseFilters from "@/components/browse/BrowseFilters";
 import BrowseGrid from "@/components/browse/BrowseGrid";
 import BrowsePagination from "@/components/browse/BrowsePagination";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
+import AdSlot from "@/components/ads/AdSlot";
+import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 
 export const runtime = "edge";
 
@@ -151,6 +153,12 @@ export default async function BrowsePage({
               currentSort={params?.sort}
             />
           </nav>
+
+          <AdSlot
+            slot={ADSENSE_CONFIG.slots.hads1}
+            format="auto"
+            responsive={true}
+          />
 
           {/* Results Grid */}
           <section aria-label="Hasil carian drama">
