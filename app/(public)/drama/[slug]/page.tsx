@@ -16,7 +16,11 @@ import { TVSeriesSchema } from "@/components/schema/TvSeriesSchema";
 import DramaCredits from "@/components/drama/DramaCredits";
 import AdSlot from "@/components/ads/AdSlot";
 
-export const runtime = "edge";
+export async function generateStaticParams() {
+  return [];
+}
+
+export const revalidate = 3600;
 
 // Generate metadata for SEO
 export async function generateMetadata({

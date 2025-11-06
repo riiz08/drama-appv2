@@ -10,7 +10,11 @@ import { unstable_cache } from "next/cache";
 import SEOContentSection from "@/components/home/SeoContentSections";
 import AdSlot from "@/components/ads/AdSlot";
 
-export const runtime = "edge";
+export async function generateStaticParams() {
+  return [];
+}
+
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://mangeakkk.my.id"),
@@ -153,7 +157,7 @@ export default async function HomePage() {
       return { success, data };
     },
     ["HomepageData"],
-    { revalidate: 600 }
+    { revalidate: 3600 }
   );
 
   const homepageData = await getCachedHomePageData();

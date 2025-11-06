@@ -19,7 +19,11 @@ import VideoPlayerWrapper from "@/components/episode/VideoPlayerWrapper";
 import { EpisodeSchema } from "@/components/schema/EpisodeSchema";
 import AdSlot from "@/components/ads/AdSlot";
 
-export const runtime = "edge";
+export async function generateStaticParams() {
+  return [];
+}
+
+export const revalidate = 28800;
 
 // ============================================
 // 3. OPTIMIZED METADATA GENERATION

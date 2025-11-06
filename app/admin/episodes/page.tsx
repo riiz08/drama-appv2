@@ -7,8 +7,6 @@ import { getAllEpisodes } from "@/app/actions/episode/queries";
 
 export const dynamic = "force-dynamic";
 
-export const runtime = "edge";
-
 export const metadata: Metadata = {
   title: "Kelola Episode | Admin Dashboard",
   robots: {

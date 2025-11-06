@@ -8,7 +8,11 @@ import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import AdSlot from "@/components/ads/AdSlot";
 import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 
-export const runtime = "edge";
+export async function generateStaticParams() {
+  return [];
+}
+
+export const revalidate = 86400;
 
 // Type for search params
 type SearchParams = Promise<{
