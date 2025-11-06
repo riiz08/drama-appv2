@@ -1,7 +1,7 @@
 "use server";
 
-import { Status } from "@/app/generated/prisma";
 import { supabase } from "@/lib/supabase";
+import { StatusType } from "@/types";
 import { revalidatePath } from "next/cache";
 
 // Types
@@ -17,7 +17,7 @@ export type CreateDramaWithRelationsInput = {
   slug: string;
   description: string;
   thumbnail: string;
-  status: Status;
+  status: StatusType;
   releaseDate: string | Date;
   isPopular?: boolean;
   totalEpisode?: number;
