@@ -169,7 +169,7 @@ export default async function EpisodePlayerPage({
           </header>
           <AdSlot
             slot={ADSENSE_CONFIG.slots.multiplex}
-            format="auto"
+            format="autorelaxed"
             responsive={true}
           />
 
