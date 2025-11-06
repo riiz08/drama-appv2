@@ -1,11 +1,11 @@
 "use server";
 
 import { supabase } from "@/lib/supabase";
-import { Status } from "@/app/generated/prisma";
+import { StatusType } from "@/types";
 
 // Get all dramas with flexible options
 export async function getAllDramas(options?: {
-  status?: Status;
+  status?: StatusType;
   limit?: number;
   offset?: number;
   orderBy?: "title" | "releaseDate" | "createdAt";
