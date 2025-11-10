@@ -15,6 +15,7 @@ import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { TVSeriesSchema } from "@/components/schema/TvSeriesSchema";
 import DramaCredits from "@/components/drama/DramaCredits";
 import AdSlot from "@/components/ads/AdSlot";
+import AdWrapper from "@/components/ads/AdWrapper";
 
 export async function generateStaticParams() {
   return [];
@@ -315,12 +316,6 @@ export default async function DramaDetailPage({
       <TVSeriesSchema drama={drama} />
 
       <div className="min-h-screen bg-black">
-        <AdSlot
-          slot={ADSENSE_CONFIG.slots.hads1}
-          format="auto"
-          responsive={true}
-        />
-
         {/* Hero Section */}
         <header>
           <DramaHero drama={drama} />
@@ -328,6 +323,8 @@ export default async function DramaDetailPage({
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+          <AdWrapper slot={ADSENSE_CONFIG.slots.hads1} format="auto" />
+
           {/* Synopsis */}
           <section aria-labelledby="synopsis-heading">
             <DramaSynopsis description={drama.description} />
@@ -340,11 +337,7 @@ export default async function DramaDetailPage({
             novelAuthors={dramaData.novelAuthors || []}
           />
 
-          <AdSlot
-            slot={ADSENSE_CONFIG.slots.hads2}
-            format="auto"
-            responsive={true}
-          />
+          <AdWrapper slot={ADSENSE_CONFIG.slots.hads2} format="auto" />
 
           {/* Episode List */}
           <section aria-labelledby="episodes-heading">
@@ -364,10 +357,9 @@ export default async function DramaDetailPage({
           {/* Ad 4: After Related Dramas */}
           {relatedDramas.length > 0 && (
             <div className="max-w-3xl mx-auto">
-              <AdSlot
+              <AdWrapper
                 slot={ADSENSE_CONFIG.slots.dramaAfterRelated}
                 format="auto"
-                responsive={true}
               />
             </div>
           )}

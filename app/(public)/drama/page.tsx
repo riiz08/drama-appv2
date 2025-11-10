@@ -7,6 +7,7 @@ import BrowsePagination from "@/components/browse/BrowsePagination";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import AdSlot from "@/components/ads/AdSlot";
 import { ADSENSE_CONFIG } from "@/lib/adsense-config";
+import AdWrapper from "@/components/ads/AdWrapper";
 
 export async function generateStaticParams() {
   return [];
@@ -158,11 +159,7 @@ export default async function BrowsePage({
             />
           </nav>
 
-          <AdSlot
-            slot={ADSENSE_CONFIG.slots.hads1}
-            format="auto"
-            responsive={true}
-          />
+          <AdWrapper slot={ADSENSE_CONFIG.slots.hads1} format="auto" />
 
           {/* Results Grid */}
           <section aria-label="Hasil carian drama">

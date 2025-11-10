@@ -32,25 +32,15 @@ export default function AdSlot({
     adEl.removeAttribute("data-adsbygoogle-status");
     adEl.innerHTML = "";
 
-    const interval = setInterval(() => {
-      if (document.body.contains(adEl)) {
-        try {
-          if (typeof window !== "undefined" && window.adsbygoogle) {
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-          }
-        } catch (error) {
-          console.error("AdSense error", error);
-        }
-        clearInterval(interval);
-      }
-    }, 50);
-
-    return () => clearInterval(interval);
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch (error) {
+      console.error("AdSense Error", error);
+    }
   }, [pathname]);
 
   return (
     <ins
-      key={pathname}
       className="adsbygoogle"
       data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}
       data-ad-slot={slot}

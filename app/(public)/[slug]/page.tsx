@@ -18,6 +18,7 @@ import VideoPlayerWrapper from "@/components/episode/VideoPlayerWrapper";
 import { EpisodeSchema } from "@/components/schema/EpisodeSchema";
 import AdSlot from "@/components/ads/AdSlot";
 import ViewTracker from "@/components/shared/VIewTracker";
+import AdWrapper from "@/components/ads/AdWrapper";
 
 export async function generateStaticParams() {
   return [];
@@ -157,21 +158,15 @@ export default async function EpisodePlayerPage({
 
       <div className="min-h-screen bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-          <AdSlot
-            slot={ADSENSE_CONFIG.slots.hads1}
-            format="auto"
-            responsive={true}
-          />
-          {/* CRITICAL CONTENT - Render immediately */}
+          <AdWrapper slot={ADSENSE_CONFIG.slots.hads1} format="auto" />
 
           {/* Episode Info Header */}
           <header>
             <EpisodeInfo episode={episode} />
           </header>
-          <AdSlot
+          <AdWrapper
             slot={ADSENSE_CONFIG.slots.multiplex}
             format="autorelaxed"
-            responsive={true}
           />
 
           {/* Video Player - Main Content */}
@@ -190,11 +185,7 @@ export default async function EpisodePlayerPage({
               dramaSlug={episode.drama.slug}
             />
           </nav>
-          <AdSlot
-            slot={ADSENSE_CONFIG.slots.hads2}
-            format="auto"
-            responsive={true}
-          />
+          <AdWrapper slot={ADSENSE_CONFIG.slots.hads2} format="auto" />
 
           {/* Episode List */}
           {allEpisodes.length > 0 && (

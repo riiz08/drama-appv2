@@ -9,6 +9,7 @@ import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 import { unstable_cache } from "next/cache";
 import SEOContentSection from "@/components/home/SeoContentSections";
 import AdSlot from "@/components/ads/AdSlot";
+import AdWrapper from "@/components/ads/AdWrapper";
 
 export async function generateStaticParams() {
   return [];
@@ -176,17 +177,12 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black">
-      <AdSlot
-        slot={ADSENSE_CONFIG.slots.hads1}
-        format="auto"
-        responsive={true}
-      />
-
+    <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 bg-black">
       {/* Hero Section */}
       {homepageData.data.featured && (
         <HeroSection drama={homepageData.data.featured} />
       )}
+      <AdWrapper slot={ADSENSE_CONFIG.slots.hads1} format="auto" />
 
       {/* Content Sections */}
       <div className="space-y-12 pb-20">
@@ -195,11 +191,7 @@ export default async function HomePage() {
           <PopularSection dramas={homepageData.data.popular} />
         )}
 
-        <AdSlot
-          slot={ADSENSE_CONFIG.slots.hads2}
-          format="auto"
-          responsive={true}
-        />
+        <AdWrapper slot={ADSENSE_CONFIG.slots.hads2} format="auto" />
 
         {/* Latest Episodes */}
         {homepageData.data.latestEpisodes.length > 0 && (
