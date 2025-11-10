@@ -1,5 +1,6 @@
 "use client"; // Hanya perlu kalau kamu pakai useEffect (dan memang perlu)
 
+import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 interface AdsenseSlotProps {
@@ -22,19 +23,34 @@ export default function AdSlot({
   responsive = true,
 }: AdsenseSlotProps) {
   const adRef = useRef<HTMLModElement>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
-    try {
-      if (typeof window !== "undefined" && window.adsbygoogle) {
-        window.adsbygoogle.push({});
+    const adEl = adRef.current;
+    if (!adEl) return;
+
+    adEl.removeAttribute("data-adsbygoogle-status");
+    adEl.innerHTML = "";
+
+    const interval = setInterval(() => {
+      if (document.body.contains(adEl)) {
+        try {
+          if (typeof window !== "undefined" && window.adsbygoogle) {
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+          }
+        } catch (error) {
+          console.error("AdSense error", error);
+        }
+        clearInterval(interval);
       }
-    } catch (e) {
-      console.error("AdSense error", e);
-    }
-  }, []);
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [pathname]);
 
   return (
     <ins
+      key={pathname}
       className="adsbygoogle"
       data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}
       data-ad-slot={slot}

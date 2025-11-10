@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 
 export async function getTopDramas(limit: number = 5) {
   try {
-    // Get dramas dengan jumlah episode
+    // Get dramas dengan stats
     const { data: dramas, error } = await supabase
       .from("Drama")
       .select(
@@ -14,7 +14,8 @@ export async function getTopDramas(limit: number = 5) {
         title,
         slug,
         thumbnail,
-        episodes:Episode(count)
+        episodes:Episode(count),
+        stats:DramaStats(totalViews)
       `
       )
       .order("isPopular", { ascending: false })
@@ -23,7 +24,7 @@ export async function getTopDramas(limit: number = 5) {
 
     if (error) throw error;
 
-    // Format data untuk komponen
+    // Format data
     const formattedDramas =
       dramas?.map((drama) => ({
         id: drama.id,
@@ -31,10 +32,12 @@ export async function getTopDramas(limit: number = 5) {
         slug: drama.slug,
         thumbnail: drama.thumbnail,
         episodes: drama.episodes?.[0]?.count || 0,
-        // Mock views & trend untuk sekarang (nanti bisa diganti dengan real data)
-        views: Math.floor(Math.random() * 10000) + 5000,
-        trend: `+${Math.floor(Math.random() * 20) + 5}%`,
+        views: (drama.stats as any)?.[0]?.totalViews || 0,
+        trend: `+${Math.floor(Math.random() * 20) + 5}%`, // Mock trend untuk sekarang
       })) || [];
+
+    // Sort by views
+    formattedDramas.sort((a, b) => b.views - a.views);
 
     return { success: true, dramas: formattedDramas };
   } catch (error) {

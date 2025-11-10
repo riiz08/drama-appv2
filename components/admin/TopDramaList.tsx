@@ -76,7 +76,7 @@ export default function TopDramasList({ dramas }: Props) {
 
       {/* Note */}
       <p className="text-xs text-gray-500 text-center pt-2">
-        📊 Data drama dari database (views & trend masih mock)
+        📊 Data real dari database (trend masih mock)
       </p>
     </div>
   );

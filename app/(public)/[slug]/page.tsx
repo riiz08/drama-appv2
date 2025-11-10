@@ -8,7 +8,6 @@ import { generateEpisodeTitle } from "@/lib/utils";
 import EpisodeInfo from "@/components/episode/EpisodeInfo";
 import EpisodeNavigation from "@/components/episode/EpisodeNavigation";
 import EpisodeListPlayer from "@/components/episode/EpisodeListPlayer";
-import AdUnit from "@/components/ads/AdUnit";
 import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 import { getHomepageData } from "@/app/actions";
 import OngoingSection from "@/components/home/OnGoingSection";
@@ -18,6 +17,7 @@ import { VideoObjectSchema } from "@/components/schema/VideoObjectSchema";
 import VideoPlayerWrapper from "@/components/episode/VideoPlayerWrapper";
 import { EpisodeSchema } from "@/components/schema/EpisodeSchema";
 import AdSlot from "@/components/ads/AdSlot";
+import ViewTracker from "@/components/shared/VIewTracker";
 
 export async function generateStaticParams() {
   return [];
@@ -153,6 +153,7 @@ export default async function EpisodePlayerPage({
       />
       <VideoObjectSchema episode={episode} />
       <EpisodeSchema episode={episode} />
+      <ViewTracker dramaId={data.episode.dramaId} />
 
       <div className="min-h-screen bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -235,30 +236,12 @@ async function BelowFoldContent({
         </section>
       )}
 
-      {/* Ad 4: Bottom Banner */}
-      <div className="max-w-5xl mx-auto py-4">
-        <AdSlot
-          slot={ADSENSE_CONFIG.slots.playerBottomBanner}
-          format="auto"
-          responsive={true}
-        />
-      </div>
-
       {/* Completed Dramas */}
       {data.completed.length > 0 && (
         <section aria-labelledby="completed-heading">
           <CompletedSection dramas={data.completed} />
         </section>
       )}
-
-      {/* Ad 5: After Completed Dramas */}
-      <div className="max-w-3xl mx-auto">
-        <AdUnit
-          slot={ADSENSE_CONFIG.slots.playerBelowVideos}
-          format="auto"
-          responsive={true}
-        />
-      </div>
     </>
   );
 }
