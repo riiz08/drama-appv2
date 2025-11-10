@@ -177,7 +177,7 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 bg-black">
+    <div className="min-h-screen max-w-7xl mx-auto sm:px-2 lg:px-6 py-4 space-y-4 bg-black">
       {/* Hero Section */}
       {homepageData.data.featured && (
         <HeroSection drama={homepageData.data.featured} />
