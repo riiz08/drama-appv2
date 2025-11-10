@@ -31,6 +31,7 @@ export default function DramaCard({
   return (
     <article className="w-full">
       <Link
+        prefetch={false}
         href={dramaUrl}
         className="block w-full"
         aria-label={`Tonton ${drama.title} - ${statusLabel}${drama.totalEpisode ? `, ${drama.totalEpisode} episod` : ""}`}
