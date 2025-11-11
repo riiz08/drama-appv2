@@ -29,10 +29,10 @@ export default function HeroSection({ drama }: HeroSectionProps) {
 
   return (
     <section
-      className="relative h-[70vh] md:h-[85vh] w-full overflow-hidden"
+      className="relative h-[70vh] md:h-[85vh] w-full overflow-hidden rounded-lg md:rounded-xl"
       aria-label="Drama Pilihan Utama"
     >
-      {/* Background Image with Gradient Overlay */}
+      {/* Background Image with Enhanced Gradient Overlay */}
       <div
         className="absolute inset-0"
         role="img"
@@ -48,20 +48,44 @@ export default function HeroSection({ drama }: HeroSectionProps) {
               priority
               fetchPriority="high"
               className="object-cover object-center"
-              sizes="100vw"
+              sizes="100vw, 100vh"
               onError={() => setImageError(true)}
             />
-            {/* Multi-layer gradient for better readability */}
+            {/* Multi-layer gradient for better readability and smooth edges */}
+            {/* Top gradient - subtle fade */}
             <div
-              className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"
+              className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-transparent"
               aria-hidden="true"
             />
+
+            {/* Left gradient - untuk readability text */}
             <div
-              className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-transparent"
+              className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent"
               aria-hidden="true"
             />
+
+            {/* Bottom gradient - strong fade */}
             <div
-              className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent"
+              className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent"
+              aria-hidden="true"
+            />
+
+            {/* HORIZONTAL EDGE GRADIENTS - Smooth transition ke samping kiri & kanan */}
+            {/* Left Edge Gradient */}
+            <div
+              className="absolute top-0 bottom-0 left-0 w-32 md:w-48 lg:w-64 bg-gradient-to-r from-black via-black/80 to-transparent"
+              aria-hidden="true"
+            />
+
+            {/* Right Edge Gradient */}
+            <div
+              className="absolute top-0 bottom-0 right-0 w-32 md:w-48 lg:w-64 bg-gradient-to-l from-black via-black/80 to-transparent"
+              aria-hidden="true"
+            />
+
+            {/* Bottom Edge - Extra smooth */}
+            <div
+              className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black via-black/90 to-transparent"
               aria-hidden="true"
             />
           </>
@@ -75,8 +99,8 @@ export default function HeroSection({ drama }: HeroSectionProps) {
 
       {/* Content */}
       <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-end h-full pb-20 md:pb-24">
-          <article className="max-w-2xl space-y-4 md:space-y-6">
+        <div className="flex items-end h-full pb-16 md:pb-20">
+          <article className="max-w-2xl space-y-3 md:space-y-6">
             {/* Status Badges */}
             <div
               className="flex items-center gap-3"
@@ -87,7 +111,7 @@ export default function HeroSection({ drama }: HeroSectionProps) {
                 color="danger"
                 variant="solid"
                 size="sm"
-                className="font-semibold"
+                className="font-semibold shadow-lg"
                 aria-label="Drama pilihan"
               >
                 PILIHAN
@@ -109,7 +133,7 @@ export default function HeroSection({ drama }: HeroSectionProps) {
 
             {/* Meta Info */}
             <div
-              className="flex flex-wrap items-center gap-3 text-sm md:text-base text-gray-300"
+              className="flex flex-wrap items-center gap-3 text-sm md:text-base text-gray-200"
               role="contentinfo"
               aria-label="Maklumat drama"
             >
@@ -161,7 +185,7 @@ export default function HeroSection({ drama }: HeroSectionProps) {
                 startContent={
                   <Play className="w-5 h-5 fill-current" aria-hidden="true" />
                 }
-                className="bg-white text-black font-semibold hover:bg-gray-200"
+                className="bg-white text-black font-semibold hover:bg-gray-200 shadow-xl"
                 aria-label={`Tonton ${drama.title} sekarang`}
               >
                 Tonton Sekarang
@@ -173,7 +197,7 @@ export default function HeroSection({ drama }: HeroSectionProps) {
                 variant="bordered"
                 size="lg"
                 startContent={<Info className="w-5 h-5" aria-hidden="true" />}
-                className="border-white/30 text-white hover:bg-white/10"
+                className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
                 aria-label={`Lihat maklumat lengkap ${drama.title}`}
               >
                 Maklumat Lengkap
@@ -182,12 +206,6 @@ export default function HeroSection({ drama }: HeroSectionProps) {
           </article>
         </div>
       </div>
-
-      {/* Bottom fade to blend with content */}
-      <div
-        className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black to-transparent pointer-events-none"
-        aria-hidden="true"
-      />
     </section>
   );
 }

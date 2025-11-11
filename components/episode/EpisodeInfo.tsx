@@ -20,6 +20,8 @@ import { getDramaUrl, formatDate, getStatusLabel } from "@/lib/utils";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Accordion, AccordionItem } from "@heroui/accordion";
+import AdWrapper from "../ads/AdWrapper";
+import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 
 interface EpisodeInfoProps {
   episode: {
@@ -258,6 +260,8 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
                 </div>
               )}
             </dl>
+
+            <AdWrapper slot={ADSENSE_CONFIG.slots.hads1} format="auto" />
 
             {/* Description */}
             <article className="pt-2 border-t border-zinc-800">

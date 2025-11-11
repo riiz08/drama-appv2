@@ -157,9 +157,7 @@ export default async function EpisodePlayerPage({
       <ViewTracker dramaId={data.episode.dramaId} />
 
       <div className="min-h-screen bg-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-          <AdWrapper slot={ADSENSE_CONFIG.slots.hads1} format="auto" />
-
+        <div className="max-w-7xl mx-auto px-3 lg:px-8 py-6 space-y-6">
           {/* Episode Info Header */}
           <header>
             <EpisodeInfo episode={episode} />
@@ -197,54 +195,8 @@ export default async function EpisodePlayerPage({
               />
             </section>
           )}
-
-          {/* NON-CRITICAL - Lazy load with Suspense */}
-          <Suspense fallback={<LoadingSkeleton />}>
-            <BelowFoldContent homeDataPromise={homeDataPromise} />
-          </Suspense>
         </div>
       </div>
     </>
-  );
-}
-
-// ============================================
-// 5. LAZY LOADED BELOW-THE-FOLD CONTENT
-// ============================================
-async function BelowFoldContent({
-  homeDataPromise,
-}: {
-  homeDataPromise: Promise<any>;
-}) {
-  const { data } = await homeDataPromise;
-
-  return (
-    <>
-      {/* Ongoing Dramas */}
-      {data.ongoing.length > 0 && (
-        <section aria-labelledby="ongoing-heading">
-          <OngoingSection dramas={data.ongoing} />
-        </section>
-      )}
-
-      {/* Completed Dramas */}
-      {data.completed.length > 0 && (
-        <section aria-labelledby="completed-heading">
-          <CompletedSection dramas={data.completed} />
-        </section>
-      )}
-    </>
-  );
-}
-
-// ============================================
-// 6. LOADING SKELETON
-// ============================================
-function LoadingSkeleton() {
-  return (
-    <div className="space-y-6">
-      <div className="h-64 bg-zinc-900 animate-pulse rounded-lg" />
-      <div className="h-64 bg-zinc-900 animate-pulse rounded-lg" />
-    </div>
   );
 }

@@ -1,8 +1,17 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { Skeleton } from "@heroui/skeleton";
 
-const AdSlot = dynamic(() => import("@/components/ads/AdSlot"), { ssr: false });
+const AdSlot = dynamic(() => import("@/components/ads/AdSlot"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full flex justify-center">
+      {/* Skeleton HeroUI */}
+      <Skeleton className="h-72 w-full rounded-xl" />
+    </div>
+  ),
+});
 
 export default function AdWrapper({
   slot,

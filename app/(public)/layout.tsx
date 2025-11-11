@@ -1,9 +1,9 @@
-//file app/(public)/layout.tsx
-
 import "@/styles/globals.css";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import Sidebar from "@/components/layout/Sidebar";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://mangeakkk.my.id"),
@@ -96,10 +96,29 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Detect if current page is homepage
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") || "";
+
   return (
     <div className="relative flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-grow pt-16 md:pt-20">{children}</main>
+
+      <main className="flex-grow pt-16 md:pt-20">
+        <div className="max-w-7xl mx-auto px-2 lg:px-8 py-6">
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Main Content - 70% */}
+            <div className="flex-1 lg:w-[70%]">{children}</div>
+
+            {/* Sidebar - 30% */}
+            <aside className="lg:w-[30%]">
+              {/* showFAQ={true} hanya di homepage */}
+              <Sidebar showFAQ={false} />
+            </aside>
+          </div>
+        </div>
+      </main>
+
       <Footer />
     </div>
   );

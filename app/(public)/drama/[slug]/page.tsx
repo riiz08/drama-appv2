@@ -323,12 +323,11 @@ export default async function DramaDetailPage({
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
-          <AdWrapper slot={ADSENSE_CONFIG.slots.hads1} format="auto" />
-
           {/* Synopsis */}
           <section aria-labelledby="synopsis-heading">
             <DramaSynopsis description={drama.description} />
           </section>
+          <AdWrapper slot={ADSENSE_CONFIG.slots.hads1} format="auto" />
 
           <DramaCredits
             casts={dramaData.casts || []}
@@ -347,13 +346,6 @@ export default async function DramaDetailPage({
             />
           </section>
 
-          {/* Related Dramas */}
-          {relatedDramas.length > 0 && (
-            <section aria-labelledby="related-heading">
-              <RelatedDramas dramas={relatedDramas} />
-            </section>
-          )}
-
           {/* Ad 4: After Related Dramas */}
           {relatedDramas.length > 0 && (
             <div className="max-w-3xl mx-auto">
@@ -364,10 +356,10 @@ export default async function DramaDetailPage({
             </div>
           )}
 
-          {/* Completed Dramas */}
-          {completedResult.data.completed.length > 0 && (
-            <section aria-labelledby="completed-heading">
-              <CompletedSection dramas={completedResult.data.completed} />
+          {/* Related Dramas */}
+          {relatedDramas.length > 0 && (
+            <section aria-labelledby="related-heading">
+              <RelatedDramas dramas={relatedDramas} />
             </section>
           )}
         </div>
