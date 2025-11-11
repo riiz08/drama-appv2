@@ -2,7 +2,6 @@
 
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 import { getEpisodeFullData } from "@/app/actions/episode/queries";
 import { generateEpisodeTitle } from "@/lib/utils";
 import EpisodeInfo from "@/components/episode/EpisodeInfo";
@@ -10,13 +9,10 @@ import EpisodeNavigation from "@/components/episode/EpisodeNavigation";
 import EpisodeListPlayer from "@/components/episode/EpisodeListPlayer";
 import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 import { getHomepageData } from "@/app/actions";
-import OngoingSection from "@/components/home/OnGoingSection";
-import CompletedSection from "@/components/home/CompletedSection";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { VideoObjectSchema } from "@/components/schema/VideoObjectSchema";
 import VideoPlayerWrapper from "@/components/episode/VideoPlayerWrapper";
 import { EpisodeSchema } from "@/components/schema/EpisodeSchema";
-import AdSlot from "@/components/ads/AdSlot";
 import ViewTracker from "@/components/shared/VIewTracker";
 import AdWrapper from "@/components/ads/AdWrapper";
 
@@ -24,7 +20,7 @@ export async function generateStaticParams() {
   return [];
 }
 
-export const revalidate = 28800;
+export const revalidate = 86400;
 
 // ============================================
 // 3. OPTIMIZED METADATA GENERATION

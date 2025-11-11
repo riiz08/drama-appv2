@@ -8,20 +8,18 @@ import DramaHero from "@/components/drama/DramaHero";
 import DramaSynopsis from "@/components/drama/DramaSynopsis";
 import EpisodeList from "@/components/drama/EpisodeList";
 import RelatedDramas from "@/components/drama/RelatedDramas";
-import CompletedSection from "@/components/home/CompletedSection";
 import { getHomepageData } from "@/app/actions";
 import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { TVSeriesSchema } from "@/components/schema/TvSeriesSchema";
 import DramaCredits from "@/components/drama/DramaCredits";
-import AdSlot from "@/components/ads/AdSlot";
 import AdWrapper from "@/components/ads/AdWrapper";
 
 export async function generateStaticParams() {
   return [];
 }
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 // Generate metadata for SEO
 export async function generateMetadata({

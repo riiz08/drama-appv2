@@ -96,10 +96,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Detect if current page is homepage
-  const headersList = await headers();
-  const pathname = headersList.get("x-pathname") || "";
-
   return (
     <div className="relative flex flex-col min-h-screen">
       <Navbar />

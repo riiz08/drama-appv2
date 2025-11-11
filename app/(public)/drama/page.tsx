@@ -13,7 +13,7 @@ export async function generateStaticParams() {
   return [];
 }
 
-export const revalidate = 86400;
+export const revalidate = 604800;
 
 // Type for search params
 type SearchParams = Promise<{
