@@ -60,7 +60,7 @@ export default function Navbar() {
         {/* Logo - Center on Mobile, Start on Desktop */}
         <NavbarContent className="md:hidden pr-3" justify="center">
           <NavbarBrand>
-            <Link href="/" className="font-bold text-inherit">
+            <Link href="/" prefetch={false} className="font-bold text-inherit">
               <span className="text-white">Mangeakkk</span>
               <span className="text-red-500"> Drama</span>
             </Link>

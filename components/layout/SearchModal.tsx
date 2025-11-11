@@ -108,6 +108,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   {results.map((drama) => (
                     <Link
                       key={drama.id}
+                      prefetch={false}
                       href={getDramaUrl(drama.slug)}
                       onClick={onClose}
                     >

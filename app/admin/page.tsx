@@ -18,6 +18,7 @@ import TrafficChart from "@/components/admin/TrafficChart";
 import { getTopDramas, getRecentActivities } from "@/app/actions/dashboard";
 import TopDramasList from "@/components/admin/TopDramaList";
 import RecentActivity from "@/components/admin/RecentActicity";
+import QuickActions from "@/components/admin/QuickActions";
 
 export const dynamic = "force-dynamic";
 
@@ -146,55 +147,7 @@ export default async function AdminDashboard() {
 
           {/* Right Column - Quick Actions (30%) */}
           <div className="xl:col-span-4 space-y-6">
-            {/* Quick Actions */}
-            <Card className="bg-zinc-900 border-none">
-              <CardBody className="p-6">
-                <h2 className="text-xl font-bold text-white mb-4">
-                  Quick Actions
-                </h2>
-                <div className="space-y-3">
-                  <a
-                    href="/admin/dramas/create"
-                    className="flex items-center gap-3 p-4 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors group"
-                  >
-                    <Plus className="w-5 h-5 text-white" />
-                    <span className="text-white font-medium flex-1">
-                      Tambah Drama
-                    </span>
-                  </a>
-
-                  <a
-                    href="/admin/episodes/create"
-                    className="flex items-center gap-3 p-4 bg-green-600 hover:bg-green-700 rounded-lg transition-colors group"
-                  >
-                    <Plus className="w-5 h-5 text-white" />
-                    <span className="text-white font-medium flex-1">
-                      Tambah Episode
-                    </span>
-                  </a>
-
-                  <div className="pt-3 border-t border-zinc-800 space-y-2">
-                    <a
-                      href="/admin/dramas"
-                      className="flex items-center gap-2 p-3 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors text-gray-300 hover:text-white group"
-                    >
-                      <span className="flex-1 text-sm">Kelola Semua Drama</span>
-                      <ExternalLink className="w-4 h-4 opacity-50 group-hover:opacity-100" />
-                    </a>
-
-                    <a
-                      href="/admin/episodes"
-                      className="flex items-center gap-2 p-3 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors text-gray-300 hover:text-white group"
-                    >
-                      <span className="flex-1 text-sm">
-                        Kelola Semua Episode
-                      </span>
-                      <ExternalLink className="w-4 h-4 opacity-50 group-hover:opacity-100" />
-                    </a>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
+            <QuickActions />
 
             {/* Recent Activity */}
             <Card className="bg-zinc-900 border-none">

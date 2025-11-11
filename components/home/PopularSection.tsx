@@ -36,6 +36,7 @@ export default function PopularSection({ dramas }: PopularSectionProps) {
         </div>
         <Button
           as={Link}
+          prefetch={false}
           href="/drama?sort=popular"
           variant="light"
           size="sm"

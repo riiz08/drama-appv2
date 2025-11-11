@@ -180,6 +180,7 @@ export default function HeroSection({ drama }: HeroSectionProps) {
               <Button
                 as={Link}
                 href={dramaUrl}
+                prefetch={false}
                 color="default"
                 size="lg"
                 startContent={
@@ -194,6 +195,7 @@ export default function HeroSection({ drama }: HeroSectionProps) {
               <Button
                 as={Link}
                 href={dramaUrl}
+                prefetch={false}
                 variant="bordered"
                 size="lg"
                 startContent={<Info className="w-5 h-5" aria-hidden="true" />}

@@ -60,8 +60,8 @@ export default function TrafficChart() {
       </div>
 
       {/* Chart */}
-      <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="w-full" style={{ height: "256px", minHeight: "256px" }}>
+        <ResponsiveContainer key={mounted ? "mounted" : "loading"}>
           <LineChart data={mockTrafficData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
             <XAxis

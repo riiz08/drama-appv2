@@ -28,6 +28,7 @@ function EpisodeListItem({ episode }: { episode: EpisodeCardType }) {
   return (
     <Link
       href={episodeUrl}
+      prefetch={false}
       className="group flex items-center justify-between px-4 py-3 hover:bg-zinc-800 transition-colors duration-200"
       aria-label={`Tonton ${episode.drama.title} Episod ${episode.episodeNum}`}
     >
@@ -77,6 +78,7 @@ export default function LatestEpisodesListSidebar({
         </div>
         <Link
           href="/drama?sort=latest"
+          prefetch={false}
           className="text-white hover:text-red-200 transition-colors"
           aria-label="Lihat semua episod terkini"
         >

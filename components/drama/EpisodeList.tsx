@@ -69,6 +69,7 @@ export default function EpisodeList({
             <article key={episode.id} role="listitem">
               <Link
                 href={episodeUrl}
+                prefetch={false}
                 aria-label={`Tonton ${dramaTitle} Episod ${episode.episodeNum} - ${formatDate(episode.releaseDate, "ms-MY")}`}
               >
                 <Card

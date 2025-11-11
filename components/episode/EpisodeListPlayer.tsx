@@ -43,7 +43,11 @@ export default function EpisodeListPlayer({
           const isCurrent = episode.episodeNum === currentEpisodeNum;
 
           return (
-            <Link key={episode.id} href={getEpisodeUrl(episode.slug)}>
+            <Link
+              key={episode.id}
+              href={getEpisodeUrl(episode.slug)}
+              prefetch={false}
+            >
               <Card
                 fullWidth
                 isPressable={!isCurrent}

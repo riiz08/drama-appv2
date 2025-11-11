@@ -5,8 +5,8 @@ import { supabase } from "@/lib/supabase";
 
 export async function getTopDramas(limit: number = 5) {
   try {
-    // Get dramas dengan stats
-    const { data: dramas, error } = await supabase
+    // Get all dramas
+    const { data: dramas, error: dramaError } = await supabase
       .from("Drama")
       .select(
         `
@@ -14,15 +14,25 @@ export async function getTopDramas(limit: number = 5) {
         title,
         slug,
         thumbnail,
-        episodes:Episode(count),
-        stats:DramaStats(totalViews)
+        episodes:Episode(count)
       `
       )
       .order("isPopular", { ascending: false })
-      .order("createdAt", { ascending: false })
-      .limit(limit);
+      .order("createdAt", { ascending: false });
 
-    if (error) throw error;
+    if (dramaError) throw dramaError;
+
+    // Get all stats
+    const { data: allStats, error: statsError } = await supabase
+      .from("DramaStats")
+      .select("dramaId, totalViews");
+
+    if (statsError) throw statsError;
+
+    // Create stats map
+    const statsMap = new Map(
+      allStats?.map((s) => [s.dramaId, s.totalViews]) || []
+    );
 
     // Format data
     const formattedDramas =
@@ -32,16 +42,18 @@ export async function getTopDramas(limit: number = 5) {
         slug: drama.slug,
         thumbnail: drama.thumbnail,
         episodes: drama.episodes?.[0]?.count || 0,
-        views: (drama.stats as any)?.[0]?.totalViews || 0,
-        trend: `+${Math.floor(Math.random() * 20) + 5}%`, // Mock trend untuk sekarang
+        views: statsMap.get(drama.id) || 0,
+        trend: `+${Math.floor(Math.random() * 20) + 5}%`,
       })) || [];
 
-    // Sort by views
+    // Sort by views descending
     formattedDramas.sort((a, b) => b.views - a.views);
 
-    return { success: true, dramas: formattedDramas };
+    // Take top limit
+    const topDramas = formattedDramas.slice(0, limit);
+
+    return { success: true, dramas: topDramas };
   } catch (error) {
-    console.error("Error fetching top dramas:", error);
     return {
       success: false,
       error: "Failed to fetch top dramas",
@@ -60,7 +72,6 @@ export async function getRecentActivities(limit: number = 5) {
       .limit(3);
 
     if (dramaError) {
-      console.error("Error fetching dramas:", dramaError);
       throw dramaError;
     }
 
@@ -81,7 +92,6 @@ export async function getRecentActivities(limit: number = 5) {
       .limit(3);
 
     if (episodeError) {
-      console.error("Error fetching episodes:", episodeError);
       throw episodeError;
     }
 
@@ -103,7 +113,6 @@ export async function getRecentActivities(limit: number = 5) {
 
     return { success: true, activities };
   } catch (error) {
-    console.error("Error fetching recent activities:", error);
     return {
       success: false,
       error: "Failed to fetch activities",

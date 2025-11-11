@@ -27,6 +27,7 @@ export default function EpisodeNavigation({
         <Button
           as={Link}
           href={getEpisodeUrl(prev.slug)}
+          prefetch={false}
           variant="bordered"
           size="lg"
           startContent={<ChevronLeft className="w-5 h-5" />}
@@ -57,6 +58,7 @@ export default function EpisodeNavigation({
         <Button
           as={Link}
           href={getEpisodeUrl(next.slug)}
+          prefetch={false}
           color="danger"
           size="lg"
           endContent={<ChevronRight className="w-5 h-5" />}

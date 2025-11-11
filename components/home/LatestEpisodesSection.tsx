@@ -36,6 +36,7 @@ function EpisodeCard({ episode }: { episode: EpisodeCardType }) {
     <article>
       <Card
         as={Link}
+        prefetch={false}
         aria-label={`Tonton ${episode.drama.title} Episod ${episode.episodeNum} - ${relativeTime}`}
         href={episodeUrl}
         isPressable
@@ -141,6 +142,7 @@ export default function LatestEpisodesSection({
         </div>
         <Button
           as={Link}
+          prefetch={false}
           href="/drama?sort=latest"
           variant="light"
           size="sm"

@@ -158,6 +158,7 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
             <nav aria-label="Kembali ke halaman drama">
               <Button
                 as={Link}
+                prefetch={false}
                 href={dramaUrl}
                 variant="light"
                 size="sm"

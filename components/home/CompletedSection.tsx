@@ -56,6 +56,7 @@ export default function CompletedSection({ dramas }: CompletedSectionProps) {
           {displayDramas.map((drama) => (
             <Link
               key={drama.id}
+              prefetch={false}
               href={`/drama/${drama.slug}`}
               className="flex items-center justify-between py-3 px-2 border-b border-zinc-800 last:border-b-0 hover:bg-zinc-900 transition-colors group"
               role="listitem"
@@ -83,6 +84,7 @@ export default function CompletedSection({ dramas }: CompletedSectionProps) {
         {dramas.length > 10 && (
           <Link
             href="/drama?status=TAMAT"
+            prefetch={false}
             className="block mt-3 text-center text-sm text-gray-400 hover:text-white transition-colors"
           >
             Lihat {dramas.length - 10} lagi →
@@ -108,6 +110,7 @@ export default function CompletedSection({ dramas }: CompletedSectionProps) {
           </div>
           <Button
             as={Link}
+            prefetch={false}
             href="/drama?status=TAMAT"
             variant="light"
             size="sm"
