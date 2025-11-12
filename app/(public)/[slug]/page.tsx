@@ -15,6 +15,7 @@ import VideoPlayerWrapper from "@/components/episode/VideoPlayerWrapper";
 import { EpisodeSchema } from "@/components/schema/EpisodeSchema";
 import ViewTracker from "@/components/shared/VIewTracker";
 import AdWrapper from "@/components/ads/AdWrapper";
+import DonationGoal from "@/components/episode/DonationGoal";
 
 export async function generateStaticParams() {
   return [];
@@ -158,10 +159,7 @@ export default async function EpisodePlayerPage({
           <header>
             <EpisodeInfo episode={episode} />
           </header>
-          <AdWrapper
-            slot={ADSENSE_CONFIG.slots.multiplex}
-            format="autorelaxed"
-          />
+          <AdWrapper slot={ADSENSE_CONFIG.slots.hads2} format="auto" />
 
           {/* Video Player - Main Content */}
           <article aria-label="Video player">
@@ -171,6 +169,8 @@ export default async function EpisodePlayerPage({
             />
           </article>
 
+          <DonationGoal />
+
           {/* Navigation (Prev/Next) */}
           <nav aria-label="Navigasi episod">
             <EpisodeNavigation
@@ -179,7 +179,10 @@ export default async function EpisodePlayerPage({
               dramaSlug={episode.drama.slug}
             />
           </nav>
-          <AdWrapper slot={ADSENSE_CONFIG.slots.hads2} format="auto" />
+          <AdWrapper
+            slot={ADSENSE_CONFIG.slots.multiplex}
+            format="autorelaxed"
+          />
 
           {/* Episode List */}
           {allEpisodes.length > 0 && (
