@@ -55,7 +55,7 @@ const getDonationGoal = unstable_cache(
   },
   ["donation_goal"], // key unik untuk cache
   {
-    revalidate: 600, // cache 10 menit
+    revalidate: false, // cache 10 menit
     tags: ["donation_goal"], // bisa di-refresh manual dari webhook
   }
 );

@@ -11,27 +11,95 @@ export default function DonationGoal() {
   const [current, setCurrent] = useState(0);
   const [currency, setCurrency] = useState("IDR");
   const [locale, setLocale] = useState("id-ID");
+  const [baseCurrency, setBaseCurrency] = useState("IDR");
+  const [exchangeRate, setExchangeRate] = useState(1);
 
-  // Ambil data donasi
+  // 🌍 Deteksi currency berdasarkan lokasi user
+  const detectUserCurrency = () => {
+    if (typeof navigator === "undefined") return "IDR";
+
+    const userLocale = navigator.language || "id-ID";
+
+    // Mapping locale ke currency (tambahkan sesuai kebutuhan)
+    const currencyMap: { [key: string]: string } = {
+      "ms-MY": "MYR", // Malaysia
+      "en-MY": "MYR", // Malaysia (English)
+      "id-ID": "IDR", // Indonesia
+      "en-SG": "SGD", // Singapore
+      "th-TH": "THB", // Thailand
+      "en-US": "USD", // United States
+      "en-GB": "GBP", // United Kingdom
+      "en-AU": "AUD", // Australia
+    };
+
+    // Coba exact match dulu
+    if (currencyMap[userLocale]) {
+      return currencyMap[userLocale];
+    }
+
+    // Fallback: ambil country code dari locale (contoh: "ms-MY" -> "MY")
+    const countryCode = userLocale.split("-")[1];
+    const countryToCurrency: { [key: string]: string } = {
+      MY: "MYR",
+      ID: "IDR",
+      SG: "SGD",
+      TH: "THB",
+      US: "USD",
+      GB: "GBP",
+      AU: "AUD",
+      PH: "PHP",
+      VN: "VND",
+    };
+
+    return countryToCurrency[countryCode] || "IDR";
+  };
+
+  // 💱 Ambil exchange rate dari Frankfurter API (unlimited & gratis)
+  const fetchExchangeRate = async (from: string, to: string) => {
+    if (from === to) return 1;
+
+    try {
+      // Frankfurter API - No limit, no API key needed
+      const res = await fetch(
+        `https://api.frankfurter.dev/v1/latest?base=${from}&symbols=${to}`
+      );
+      const data = await res.json();
+
+      return data.rates[to] || 1;
+    } catch (err) {
+      console.error("Gagal ambil exchange rate:", err);
+      return 1; // Fallback ke rate 1:1 jika error
+    }
+  };
+
+  // 📊 Ambil data donasi + konversi currency
   useEffect(() => {
     async function fetchData() {
       try {
         const res = await fetch("/api/donation", { cache: "no-store" });
         const data = await res.json();
 
-        const localeDetected =
-          typeof navigator !== "undefined" ? navigator.language : "id-ID";
-        const formattedCurrency = new Intl.NumberFormat(localeDetected, {
-          style: "currency",
-          currency: data?.base_currency ?? "IDR",
-          minimumFractionDigits: 0,
-        });
+        const userLocale = navigator.language || "id-ID";
+        const userCurrency = detectUserCurrency();
+        const apiBaseCurrency = data?.base_currency ?? "IDR";
 
-        setCurrency(formattedCurrency.resolvedOptions().currency || "IDR");
-        setGoal(data.target_amount);
-        setCurrent(data.current_amount);
-        setLocale(navigator.language || "id-ID");
+        setBaseCurrency(apiBaseCurrency);
+        setCurrency(userCurrency);
+        setLocale(userLocale);
+        console.log(data);
 
+        // Ambil exchange rate
+        const rate = await fetchExchangeRate(apiBaseCurrency, userCurrency);
+        setExchangeRate(rate);
+
+        // Konversi amount
+        const convertedGoal = data.target_amount * rate;
+        const convertedCurrent = data.current_amount * rate;
+
+        setGoal(convertedGoal);
+        setCurrent(convertedCurrent);
+
+        // Animasi progress
         let start = 0;
         const target = data.progress;
         const step = target / 40;
@@ -65,7 +133,7 @@ export default function DonationGoal() {
       minimumFractionDigits: 0,
     }).format(num);
 
-  // 🔹 Placeholder agar tidak picu LCP
+  // 🔹 Placeholder loading
   if (!goal) {
     return (
       <Card className="bg-black border-none rounded-2xl p-6 w-full mx-auto shadow-lg animate-pulse">
@@ -114,6 +182,7 @@ export default function DonationGoal() {
               window.gtag?.("event", "click_donate_cta", {
                 event_category: "Donation",
                 event_label: "Support button clicked",
+                user_currency: currency,
               });
             }
 
