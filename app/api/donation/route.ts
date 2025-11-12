@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { unstable_cache, revalidateTag } from "next/cache";
+import { supabase } from "@/lib/supabase";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY! // pakai service role biar bisa update
-);
-
-export async function GET() {
-  try {
+// --- Fungsi untuk ambil dan update goal ---
+const getDonationGoal = unstable_cache(
+  async () => {
     // Ambil satu record aktif dari donation_goal
     const { data: goal, error } = await supabase
       .from("donation_goal")
@@ -16,10 +13,7 @@ export async function GET() {
 
     if (error || !goal) {
       console.error("Gagal ambil data donation_goal:", error);
-      return NextResponse.json(
-        { error: "Data tidak ditemukan" },
-        { status: 404 }
-      );
+      throw new Error("Data tidak ditemukan");
     }
 
     // Dapatkan bulan sekarang dalam format YYYY-MM
@@ -40,6 +34,8 @@ export async function GET() {
       } else {
         goal.current_amount = 0;
         goal.last_reset_month = currentMonth;
+        // Invalidasi cache agar data baru langsung disajikan
+        revalidateTag("donation_goal");
       }
     }
 
@@ -49,13 +45,25 @@ export async function GET() {
       100
     );
 
-    return NextResponse.json({
+    return {
       target_amount: goal.target_amount,
       current_amount: goal.current_amount,
       progress,
       currency: goal.base_currency,
       last_reset_month: goal.last_reset_month,
-    });
+    };
+  },
+  ["donation_goal"], // key unik untuk cache
+  {
+    revalidate: 600, // cache 10 menit
+    tags: ["donation_goal"], // bisa di-refresh manual dari webhook
+  }
+);
+
+export async function GET() {
+  try {
+    const data = await getDonationGoal();
+    return NextResponse.json(data);
   } catch (err) {
     console.error("Terjadi kesalahan di server:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
