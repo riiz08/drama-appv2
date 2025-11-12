@@ -4,7 +4,6 @@ import { Progress } from "@heroui/progress";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 
 export default function DonationGoal() {
   const [progress, setProgress] = useState(0);
@@ -12,13 +11,6 @@ export default function DonationGoal() {
   const [current, setCurrent] = useState(0);
   const [currency, setCurrency] = useState("IDR");
   const [locale, setLocale] = useState("id-ID");
-
-  // Hindari hydration mismatch
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setLocale(navigator.language || "id-ID");
-    }
-  }, []);
 
   // Ambil data donasi
   useEffect(() => {
@@ -38,6 +30,7 @@ export default function DonationGoal() {
         setCurrency(formattedCurrency.resolvedOptions().currency || "IDR");
         setGoal(data.target_amount);
         setCurrent(data.current_amount);
+        setLocale(navigator.language || "id-ID");
 
         let start = 0;
         const target = data.progress;
