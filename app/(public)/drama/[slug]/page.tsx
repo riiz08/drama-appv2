@@ -42,13 +42,13 @@ export async function generateMetadata({
     };
   }
 
-  const title = generateDramaTitle(drama.title);
+  const title = `${drama.title} Full Episod HD Percuma | Mangeakkk Drama`;
 
   // Cast drama ke any untuk akses nested data dari Supabase
   const dramaData = drama as any;
 
   // Build rich description with cast/director/production info
-  let description = `Tonton ${drama.title} online secara percuma dalam kualiti HD.`;
+  let description = `Tonton drama ${drama.title} full episod dalam kualiti HD. Streaming percuma tanpa iklan hanya di Mangeakkk.`;
 
   // Add cast info
   if (

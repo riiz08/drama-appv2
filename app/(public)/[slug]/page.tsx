@@ -45,10 +45,10 @@ export async function generateMetadata({
   }
 
   const { episode, prev, next } = data;
-  const title = generateEpisodeTitle(episode.drama.title, episode.episodeNum);
+  const title = `${episode.drama.title} Full Episod ${episode.episodeNum} HD | Mangeakkk`;
 
   // Build description
-  let description = `Tonton ${episode.drama.title} Episod ${episode.episodeNum} HD.`;
+  let description = `Tonton episod ${episode.episodeNum} drama ${episode.drama.title} dalam HD. Tonton percuma di Mangeakkk.`;
 
   if (episode.drama.casts?.[0]) {
     const topCast = episode.drama.casts
@@ -62,6 +62,11 @@ export async function generateMetadata({
     description += ` Diarahkan oleh ${episode.drama.directors[0].director.name}.`;
   }
 
+  function truncate(text: string, max: number) {
+    return text.length > max ? text.slice(0, max - 3) + "..." : text;
+  }
+  description = truncate(description, 155);
+
   const canonicalUrl = `https://mangeakkk.my.id/${episode.slug}`;
 
   // Minimal but effective keywords
@@ -69,6 +74,11 @@ export async function generateMetadata({
     `${episode.drama.title} episod ${episode.episodeNum}`,
     `tonton ${episode.drama.title}`,
     "drama melayu online",
+    `tonton ${episode.drama.title} episod ${episode.episodeNum}`,
+    `drama ${episode.drama.title} full episode`,
+    `streaming drama melayu HD`,
+    `drama ${episode.drama.title} ${new Date().getFullYear()}`,
+    "mangeakkk",
   ];
 
   return {
