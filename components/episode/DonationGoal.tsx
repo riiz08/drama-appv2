@@ -116,7 +116,6 @@ export default function DonationGoal() {
           radius="lg"
           variant="solid"
           color="danger"
-          as={Link}
           onPress={() => {
             if (typeof window !== "undefined") {
               window.gtag?.("event", "click_donate_cta", {
