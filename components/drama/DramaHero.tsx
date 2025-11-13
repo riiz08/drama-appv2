@@ -104,7 +104,7 @@ export default function DramaHero({ drama }: DramaHeroProps) {
             {/* Title & Status */}
             <div className="space-y-3">
               <h1 className="text-3xl md:text-5xl font-bold text-white leading-tight">
-                {drama.title}
+                Drama melayu {drama.title} - Tonton full episod HD
               </h1>
               <div className="flex flex-wrap items-center gap-2">
                 <Chip

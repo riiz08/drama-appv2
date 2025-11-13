@@ -175,7 +175,8 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
             {/* Title & Episode Number */}
             <div className="space-y-3">
               <h1 className="text-3xl md:text-5xl font-bold text-white leading-tight">
-                {episode.drama.title} - Episod {episode.episodeNum}
+                {episode.drama.title} full episod {episode.episodeNum} tonton
+                drama video
               </h1>
               <div className="flex flex-wrap items-center gap-2">
                 <Chip

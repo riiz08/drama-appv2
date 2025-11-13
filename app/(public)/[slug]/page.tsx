@@ -164,12 +164,12 @@ export default async function EpisodePlayerPage({
       <ViewTracker dramaId={data.episode.dramaId} />
 
       <div className="min-h-screen bg-black">
+        <AdWrapper slot={ADSENSE_CONFIG.slots.hads2} format="auto" />
         <div className="max-w-7xl mx-auto px-3 lg:px-8 py-6 space-y-6">
           {/* Episode Info Header */}
           <header>
             <EpisodeInfo episode={episode} />
           </header>
-          <AdWrapper slot={ADSENSE_CONFIG.slots.hads2} format="auto" />
 
           {/* Video Player - Main Content */}
           <article aria-label="Video player">
