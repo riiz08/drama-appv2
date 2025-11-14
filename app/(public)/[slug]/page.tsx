@@ -191,7 +191,7 @@ export default async function EpisodePlayerPage({
           </nav>
           <AdWrapper
             slot={ADSENSE_CONFIG.slots.multiplex}
-            format="autorelaxed"
+            format="auto"
           />
 
           {/* Episode List */}
