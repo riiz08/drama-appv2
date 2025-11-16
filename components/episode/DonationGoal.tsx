@@ -76,7 +76,7 @@ export default function DonationGoal() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch("/api/donation", { cache: "no-store" });
+        const res = await fetch("/api/donation");
         const data = await res.json();
 
         const userLocale = navigator.language || "id-ID";
@@ -86,7 +86,6 @@ export default function DonationGoal() {
         setBaseCurrency(apiBaseCurrency);
         setCurrency(userCurrency);
         setLocale(userLocale);
-        console.log(data);
 
         // Ambil exchange rate
         const rate = await fetchExchangeRate(apiBaseCurrency, userCurrency);

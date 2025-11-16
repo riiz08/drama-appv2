@@ -139,9 +139,6 @@ export default async function EpisodePlayerPage({
 
   const { episode, prev, next, allEpisodes } = data;
 
-  // OPTIMIZATION: Start fetching homepage data (don't await yet)
-  const homeDataPromise = getHomepageData();
-
   return (
     <>
       {/* Schemas - minimal overhead */}
@@ -189,10 +186,7 @@ export default async function EpisodePlayerPage({
               dramaSlug={episode.drama.slug}
             />
           </nav>
-          <AdWrapper
-            slot={ADSENSE_CONFIG.slots.multiplex}
-            format="auto"
-          />
+          <AdWrapper slot={ADSENSE_CONFIG.slots.multiplex} format="auto" />
 
           {/* Episode List */}
           {allEpisodes.length > 0 && (
