@@ -1,61 +1,55 @@
-// file: app/actions/tracking.ts
 "use server";
 
 import { supabase } from "@/lib/supabase";
+import { revalidateTag } from "next/cache";
 
 export async function trackDramaView(dramaId: string) {
   try {
     const today = new Date().toISOString().split("T")[0];
 
-    // 1. Update atau create DramaStats
-    const { data: stats, error: statsError } = await supabase
-      .from("DramaStats")
-      .select("*")
-      .eq("dramaId", dramaId)
-      .maybeSingle();
+    // Execute both updates in parallel with upsert (single query each)
+    const [statsResult, dailyResult] = await Promise.all([
+      // 1. Upsert DramaStats (1 query instead of 2)
+      supabase.rpc("increment_drama_views", { drama_id: dramaId }),
 
-    if (stats) {
-      // Update existing
-      await supabase
-        .from("DramaStats")
-        .update({
-          totalViews: stats.totalViews + 1,
-          updatedAt: new Date().toISOString(),
-        })
-        .eq("dramaId", dramaId);
-    } else {
-      // Create new
-      await supabase.from("DramaStats").insert({
-        dramaId,
-        totalViews: 1,
-      });
+      // 2. Upsert DramaViewsDaily (1 query instead of 2)
+      supabase.rpc("increment_daily_views", {
+        drama_id: dramaId,
+        view_date: today,
+      }),
+    ]);
+
+    // Fallback jika RPC tidak tersedia - gunakan upsert manual
+    if (statsResult.error || dailyResult.error) {
+      await Promise.all([
+        supabase.from("DramaStats").upsert(
+          {
+            dramaId,
+            totalViews: 1,
+            updatedAt: new Date().toISOString(),
+          },
+          {
+            onConflict: "dramaId",
+            ignoreDuplicates: false,
+          }
+        ),
+
+        supabase.from("DramaViewsDaily").upsert(
+          {
+            dramaId,
+            date: today,
+            views: 1,
+          },
+          {
+            onConflict: "dramaId,date",
+            ignoreDuplicates: false,
+          }
+        ),
+      ]);
     }
 
-    // 2. Update atau create DramaViewsDaily
-    const { data: dailyStats, error: dailyError } = await supabase
-      .from("DramaViewsDaily")
-      .select("*")
-      .eq("dramaId", dramaId)
-      .eq("date", today)
-      .maybeSingle();
-
-    if (dailyStats) {
-      // Update existing
-      await supabase
-        .from("DramaViewsDaily")
-        .update({
-          views: dailyStats.views + 1,
-        })
-        .eq("dramaId", dramaId)
-        .eq("date", today);
-    } else {
-      // Create new
-      await supabase.from("DramaViewsDaily").insert({
-        dramaId,
-        date: today,
-        views: 1,
-      });
-    }
+    // Invalidate dashboard cache (views changed)
+    revalidateTag("dashboard-top-dramas");
 
     return { success: true };
   } catch (error) {

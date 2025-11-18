@@ -109,7 +109,7 @@ export default async function RootLayout({
             {/* Sidebar - 30% */}
             <aside className="lg:w-[30%]">
               {/* showFAQ={true} hanya di homepage */}
-              <Sidebar showFAQ={false} />
+              <Sidebar />
             </aside>
           </div>
         </div>

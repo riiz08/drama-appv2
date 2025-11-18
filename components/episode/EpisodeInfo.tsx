@@ -104,7 +104,7 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
             <div className="absolute inset-0 scale-110 blur-2xl opacity-20">
               <Image
                 src={episode.drama.thumbnail}
-                alt=""
+                alt={episode.drama.title}
                 fill
                 className="object-cover"
                 priority

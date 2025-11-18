@@ -1,122 +1,130 @@
-// file: app/actions/dashboard.ts
 "use server";
 
 import { supabase } from "@/lib/supabase";
+import { unstable_cache } from "next/cache";
+
+// ============================================
+// TOP DRAMAS - CACHED
+// ============================================
 
 export async function getTopDramas(limit: number = 5) {
-  try {
-    // Get all dramas
-    const { data: dramas, error: dramaError } = await supabase
-      .from("Drama")
-      .select(
-        `
-        id,
-        title,
-        slug,
-        thumbnail,
-        episodes:Episode(count)
-      `
-      )
-      .order("isPopular", { ascending: false })
-      .order("createdAt", { ascending: false });
+  return unstable_cache(
+    async () => {
+      try {
+        // Single optimized query with aggregation
+        const { data: dramas, error } = await supabase
+          .from("Drama")
+          .select(
+            `
+            id,
+            title,
+            slug,
+            thumbnail,
+            isPopular,
+            dramaStats:DramaStats(totalViews),
+            episodes:Episode(id)
+          `
+          )
+          .order("isPopular", { ascending: false })
+          .order("createdAt", { ascending: false })
+          .limit(limit * 2); // Fetch more to ensure we have enough after sorting
 
-    if (dramaError) throw dramaError;
+        if (error) throw error;
 
-    // Get all stats
-    const { data: allStats, error: statsError } = await supabase
-      .from("DramaStats")
-      .select("dramaId, totalViews");
+        // Format and sort by views
+        const formattedDramas =
+          dramas
+            ?.map((drama) => ({
+              id: drama.id,
+              title: drama.title,
+              slug: drama.slug,
+              thumbnail: drama.thumbnail,
+              episodes: drama.episodes?.length || 0,
+              views: (drama.dramaStats as any)?.[0]?.totalViews || 0,
+              trend: `+${Math.floor(Math.random() * 20) + 5}%`,
+            }))
+            .sort((a, b) => b.views - a.views)
+            .slice(0, limit) || [];
 
-    if (statsError) throw statsError;
-
-    // Create stats map
-    const statsMap = new Map(
-      allStats?.map((s) => [s.dramaId, s.totalViews]) || []
-    );
-
-    // Format data
-    const formattedDramas =
-      dramas?.map((drama) => ({
-        id: drama.id,
-        title: drama.title,
-        slug: drama.slug,
-        thumbnail: drama.thumbnail,
-        episodes: drama.episodes?.[0]?.count || 0,
-        views: statsMap.get(drama.id) || 0,
-        trend: `+${Math.floor(Math.random() * 20) + 5}%`,
-      })) || [];
-
-    // Sort by views descending
-    formattedDramas.sort((a, b) => b.views - a.views);
-
-    // Take top limit
-    const topDramas = formattedDramas.slice(0, limit);
-
-    return { success: true, dramas: topDramas };
-  } catch (error) {
-    return {
-      success: false,
-      error: "Failed to fetch top dramas",
-      dramas: [],
-    };
-  }
+        return { success: true, dramas: formattedDramas };
+      } catch (error) {
+        return {
+          success: false,
+          error: "Failed to fetch top dramas",
+          dramas: [],
+        };
+      }
+    },
+    ["dashboard-top-dramas", limit.toString()],
+    {
+      revalidate: 300, // 5 minutes
+      tags: ["dashboard", "dashboard-top-dramas", "dramas"],
+    }
+  )();
 }
 
+// ============================================
+// RECENT ACTIVITIES - CACHED
+// ============================================
+
 export async function getRecentActivities(limit: number = 5) {
-  try {
-    // Get recent dramas
-    const { data: recentDramas, error: dramaError } = await supabase
-      .from("Drama")
-      .select("title, createdAt")
-      .order("createdAt", { ascending: false })
-      .limit(3);
+  return unstable_cache(
+    async () => {
+      try {
+        // Fetch both in parallel
+        const [dramasResult, episodesResult] = await Promise.all([
+          supabase
+            .from("Drama")
+            .select("title, createdAt")
+            .order("createdAt", { ascending: false })
+            .limit(3),
+          supabase
+            .from("Episode")
+            .select(
+              `
+              episodeNum, 
+              createdAt,
+              drama:Drama!inner(title)
+            `
+            )
+            .order("createdAt", { ascending: false })
+            .limit(3),
+        ]);
 
-    if (dramaError) {
-      throw dramaError;
+        if (dramasResult.error) throw dramasResult.error;
+        if (episodesResult.error) throw episodesResult.error;
+
+        // Combine and sort
+        const activities = [
+          ...(dramasResult.data?.map((d) => ({
+            type: "drama" as const,
+            title: `Drama "${d.title}" ditambahkan`,
+            time: d.createdAt,
+          })) || []),
+          ...(episodesResult.data?.map((e) => ({
+            type: "episode" as const,
+            title: `Episode ${e.episodeNum} "${(e.drama as any)?.title || "Unknown"}" di-upload`,
+            time: e.createdAt,
+          })) || []),
+        ]
+          .sort(
+            (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
+          )
+          .slice(0, limit);
+
+        return { success: true, activities };
+      } catch (error) {
+        return {
+          success: false,
+          error: "Failed to fetch activities",
+          activities: [],
+        };
+      }
+    },
+    ["dashboard-recent-activities", limit.toString()],
+    {
+      revalidate: 60, // 1 minute (lebih fresh untuk activities)
+      tags: ["dashboard", "dashboard-activities"],
     }
-
-    // Get recent episodes dengan drama info
-    const { data: recentEpisodes, error: episodeError } = await supabase
-      .from("Episode")
-      .select(
-        `
-        episodeNum, 
-        createdAt, 
-        dramaId,
-        Drama!inner (
-          title
-        )
-      `
-      )
-      .order("createdAt", { ascending: false })
-      .limit(3);
-
-    if (episodeError) {
-      throw episodeError;
-    }
-
-    // Combine dan sort berdasarkan waktu
-    const activities = [
-      ...(recentDramas?.map((d) => ({
-        type: "drama" as const,
-        title: `Drama "${d.title}" ditambahkan`,
-        time: d.createdAt,
-      })) || []),
-      ...(recentEpisodes?.map((e) => ({
-        type: "episode" as const,
-        title: `Episode ${e.episodeNum} "${(e.Drama as any)?.[0]?.title || "Unknown"}" di-upload`,
-        time: e.createdAt,
-      })) || []),
-    ]
-      .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-      .slice(0, limit);
-
-    return { success: true, activities };
-  } catch (error) {
-    return {
-      success: false,
-      error: "Failed to fetch activities",
-      activities: [],
-    };
-  }
+  )();
 }

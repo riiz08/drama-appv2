@@ -1,13 +1,11 @@
 import { getHomepageData } from "@/app/actions";
 import OngoingSection from "@/components/home/OnGoingSection";
 import CompletedSection from "@/components/home/CompletedSection";
-import SEOContentSection from "@/components/home/SeoContentSections";
 import LatestEpisodesListSidebar from "@/components/home/LatestEpisodesListSidebar";
 import { unstable_cache } from "next/cache";
 
 interface SidebarProps {
   // Conditional rendering based on page
-  showFAQ?: boolean; // true = show FAQ, false = show Latest Episodes
   // Optional: hide specific sections
   hideOngoing?: boolean;
   hideCompleted?: boolean;
@@ -36,7 +34,6 @@ const getCachedSidebarData = unstable_cache(
 );
 
 export default async function Sidebar({
-  showFAQ = false,
   hideOngoing = false,
   hideCompleted = false,
 }: SidebarProps) {
@@ -56,7 +53,7 @@ export default async function Sidebar({
 
       {/* Conditional: FAQ atau Latest Episodes */}
       {latestEpisodes.length > 0 && (
-        <div className="hidden lg:block">
+        <div>
           <LatestEpisodesListSidebar episodes={latestEpisodes} />
         </div>
       )}

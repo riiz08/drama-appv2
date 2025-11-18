@@ -4,10 +4,12 @@ import { useState } from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
-import { Plus, Pencil, Trash2, Eye } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import Image from "next/image";
 import DramaFormModal from "@/components/admin/DramaFormModal";
 import DeleteDramaModal from "@/components/admin/DeleteDramaModal";
+import { getDramaById } from "@/app/actions/drama/queries";
+import { addToast } from "@heroui/toast";
 
 type Drama = {
   id: string;
@@ -32,10 +34,34 @@ export default function DramaTable({ dramas }: Props) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedDrama, setSelectedDrama] = useState<Drama | null>(null);
+  const [isLoadingEdit, setIsLoadingEdit] = useState(false);
 
-  const handleEdit = (drama: Drama) => {
-    setSelectedDrama(drama);
-    setIsEditModalOpen(true);
+  // FIXED: Fetch drama with full relations before opening edit modal
+  const handleEdit = async (drama: Drama) => {
+    setIsLoadingEdit(true);
+    try {
+      // Fetch drama with all relations
+      const { success, drama: fullDrama } = await getDramaById(drama.id);
+
+      if (success && fullDrama) {
+        console.log("Fetched drama with relations:", fullDrama);
+        setSelectedDrama(fullDrama as any);
+        setIsEditModalOpen(true);
+      } else {
+        addToast({
+          title: "Gagal!",
+          description: "Tidak dapat memuat data drama",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching drama:", error);
+      addToast({
+        title: "Error!",
+        description: "Terjadi kesalahan saat memuat data",
+      });
+    } finally {
+      setIsLoadingEdit(false);
+    }
   };
 
   const handleDelete = (drama: Drama) => {
@@ -110,6 +136,7 @@ export default function DramaTable({ dramas }: Props) {
                             src={drama.thumbnail}
                             alt={drama.title}
                             fill
+                            sizes="64px"
                             className="object-cover"
                           />
                         </div>
@@ -158,6 +185,7 @@ export default function DramaTable({ dramas }: Props) {
                             variant="flat"
                             color="primary"
                             onPress={() => handleEdit(drama)}
+                            isLoading={isLoadingEdit}
                           >
                             <Pencil className="w-4 h-4" />
                           </Button>

@@ -2,13 +2,11 @@
 
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getEpisodeFullData } from "@/app/actions/episode/queries";
-import { generateEpisodeTitle } from "@/lib/utils";
+import { getEpisodeForPublic } from "@/app/actions/episode/queries";
 import EpisodeInfo from "@/components/episode/EpisodeInfo";
 import EpisodeNavigation from "@/components/episode/EpisodeNavigation";
 import EpisodeListPlayer from "@/components/episode/EpisodeListPlayer";
 import { ADSENSE_CONFIG } from "@/lib/adsense-config";
-import { getHomepageData } from "@/app/actions";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { VideoObjectSchema } from "@/components/schema/VideoObjectSchema";
 import VideoPlayerWrapper from "@/components/episode/VideoPlayerWrapper";
@@ -34,7 +32,7 @@ export async function generateMetadata({
   const { slug } = await params;
 
   // Use optimized single query
-  const data = await getEpisodeFullData(slug);
+  const data = await getEpisodeForPublic(slug);
 
   if (!data.success || !data.episode) {
     return {
@@ -131,7 +129,7 @@ export default async function EpisodePlayerPage({
   const { slug } = await params;
 
   // OPTIMIZATION: Single optimized query
-  const data = await getEpisodeFullData(slug);
+  const data = await getEpisodeForPublic(slug);
 
   if (!data.success || !data.episode) {
     notFound();

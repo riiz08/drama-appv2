@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Clock, ChevronRight, Play } from "lucide-react";
-import { getEpisodeUrl, formatRelativeTime } from "@/lib/utils";
+import { getEpisodeUrl } from "@/lib/utils";
 import { Chip } from "@heroui/chip";
 
 interface EpisodeCardType {

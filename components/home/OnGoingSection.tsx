@@ -36,7 +36,7 @@ export default function OngoingSection({ dramas }: OngoingSectionProps) {
               id="ongoing-heading-desktop"
               className="text-xl font-bold text-white"
             >
-              Episod Terkini
+              Drama Sedang Tayangan
             </h2>
           </div>
           <button

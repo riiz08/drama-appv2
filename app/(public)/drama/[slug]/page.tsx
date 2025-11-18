@@ -3,12 +3,11 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getDramaBySlug, getRelatedDramas } from "@/app/actions/drama";
-import { generateDramaTitle, generateMetaDescription } from "@/lib/utils";
+import { generateMetaDescription } from "@/lib/utils";
 import DramaHero from "@/components/drama/DramaHero";
 import DramaSynopsis from "@/components/drama/DramaSynopsis";
 import EpisodeList from "@/components/drama/EpisodeList";
 import RelatedDramas from "@/components/drama/RelatedDramas";
-import { getHomepageData } from "@/app/actions";
 import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { TVSeriesSchema } from "@/components/schema/TvSeriesSchema";
@@ -295,7 +294,6 @@ export default async function DramaDetailPage({
   // Get related dramas
   const relatedResult = await getRelatedDramas(drama.id, 6);
   const relatedDramas = relatedResult.success ? relatedResult.dramas : [];
-  const completedResult = await getHomepageData();
 
   return (
     <>

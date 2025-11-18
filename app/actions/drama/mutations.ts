@@ -2,7 +2,7 @@
 
 import { supabase } from "@/lib/supabase";
 import { StatusType } from "@/types";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 
 // Types
 type CastInput = { name: string; character?: string };
@@ -23,7 +23,6 @@ export type CreateDramaWithRelationsInput = {
   totalEpisode?: number;
   airTime?: string;
 
-  // Relasi - semua optional
   casts?: CastInput[];
   directors?: DirectorInput[];
   writers?: WriterInput[];
@@ -32,160 +31,172 @@ export type CreateDramaWithRelationsInput = {
   production?: ProductionInput;
 };
 
-// Helper: Get or create Cast
-async function getOrCreateCast(name: string) {
-  const trimmedName = name.trim();
+// ============================================
+// OPTIMIZED: Batch get or create operations
+// ============================================
 
-  const { data: cast, error } = await supabase
+async function batchGetOrCreateCasts(names: string[]) {
+  if (names.length === 0) return [];
+
+  const trimmedNames = names.map((n) => n.trim()).filter(Boolean);
+
+  const { data: existingCasts } = await supabase
     .from("Cast")
     .select("*")
-    .eq("name", trimmedName)
-    .maybeSingle();
+    .in("name", trimmedNames);
 
-  if (cast) {
-    return cast;
+  const existingMap = new Map((existingCasts || []).map((c) => [c.name, c]));
+
+  const missingNames = trimmedNames.filter((name) => !existingMap.has(name));
+
+  if (missingNames.length > 0) {
+    const { data: newCasts } = await supabase
+      .from("Cast")
+      .insert(missingNames.map((name) => ({ name })))
+      .select();
+
+    newCasts?.forEach((cast) => existingMap.set(cast.name, cast));
   }
 
-  const { data: newCast, error: createError } = await supabase
-    .from("Cast")
-    .insert({ name: trimmedName })
-    .select()
-    .single();
-
-  if (createError) throw createError;
-
-  return newCast;
+  return trimmedNames.map((name) => existingMap.get(name)!);
 }
 
-// Helper: Get or create Director
-async function getOrCreateDirector(name: string) {
-  const trimmedName = name.trim();
+async function batchGetOrCreateDirectors(names: string[]) {
+  if (names.length === 0) return [];
 
-  const { data: director, error } = await supabase
+  const trimmedNames = names.map((n) => n.trim()).filter(Boolean);
+
+  const { data: existingDirectors } = await supabase
     .from("Director")
     .select("*")
-    .eq("name", trimmedName)
-    .maybeSingle();
+    .in("name", trimmedNames);
 
-  if (director) {
-    return director;
+  const existingMap = new Map(
+    (existingDirectors || []).map((d) => [d.name, d])
+  );
+
+  const missingNames = trimmedNames.filter((name) => !existingMap.has(name));
+
+  if (missingNames.length > 0) {
+    const { data: newDirectors } = await supabase
+      .from("Director")
+      .insert(missingNames.map((name) => ({ name })))
+      .select();
+
+    newDirectors?.forEach((director) =>
+      existingMap.set(director.name, director)
+    );
   }
 
-  const { data: newDirector, error: createError } = await supabase
-    .from("Director")
-    .insert({ name: trimmedName })
-    .select()
-    .single();
-
-  if (createError) throw createError;
-
-  return newDirector;
+  return trimmedNames.map((name) => existingMap.get(name)!);
 }
 
-// Helper: Get or create Writer
-async function getOrCreateWriter(name: string) {
-  const trimmedName = name.trim();
+async function batchGetOrCreateWriters(names: string[]) {
+  if (names.length === 0) return [];
 
-  const { data: writer, error } = await supabase
+  const trimmedNames = names.map((n) => n.trim()).filter(Boolean);
+
+  const { data: existingWriters } = await supabase
     .from("Writer")
     .select("*")
-    .eq("name", trimmedName)
-    .maybeSingle();
+    .in("name", trimmedNames);
 
-  if (writer) {
-    return writer;
+  const existingMap = new Map((existingWriters || []).map((w) => [w.name, w]));
+
+  const missingNames = trimmedNames.filter((name) => !existingMap.has(name));
+
+  if (missingNames.length > 0) {
+    const { data: newWriters } = await supabase
+      .from("Writer")
+      .insert(missingNames.map((name) => ({ name })))
+      .select();
+
+    newWriters?.forEach((writer) => existingMap.set(writer.name, writer));
   }
 
-  const { data: newWriter, error: createError } = await supabase
-    .from("Writer")
-    .insert({ name: trimmedName })
-    .select()
-    .single();
-
-  if (createError) throw createError;
-
-  return newWriter;
+  return trimmedNames.map((name) => existingMap.get(name)!);
 }
 
-// Helper: Get or create Novel Author
-async function getOrCreateNovelAuthor(name: string) {
-  const trimmedName = name.trim();
+async function batchGetOrCreateNovelAuthors(names: string[]) {
+  if (names.length === 0) return [];
 
-  const { data: author, error } = await supabase
+  const trimmedNames = names.map((n) => n.trim()).filter(Boolean);
+
+  const { data: existingAuthors } = await supabase
     .from("NovelAuthor")
     .select("*")
-    .eq("name", trimmedName)
-    .maybeSingle();
+    .in("name", trimmedNames);
 
-  if (author) {
-    return author;
+  const existingMap = new Map((existingAuthors || []).map((a) => [a.name, a]));
+
+  const missingNames = trimmedNames.filter((name) => !existingMap.has(name));
+
+  if (missingNames.length > 0) {
+    const { data: newAuthors } = await supabase
+      .from("NovelAuthor")
+      .insert(missingNames.map((name) => ({ name })))
+      .select();
+
+    newAuthors?.forEach((author) => existingMap.set(author.name, author));
   }
 
-  const { data: newAuthor, error: createError } = await supabase
-    .from("NovelAuthor")
-    .insert({ name: trimmedName })
-    .select()
-    .single();
-
-  if (createError) throw createError;
-
-  return newAuthor;
+  return trimmedNames.map((name) => existingMap.get(name)!);
 }
 
-// Helper: Get or create Network
-async function getOrCreateNetwork(name: string) {
-  const trimmedName = name.trim();
+async function batchGetOrCreateNetworks(names: string[]) {
+  if (names.length === 0) return [];
 
-  const { data: network, error } = await supabase
+  const trimmedNames = names.map((n) => n.trim()).filter(Boolean);
+
+  const { data: existingNetworks } = await supabase
     .from("Network")
     .select("*")
-    .eq("name", trimmedName)
-    .maybeSingle();
+    .in("name", trimmedNames);
 
-  if (network) {
-    return network;
+  const existingMap = new Map((existingNetworks || []).map((n) => [n.name, n]));
+
+  const missingNames = trimmedNames.filter((name) => !existingMap.has(name));
+
+  if (missingNames.length > 0) {
+    const { data: newNetworks } = await supabase
+      .from("Network")
+      .insert(missingNames.map((name) => ({ name })))
+      .select();
+
+    newNetworks?.forEach((network) => existingMap.set(network.name, network));
   }
 
-  const { data: newNetwork, error: createError } = await supabase
-    .from("Network")
-    .insert({ name: trimmedName })
-    .select()
-    .single();
-
-  if (createError) throw createError;
-
-  return newNetwork;
+  return trimmedNames.map((name) => existingMap.get(name)!);
 }
 
-// Helper: Get or create Production
 async function getOrCreateProduction(name: string) {
   const trimmedName = name.trim();
 
-  const { data: production, error } = await supabase
+  const { data: production } = await supabase
     .from("Production")
     .select("*")
     .eq("name", trimmedName)
     .maybeSingle();
 
-  if (production) {
-    return production;
-  }
+  if (production) return production;
 
-  const { data: newProduction, error: createError } = await supabase
+  const { data: newProduction, error } = await supabase
     .from("Production")
     .insert({ name: trimmedName })
     .select()
     .single();
 
-  if (createError) throw createError;
-
+  if (error) throw error;
   return newProduction;
 }
 
-// Create new drama WITH all relations
+// ============================================
+// OPTIMIZED: Create Drama
+// ============================================
+
 export async function createDrama(data: CreateDramaWithRelationsInput) {
   try {
-    // 1. Handle production first (if provided)
+    // 1. Handle production
     let productionId: string | undefined;
     if (data.production?.name) {
       const production = await getOrCreateProduction(data.production.name);
@@ -212,75 +223,147 @@ export async function createDrama(data: CreateDramaWithRelationsInput) {
 
     if (dramaError) throw dramaError;
 
-    // 3. Handle casts
+    // 3. Batch process all relations in parallel
+    const relationPromises = [];
+
+    // Casts
     if (data.casts && data.casts.length > 0) {
-      for (const castInput of data.casts) {
-        if (castInput.name) {
-          const cast = await getOrCreateCast(castInput.name);
-          await supabase.from("DramaCast").insert({
+      relationPromises.push(
+        (async () => {
+          const castNames = data.casts!.map((c) => c.name).filter(Boolean);
+          const casts = await batchGetOrCreateCasts(castNames);
+
+          const dramaCastInserts = data.casts!.map((castInput, idx) => ({
             dramaId: drama.id,
-            castId: cast.id,
+            castId: casts[idx].id,
             character: castInput.character?.trim() || null,
-          });
-        }
-      }
+          }));
+
+          const { error } = await supabase
+            .from("DramaCast")
+            .insert(dramaCastInserts);
+
+          if (error) throw new Error(`Failed to add casts: ${error.message}`);
+        })()
+      );
     }
 
-    // 4. Handle directors
+    // Directors
     if (data.directors && data.directors.length > 0) {
-      for (const directorInput of data.directors) {
-        if (directorInput.name) {
-          const director = await getOrCreateDirector(directorInput.name);
-          await supabase.from("DramaDirector").insert({
+      relationPromises.push(
+        (async () => {
+          const directorNames = data
+            .directors!.map((d) => d.name)
+            .filter(Boolean);
+          const directors = await batchGetOrCreateDirectors(directorNames);
+
+          const dramaDirectorInserts = directors.map((director) => ({
             dramaId: drama.id,
             directorId: director.id,
-          });
-        }
-      }
+          }));
+
+          const { error } = await supabase
+            .from("DramaDirector")
+            .insert(dramaDirectorInserts);
+
+          if (error)
+            throw new Error(`Failed to add directors: ${error.message}`);
+        })()
+      );
     }
 
-    // 5. Handle writers
+    // Writers
     if (data.writers && data.writers.length > 0) {
-      for (const writerInput of data.writers) {
-        if (writerInput.name) {
-          const writer = await getOrCreateWriter(writerInput.name);
-          await supabase.from("DramaWriter").insert({
+      relationPromises.push(
+        (async () => {
+          const writerNames = data.writers!.map((w) => w.name).filter(Boolean);
+          const writers = await batchGetOrCreateWriters(writerNames);
+
+          const dramaWriterInserts = writers.map((writer) => ({
             dramaId: drama.id,
             writerId: writer.id,
-          });
-        }
-      }
+          }));
+
+          const { error } = await supabase
+            .from("DramaWriter")
+            .insert(dramaWriterInserts);
+
+          if (error) throw new Error(`Failed to add writers: ${error.message}`);
+        })()
+      );
     }
 
-    // 6. Handle novel authors
+    // Novel Authors
     if (data.novelAuthors && data.novelAuthors.length > 0) {
-      for (const authorInput of data.novelAuthors) {
-        if (authorInput.name) {
-          const author = await getOrCreateNovelAuthor(authorInput.name);
-          await supabase.from("DramaNovelAuthor").insert({
-            dramaId: drama.id,
-            novelAuthorId: author.id,
-            novelTitle: authorInput.novelTitle?.trim() || null,
-          });
-        }
-      }
+      relationPromises.push(
+        (async () => {
+          const authorNames = data
+            .novelAuthors!.map((a) => a.name)
+            .filter(Boolean);
+          const authors = await batchGetOrCreateNovelAuthors(authorNames);
+
+          const dramaAuthorInserts = data.novelAuthors!.map(
+            (authorInput, idx) => ({
+              dramaId: drama.id,
+              novelAuthorId: authors[idx].id,
+              novelTitle: authorInput.novelTitle?.trim() || null,
+            })
+          );
+
+          const { error } = await supabase
+            .from("DramaNovelAuthor")
+            .insert(dramaAuthorInserts);
+
+          if (error)
+            throw new Error(`Failed to add novel authors: ${error.message}`);
+        })()
+      );
     }
 
-    // 7. Handle networks
+    // Networks
     if (data.networks && data.networks.length > 0) {
-      for (const networkInput of data.networks) {
-        if (networkInput.name) {
-          const network = await getOrCreateNetwork(networkInput.name);
-          await supabase.from("DramaNetwork").insert({
+      relationPromises.push(
+        (async () => {
+          const networkNames = data
+            .networks!.map((n) => n.name)
+            .filter(Boolean);
+          const networks = await batchGetOrCreateNetworks(networkNames);
+
+          const dramaNetworkInserts = networks.map((network) => ({
             dramaId: drama.id,
             networkId: network.id,
-          });
-        }
-      }
+          }));
+
+          const { error } = await supabase
+            .from("DramaNetwork")
+            .insert(dramaNetworkInserts);
+
+          if (error)
+            throw new Error(`Failed to add networks: ${error.message}`);
+        })()
+      );
     }
 
-    revalidatePath("/");
-    revalidatePath("/drama");
+    // Execute all relation operations in parallel
+    await Promise.all(relationPromises);
+
+    // Smart cache invalidation
+    revalidateTag("dramas");
+    revalidateTag("dramas-list");
+    revalidateTag("dramas-popular");
+    revalidateTag("dramas-featured");
+    revalidateTag("dramas-filtered");
+    revalidateTag("dashboard");
+    revalidateTag("dashboard-activities");
+    revalidateTag("dashboard-top-dramas");
+    revalidateTag("homepage");
+    revalidateTag("site-stats");
+    if (data.status === "TAMAT") {
+      revalidateTag("dramas-completed");
+      revalidateTag("dashboard-activities");
+      revalidateTag("dashboard-top-dramas");
+      revalidateTag("dashboard");
+    }
 
     return { success: true, drama };
   } catch (error) {
@@ -292,7 +375,10 @@ export async function createDrama(data: CreateDramaWithRelationsInput) {
   }
 }
 
-// Update drama WITH relations
+// ============================================
+// OPTIMIZED: Update Drama
+// ============================================
+
 export async function updateDrama(
   id: string,
   data: Partial<CreateDramaWithRelationsInput>
@@ -329,98 +415,172 @@ export async function updateDrama(
 
     if (updateError) throw updateError;
 
-    // 3. Update casts (delete old + create new)
-    if (data.casts !== undefined) {
-      // Delete existing casts
-      await supabase.from("DramaCast").delete().eq("dramaId", id);
+    // 3. Batch update all relations in parallel
+    const relationPromises = [];
 
-      // Create new casts
-      if (data.casts.length > 0) {
-        for (const castInput of data.casts) {
-          if (castInput.name) {
-            const cast = await getOrCreateCast(castInput.name);
-            await supabase.from("DramaCast").insert({
+    // Casts
+    if (data.casts !== undefined) {
+      relationPromises.push(
+        (async () => {
+          await supabase.from("DramaCast").delete().eq("dramaId", id);
+
+          if (data.casts!.length > 0) {
+            const castNames = data.casts!.map((c) => c.name).filter(Boolean);
+            const casts = await batchGetOrCreateCasts(castNames);
+
+            const dramaCastInserts = data.casts!.map((castInput, idx) => ({
               dramaId: id,
-              castId: cast.id,
+              castId: casts[idx].id,
               character: castInput.character?.trim() || null,
-            });
+            }));
+
+            const { error } = await supabase
+              .from("DramaCast")
+              .insert(dramaCastInserts);
+
+            if (error)
+              throw new Error(`Failed to update casts: ${error.message}`);
           }
-        }
-      }
+        })()
+      );
     }
 
-    // 4. Update directors
+    // Directors
     if (data.directors !== undefined) {
-      await supabase.from("DramaDirector").delete().eq("dramaId", id);
+      relationPromises.push(
+        (async () => {
+          await supabase.from("DramaDirector").delete().eq("dramaId", id);
 
-      if (data.directors.length > 0) {
-        for (const directorInput of data.directors) {
-          if (directorInput.name) {
-            const director = await getOrCreateDirector(directorInput.name);
-            await supabase.from("DramaDirector").insert({
+          if (data.directors!.length > 0) {
+            const directorNames = data
+              .directors!.map((d) => d.name)
+              .filter(Boolean);
+            const directors = await batchGetOrCreateDirectors(directorNames);
+
+            const dramaDirectorInserts = directors.map((director) => ({
               dramaId: id,
               directorId: director.id,
-            });
+            }));
+
+            const { error } = await supabase
+              .from("DramaDirector")
+              .insert(dramaDirectorInserts);
+
+            if (error)
+              throw new Error(`Failed to update directors: ${error.message}`);
           }
-        }
-      }
+        })()
+      );
     }
 
-    // 5. Update writers
+    // Writers
     if (data.writers !== undefined) {
-      await supabase.from("DramaWriter").delete().eq("dramaId", id);
+      relationPromises.push(
+        (async () => {
+          await supabase.from("DramaWriter").delete().eq("dramaId", id);
 
-      if (data.writers.length > 0) {
-        for (const writerInput of data.writers) {
-          if (writerInput.name) {
-            const writer = await getOrCreateWriter(writerInput.name);
-            await supabase.from("DramaWriter").insert({
+          if (data.writers!.length > 0) {
+            const writerNames = data
+              .writers!.map((w) => w.name)
+              .filter(Boolean);
+            const writers = await batchGetOrCreateWriters(writerNames);
+
+            const dramaWriterInserts = writers.map((writer) => ({
               dramaId: id,
               writerId: writer.id,
-            });
+            }));
+
+            const { error } = await supabase
+              .from("DramaWriter")
+              .insert(dramaWriterInserts);
+
+            if (error)
+              throw new Error(`Failed to update writers: ${error.message}`);
           }
-        }
-      }
+        })()
+      );
     }
 
-    // 6. Update novel authors
+    // Novel Authors
     if (data.novelAuthors !== undefined) {
-      await supabase.from("DramaNovelAuthor").delete().eq("dramaId", id);
+      relationPromises.push(
+        (async () => {
+          await supabase.from("DramaNovelAuthor").delete().eq("dramaId", id);
 
-      if (data.novelAuthors.length > 0) {
-        for (const authorInput of data.novelAuthors) {
-          if (authorInput.name) {
-            const author = await getOrCreateNovelAuthor(authorInput.name);
-            await supabase.from("DramaNovelAuthor").insert({
-              dramaId: id,
-              novelAuthorId: author.id,
-              novelTitle: authorInput.novelTitle?.trim() || null,
-            });
+          if (data.novelAuthors!.length > 0) {
+            const authorNames = data
+              .novelAuthors!.map((a) => a.name)
+              .filter(Boolean);
+            const authors = await batchGetOrCreateNovelAuthors(authorNames);
+
+            const dramaAuthorInserts = data.novelAuthors!.map(
+              (authorInput, idx) => ({
+                dramaId: id,
+                novelAuthorId: authors[idx].id,
+                novelTitle: authorInput.novelTitle?.trim() || null,
+              })
+            );
+
+            const { error } = await supabase
+              .from("DramaNovelAuthor")
+              .insert(dramaAuthorInserts);
+
+            if (error)
+              throw new Error(
+                `Failed to update novel authors: ${error.message}`
+              );
           }
-        }
-      }
+        })()
+      );
     }
 
-    // 7. Update networks
+    // Networks
     if (data.networks !== undefined) {
-      await supabase.from("DramaNetwork").delete().eq("dramaId", id);
+      relationPromises.push(
+        (async () => {
+          await supabase.from("DramaNetwork").delete().eq("dramaId", id);
 
-      if (data.networks.length > 0) {
-        for (const networkInput of data.networks) {
-          if (networkInput.name) {
-            const network = await getOrCreateNetwork(networkInput.name);
-            await supabase.from("DramaNetwork").insert({
+          if (data.networks!.length > 0) {
+            const networkNames = data
+              .networks!.map((n) => n.name)
+              .filter(Boolean);
+            const networks = await batchGetOrCreateNetworks(networkNames);
+
+            const dramaNetworkInserts = networks.map((network) => ({
               dramaId: id,
               networkId: network.id,
-            });
+            }));
+
+            const { error } = await supabase
+              .from("DramaNetwork")
+              .insert(dramaNetworkInserts);
+
+            if (error)
+              throw new Error(`Failed to update networks: ${error.message}`);
           }
-        }
-      }
+        })()
+      );
     }
 
-    revalidatePath("/");
-    revalidatePath("/drama");
-    revalidatePath(`/drama/${drama.slug}`);
+    // Execute all relation operations in parallel
+    await Promise.all(relationPromises);
+
+    // Invalidate specific caches
+    revalidateTag("dramas");
+    revalidateTag("dramas-list");
+    revalidateTag("dramas-filtered");
+    revalidateTag(`drama-${id}`);
+    revalidateTag(`drama-slug-${drama.slug}`);
+    revalidateTag("homepage");
+
+    // Invalidate related caches based on changes
+    if (data.isPopular !== undefined) {
+      revalidateTag("dramas-popular");
+      revalidateTag("dramas-featured");
+    }
+    if (data.status === "TAMAT" || updateData.status === "TAMAT") {
+      revalidateTag("dramas-completed");
+    }
 
     return { success: true, drama };
   } catch (error) {
@@ -432,15 +592,34 @@ export async function updateDrama(
   }
 }
 
-// Delete drama (cascade akan auto delete relasi jika sudah setup di database)
+// Delete drama
 export async function deleteDrama(id: string) {
   try {
+    // Get slug before delete for cache invalidation
+    const { data: drama } = await supabase
+      .from("Drama")
+      .select("slug")
+      .eq("id", id)
+      .single();
+
     const { error } = await supabase.from("Drama").delete().eq("id", id);
 
     if (error) throw error;
 
-    revalidatePath("/");
-    revalidatePath("/drama");
+    // Invalidate all related caches
+    revalidateTag("dramas");
+    revalidateTag("dramas-list");
+    revalidateTag("dramas-filtered");
+    revalidateTag("dramas-popular");
+    revalidateTag("dramas-completed");
+    revalidateTag("dramas-featured");
+    revalidateTag(`drama-${id}`);
+    revalidateTag("homepage");
+    revalidateTag("site-stats");
+
+    if (drama?.slug) {
+      revalidateTag(`drama-slug-${drama.slug}`);
+    }
 
     return { success: true };
   } catch (error) {
@@ -473,9 +652,13 @@ export async function togglePopular(id: string) {
 
     if (updateError) throw updateError;
 
-    revalidatePath("/");
-    revalidatePath("/drama");
-    revalidatePath(`/drama/${drama.slug}`);
+    // Invalidate popular-related caches
+    revalidateTag("dramas");
+    revalidateTag("dramas-list");
+    revalidateTag("dramas-popular");
+    revalidateTag("dramas-featured");
+    revalidateTag(`drama-${id}`);
+    revalidateTag(`drama-slug-${drama.slug}`);
 
     return { success: true, drama: updated };
   } catch (error) {

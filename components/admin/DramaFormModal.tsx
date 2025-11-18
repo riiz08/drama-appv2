@@ -19,6 +19,7 @@ import { Card, CardBody } from "@heroui/card";
 import { Plus, X } from "lucide-react";
 import type { CreateDramaWithRelationsInput } from "@/app/actions/drama/mutations";
 
+// Update Drama type to include relations
 type Drama = {
   id: string;
   title: string;
@@ -30,6 +31,13 @@ type Drama = {
   isPopular: boolean;
   totalEpisode: number | null;
   airTime: string | null;
+  // Add relations
+  casts?: Array<{ name: string; character: string }>;
+  directors?: Array<{ name: string }>;
+  writers?: Array<{ name: string }>;
+  novelAuthors?: Array<{ name: string; novelTitle: string }>;
+  networks?: Array<{ name: string }>;
+  production?: { name: string } | null;
 };
 
 type Props = {
@@ -73,10 +81,16 @@ export default function DramaFormModal({
   const [networks, setNetworks] = useState<NetworkItem[]>([]);
   const [production, setProduction] = useState("");
 
-  // Reset form when modal opens/closes or drama changes
+  // FIXED: Reset form when modal opens/closes or drama changes
   useEffect(() => {
+    // console.log("=== MODAL EFFECT TRIGGERED ===");
+    // console.log("isOpen:", isOpen);
+    // console.log("mode:", mode);
+    // console.log("drama data:", drama);
+
     if (isOpen) {
       if (mode === "edit" && drama) {
+        // Load basic form data
         setFormData({
           title: drama.title,
           slug: drama.slug,
@@ -88,6 +102,22 @@ export default function DramaFormModal({
           totalEpisode: drama.totalEpisode?.toString() || "",
           airTime: drama.airTime || "",
         });
+
+        // // FIXED: Load relations data with debugging
+        // console.log("Loading relations:");
+        // console.log("- Casts:", drama.casts);
+        // console.log("- Directors:", drama.directors);
+        // console.log("- Writers:", drama.writers);
+        // console.log("- Novel Authors:", drama.novelAuthors);
+        // console.log("- Networks:", drama.networks);
+        // console.log("- Production:", drama.production);
+
+        setCasts(drama.casts || []);
+        setDirectors(drama.directors || []);
+        setWriters(drama.writers || []);
+        setNovelAuthors(drama.novelAuthors || []);
+        setNetworks(drama.networks || []);
+        setProduction(drama.production?.name || "");
       } else {
         // Reset for create mode
         setFormData({
@@ -112,32 +142,44 @@ export default function DramaFormModal({
     }
   }, [isOpen, mode, drama]);
 
-  // Auto generate slug and thumbnail from title
+  // Auto generate slug and thumbnail from title (only in create mode)
   const handleTitleChange = (value: string) => {
-    const newSlug = value
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
+    if (mode === "create") {
+      const newSlug = value
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
 
-    const newThumbnail = newSlug
-      ? `https://cdn.mangeakkk.my.id/${newSlug}/${newSlug}.webp`
-      : "";
+      const newThumbnail = newSlug
+        ? `https://cdn.mangeakkk.my.id/${newSlug}/${newSlug}.webp`
+        : "";
 
-    setFormData((prev) => ({
-      ...prev,
-      title: value,
-      slug: newSlug,
-      thumbnail: newThumbnail,
-    }));
+      setFormData((prev) => ({
+        ...prev,
+        title: value,
+        slug: newSlug,
+        thumbnail: newThumbnail,
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, title: value }));
+    }
   };
 
-  // Cast handlers
-  const addCast = () => setCasts([...casts, { name: "", character: "" }]);
-  const removeCast = (index: number) =>
+  // Cast handlers with debugging
+  const addCast = () => {
+    const newCast = { name: "", character: "" };
+    // console.log("Adding cast:", newCast);
+    setCasts([...casts, newCast]);
+  };
+  const removeCast = (index: number) => {
+    // console.log("Removing cast at index:", index);
     setCasts(casts.filter((_, i) => i !== index));
+  };
   const updateCast = (index: number, field: keyof CastItem, value: string) => {
     const updated = [...casts];
     updated[index][field] = value;
+    // console.log(`Updated cast ${index} - ${field}:`, value);
+    // console.log("All casts:", updated);
     setCasts(updated);
   };
 
@@ -191,6 +233,26 @@ export default function DramaFormModal({
     setIsLoading(true);
 
     try {
+      // Filter data dengan benar
+      const filteredCasts = casts.filter((c) => c.name && c.name.trim());
+      const filteredDirectors = directors.filter(
+        (d) => d.name && d.name.trim()
+      );
+      const filteredWriters = writers.filter((w) => w.name && w.name.trim());
+      const filteredNovelAuthors = novelAuthors.filter(
+        (n) => n.name && n.name.trim()
+      );
+      const filteredNetworks = networks.filter((n) => n.name && n.name.trim());
+
+      // // Debug: Log data yang akan dikirim
+      // console.log("=== SUBMIT DATA DEBUG ===");
+      // console.log("Casts:", filteredCasts);
+      // console.log("Directors:", filteredDirectors);
+      // console.log("Writers:", filteredWriters);
+      // console.log("Novel Authors:", filteredNovelAuthors);
+      // console.log("Networks:", filteredNetworks);
+      // console.log("Production:", production);
+
       const submitData: CreateDramaWithRelationsInput = {
         title: formData.title,
         slug: formData.slug,
@@ -203,14 +265,16 @@ export default function DramaFormModal({
           ? parseInt(formData.totalEpisode)
           : undefined,
         airTime: formData.airTime || undefined,
-        // Relations - filter empty values
-        casts: casts.filter((c) => c.name.trim()),
-        directors: directors.filter((d) => d.name.trim()),
-        writers: writers.filter((w) => w.name.trim()),
-        novelAuthors: novelAuthors.filter((n) => n.name.trim()),
-        networks: networks.filter((n) => n.name.trim()),
+        // Relations - gunakan data yang sudah difilter
+        casts: filteredCasts,
+        directors: filteredDirectors,
+        writers: filteredWriters,
+        novelAuthors: filteredNovelAuthors,
+        networks: filteredNetworks,
         production: production.trim() ? { name: production.trim() } : undefined,
       };
+
+      // console.log("Full submitData:", submitData);
 
       let result;
       if (mode === "edit" && drama) {
@@ -230,6 +294,7 @@ export default function DramaFormModal({
         onClose();
         router.refresh();
       } else {
+        // console.log(result.error);
         addToast({
           title: "Gagal!",
           description: result.error || "Terjadi kesalahan",
@@ -286,8 +351,15 @@ export default function DramaFormModal({
                   label="Slug (URL)"
                   placeholder="judul-drama"
                   value={formData.slug}
-                  isDisabled
-                  description="Auto-generated dari judul"
+                  isDisabled={mode === "edit"}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, slug: value }))
+                  }
+                  description={
+                    mode === "edit"
+                      ? "Slug tidak dapat diubah saat edit"
+                      : "Auto-generated dari judul"
+                  }
                   isRequired
                   classNames={{
                     label: "text-white",
@@ -320,7 +392,11 @@ export default function DramaFormModal({
                   onValueChange={(value) =>
                     setFormData((prev) => ({ ...prev, thumbnail: value }))
                   }
-                  description="Auto-generated, boleh edit manual"
+                  description={
+                    mode === "edit"
+                      ? "Edit manual jika perlu"
+                      : "Auto-generated, boleh edit manual"
+                  }
                   isRequired
                   classNames={{
                     label: "text-white",

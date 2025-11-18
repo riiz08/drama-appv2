@@ -3,7 +3,7 @@
 import { Progress } from "@heroui/progress";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function DonationGoal() {
   const [progress, setProgress] = useState(0);
@@ -14,30 +14,29 @@ export default function DonationGoal() {
   const [baseCurrency, setBaseCurrency] = useState("IDR");
   const [exchangeRate, setExchangeRate] = useState(1);
 
-  // 🌍 Deteksi currency berdasarkan lokasi user
+  // ✅ Use ref to track if component is mounted
+  const isMountedRef = useRef(true);
+  const animationRef = useRef<number | null>(null);
+
   const detectUserCurrency = () => {
     if (typeof navigator === "undefined") return "IDR";
-
     const userLocale = navigator.language || "id-ID";
 
-    // Mapping locale ke currency (tambahkan sesuai kebutuhan)
     const currencyMap: { [key: string]: string } = {
-      "ms-MY": "MYR", // Malaysia
-      "en-MY": "MYR", // Malaysia (English)
-      "id-ID": "IDR", // Indonesia
-      "en-SG": "SGD", // Singapore
-      "th-TH": "THB", // Thailand
-      "en-US": "USD", // United States
-      "en-GB": "GBP", // United Kingdom
-      "en-AU": "AUD", // Australia
+      "ms-MY": "MYR",
+      "en-MY": "MYR",
+      "id-ID": "IDR",
+      "en-SG": "SGD",
+      "th-TH": "THB",
+      "en-US": "USD",
+      "en-GB": "GBP",
+      "en-AU": "AUD",
     };
 
-    // Coba exact match dulu
     if (currencyMap[userLocale]) {
       return currencyMap[userLocale];
     }
 
-    // Fallback: ambil country code dari locale (contoh: "ms-MY" -> "MY")
     const countryCode = userLocale.split("-")[1];
     const countryToCurrency: { [key: string]: string } = {
       MY: "MYR",
@@ -54,30 +53,70 @@ export default function DonationGoal() {
     return countryToCurrency[countryCode] || "IDR";
   };
 
-  // 💱 Ambil exchange rate dari Frankfurter API (unlimited & gratis)
   const fetchExchangeRate = async (from: string, to: string) => {
     if (from === to) return 1;
 
     try {
-      // Frankfurter API - No limit, no API key needed
       const res = await fetch(
         `https://api.frankfurter.dev/v1/latest?base=${from}&symbols=${to}`
       );
       const data = await res.json();
-
       return data.rates[to] || 1;
     } catch (err) {
       console.error("Gagal ambil exchange rate:", err);
-      return 1; // Fallback ke rate 1:1 jika error
+      return 1;
     }
   };
 
-  // 📊 Ambil data donasi + konversi currency
+  // ✅ Optimized animation using requestAnimationFrame
+  const animateProgress = (targetProgress: number) => {
+    const startTime = performance.now();
+    const duration = 800; // 800ms instead of 800ms with 20ms intervals
+    const startProgress = progress;
+
+    const animate = (currentTime: number) => {
+      if (!isMountedRef.current) return;
+
+      const elapsed = currentTime - startTime;
+      const progressRatio = Math.min(elapsed / duration, 1);
+
+      // Easing function for smooth animation
+      const easeOutQuad = (t: number) => t * (2 - t);
+      const easedProgress = easeOutQuad(progressRatio);
+
+      const newProgress =
+        startProgress + (targetProgress - startProgress) * easedProgress;
+      setProgress(Math.round(newProgress));
+
+      if (progressRatio < 1) {
+        animationRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    // Cancel previous animation if exists
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+
+    animationRef.current = requestAnimationFrame(animate);
+  };
+
   useEffect(() => {
+    isMountedRef.current = true;
+    let intervalId: NodeJS.Timeout | null = null;
+
     async function fetchData() {
+      // ✅ Check if still mounted before fetching
+      if (!isMountedRef.current) return;
+
       try {
         const res = await fetch("/api/donation");
+        if (!res.ok) throw new Error("Failed to fetch");
+
         const data = await res.json();
+
+        // ✅ Check again after async operation
+        if (!isMountedRef.current) return;
 
         const userLocale = navigator.language || "id-ID";
         const userCurrency = detectUserCurrency();
@@ -87,29 +126,20 @@ export default function DonationGoal() {
         setCurrency(userCurrency);
         setLocale(userLocale);
 
-        // Ambil exchange rate
         const rate = await fetchExchangeRate(apiBaseCurrency, userCurrency);
+
+        if (!isMountedRef.current) return;
+
         setExchangeRate(rate);
 
-        // Konversi amount
         const convertedGoal = data.target_amount * rate;
         const convertedCurrent = data.current_amount * rate;
 
         setGoal(convertedGoal);
         setCurrent(convertedCurrent);
 
-        // Animasi progress
-        let start = 0;
-        const target = data.progress;
-        const step = target / 40;
-        const animate = setInterval(() => {
-          start += step;
-          if (start >= target) {
-            start = target;
-            clearInterval(animate);
-          }
-          setProgress(Math.round(start));
-        }, 20);
+        // ✅ Use optimized animation
+        animateProgress(data.progress);
       } catch (err) {
         console.error("Gagal ambil data donasi:", err);
       }
@@ -117,13 +147,25 @@ export default function DonationGoal() {
 
     fetchData();
 
-    // Auto refresh setiap 1 jam
-    const interval = setInterval(() => {
+    // ✅ Increase interval to reduce server load (every 5 minutes instead of 1 hour)
+    // Or remove auto-refresh entirely - let user refresh page manually
+    intervalId = setInterval(() => {
       fetchData();
-    }, 3600000);
+    }, 300000); // 5 minutes = 300,000ms
 
-    return () => clearInterval(interval);
-  }, []);
+    // ✅ CRITICAL: Cleanup on unmount
+    return () => {
+      isMountedRef.current = false;
+
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, []); // Empty dependency array - only run once
 
   const formatNumber = (num: number) =>
     new Intl.NumberFormat(locale, {
@@ -132,7 +174,6 @@ export default function DonationGoal() {
       minimumFractionDigits: 0,
     }).format(num);
 
-  // 🔹 Placeholder loading
   if (!goal) {
     return (
       <Card className="bg-black border-none rounded-2xl p-6 w-full mx-auto shadow-lg animate-pulse">
@@ -147,7 +188,6 @@ export default function DonationGoal() {
     );
   }
 
-  // 🔹 Konten utama
   return (
     <Card className="bg-black border-none rounded-2xl p-6 text-white w-full mx-auto shadow-lg transition-opacity duration-500 opacity-100 shadow-red-600">
       <CardBody className="flex flex-col gap-3">
