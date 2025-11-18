@@ -25,13 +25,13 @@ const nextConfig = {
       // Redirect old URL structures to new structure
       {
         source: "/watch/:slug(.*)-full-episod-:episode",
-        destination: "/:slug-episode-:episode",
+        destination: "/:slug-episod-:episode",
         permanent: true,
         statusCode: 301,
       },
       {
         source: "/:slug(.*)-full-episod-:episode",
-        destination: "/:slug-episode-:episode",
+        destination: "/:slug-episod-:episode",
         permanent: true,
         statusCode: 301,
       },
