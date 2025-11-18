@@ -5,7 +5,6 @@ import BrowseFilters from "@/components/browse/BrowseFilters";
 import BrowseGrid from "@/components/browse/BrowseGrid";
 import BrowsePagination from "@/components/browse/BrowsePagination";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
-import AdSlot from "@/components/ads/AdSlot";
 import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 import AdWrapper from "@/components/ads/AdWrapper";
 
