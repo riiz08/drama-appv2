@@ -184,7 +184,10 @@ export default async function EpisodePlayerPage({
               dramaSlug={episode.drama.slug}
             />
           </nav>
-          <AdWrapper slot={ADSENSE_CONFIG.slots.multiplex} format="auto" />
+          <AdWrapper
+            slot={ADSENSE_CONFIG.slots.multiplex}
+            format="autorelaxed"
+          />
 
           {/* Episode List */}
           {allEpisodes.length > 0 && (
