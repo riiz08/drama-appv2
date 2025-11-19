@@ -13,7 +13,6 @@ import VideoPlayerWrapper from "@/components/episode/VideoPlayerWrapper";
 import { EpisodeSchema } from "@/components/schema/EpisodeSchema";
 import ViewTracker from "@/components/shared/VIewTracker";
 import AdWrapper from "@/components/ads/AdWrapper";
-import DonationGoal from "@/components/episode/DonationGoal";
 
 export async function generateStaticParams() {
   return [];
@@ -173,8 +172,6 @@ export default async function EpisodePlayerPage({
               title={`${episode.drama.title} - Episod ${episode.episodeNum}`}
             />
           </article>
-
-          <DonationGoal />
 
           {/* Navigation (Prev/Next) */}
           <nav aria-label="Navigasi episod">
