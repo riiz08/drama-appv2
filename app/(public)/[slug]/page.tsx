@@ -2,7 +2,10 @@
 
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getEpisodeForPublic } from "@/app/actions/episode/queries";
+import {
+  getEpisodeForPublic,
+  getEpisodeMetadata,
+} from "@/app/actions/episode/queries";
 import EpisodeInfo from "@/components/episode/EpisodeInfo";
 import EpisodeNavigation from "@/components/episode/EpisodeNavigation";
 import EpisodeListPlayer from "@/components/episode/EpisodeListPlayer";
@@ -31,7 +34,7 @@ export async function generateMetadata({
   const { slug } = await params;
 
   // Use optimized single query
-  const data = await getEpisodeForPublic(slug);
+  const data = await getEpisodeMetadata(slug);
 
   if (!data.success || !data.episode) {
     return {

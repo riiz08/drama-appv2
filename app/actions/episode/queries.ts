@@ -490,59 +490,155 @@ export async function getPopularEpisodeSlugs(limit: number = 50) {
 // EPISODE METADATA - FOR SEO
 // ============================================
 
-export async function getEpisodeMetadata(slug: string) {
-  return unstable_cache(
-    async () => {
-      try {
-        const { data: episode, error } = await supabase
-          .from("Episode")
-          .select(
-            `
-            episodeNum,
-            releaseDate,
-            updatedAt,
-            drama:Drama!inner(
-              title,
-              description,
-              thumbnail
-            )
-          `
-          )
-          .eq("slug", slug)
-          .single();
-
-        if (error || !episode) {
-          return { success: false, metadata: null };
-        }
-
-        const drama = episode.drama as any;
-
-        return {
-          success: true,
-          metadata: {
-            title: `${drama.title} - Episode ${episode.episodeNum}`,
-            description: drama.description,
-            image: drama.thumbnail,
-            releaseDate: episode.releaseDate,
-            lastUpdated: episode.updatedAt,
-          },
-        };
-      } catch (error) {
-        return {
-          success: false,
-          metadata: null,
-          error: "Failed to fetch episode metadata",
-        };
-      }
-    },
-    ["episode-metadata", slug],
-    {
-      revalidate: 600, // 10 minutes (metadata rarely changes)
-      tags: ["episodes", `episode-${slug}-metadata`],
-    }
-  )();
+// Types untuk response
+interface Cast {
+  cast: {
+    id: string;
+    name: string;
+  };
+  character?: string;
 }
 
+interface Director {
+  director: {
+    id: string;
+    name: string;
+  };
+}
+
+interface Writer {
+  writer: {
+    id: string;
+    name: string;
+  };
+}
+
+interface Network {
+  network: {
+    id: string;
+    name: string;
+  };
+}
+
+interface Production {
+  id: string;
+  name: string;
+}
+
+interface Drama {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  thumbnail: string;
+  status: string;
+  releaseDate: string;
+  isPopular: boolean;
+  totalEpisode?: number;
+  airTime?: string;
+  casts?: Cast[];
+  directors?: Director[];
+  writers?: Writer[];
+  networks?: Network[];
+  production?: Production | null;
+}
+
+interface Episode {
+  id: string;
+  slug: string;
+  episodeNum: number;
+  videoUrl: string;
+  releaseDate: string;
+  drama: Drama;
+}
+
+interface PrevNextEpisode {
+  slug: string;
+  episodeNum: number;
+}
+
+interface EpisodeMetadataResponse {
+  success: boolean;
+  episode?: Episode;
+  prev?: PrevNextEpisode | null;
+  next?: PrevNextEpisode | null;
+}
+
+// Internal function tanpa cache (untuk revalidation)
+async function _getEpisodeMetadata(
+  slug: string
+): Promise<EpisodeMetadataResponse> {
+  try {
+    // Call RPC function
+    const { data, error } = await supabase.rpc("get_episode_metadata", {
+      episode_slug: slug,
+    });
+
+    if (error) {
+      console.error("Error fetching episode metadata:", error);
+      return { success: false };
+    }
+
+    if (!data || !data.success) {
+      return { success: false };
+    }
+
+    return data as EpisodeMetadataResponse;
+  } catch (error) {
+    console.error("Unexpected error in getEpisodeMetadata:", error);
+    return { success: false };
+  }
+}
+
+export async function getEpisodeMetadata(
+  slug: string
+): Promise<EpisodeMetadataResponse> {
+  const getCachedMetadata = unstable_cache(
+    async (episodeSlug: string) => _getEpisodeMetadata(episodeSlug),
+    [`episode-metadata-${slug}`], // cache key
+    {
+      revalidate: 3600, // revalidate setiap 1 jam (3600 detik)
+      tags: [`episode-${slug}`, "episode-metadata"], // tags untuk on-demand revalidation
+    }
+  );
+
+  return getCachedMetadata(slug);
+}
+
+// Optional: Helper function untuk fetch hanya basic episode info
+export async function getBasicEpisodeInfo(slug: string) {
+  try {
+    const { data, error } = await supabase
+      .from("Episode")
+      .select(
+        `
+        id,
+        slug,
+        episodeNum,
+        videoUrl,
+        releaseDate,
+        drama:Drama(
+          id,
+          title,
+          slug,
+          thumbnail
+        )
+      `
+      )
+      .eq("slug", slug)
+      .single();
+
+    if (error) {
+      console.error("Error fetching basic episode info:", error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Unexpected error in getBasicEpisodeInfo:", error);
+    return null;
+  }
+}
 // ============================================
 // ALL EPISODES - ADMIN WITH PAGINATION
 // ============================================
