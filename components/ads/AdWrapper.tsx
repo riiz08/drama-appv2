@@ -8,7 +8,7 @@ const AdSlot = dynamic(() => import("@/components/ads/AdSlot"), {
   loading: () => (
     <div className="w-full flex justify-center">
       {/* Skeleton HeroUI */}
-      <Skeleton className="h-72 max-h-[800] w-full rounded-xl" />
+      <Skeleton className="min-h-80 w-full rounded-xl" />
     </div>
   ),
 });

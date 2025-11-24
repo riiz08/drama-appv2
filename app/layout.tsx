@@ -23,9 +23,6 @@ export default async function RootLayout({
           crossOrigin="anonymous"
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4287822627580434"
         />
-
-        {/* ✅ Preconnect to external domains */}
-        <link rel="preconnect" href="https://cdn.mangeakkk.my.id" />
       </head>
       <body
         className={clsx(

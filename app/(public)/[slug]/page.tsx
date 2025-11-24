@@ -16,10 +16,6 @@ import VideoPlayerWrapper from "@/components/episode/VideoPlayerWrapper";
 import { EpisodeSchema } from "@/components/schema/EpisodeSchema";
 import AdWrapper from "@/components/ads/AdWrapper";
 
-// export async function generateStaticParams() {
-//   return [];
-// }
-
 export const dynamic = "force-static";
 
 export const revalidate = 86400;

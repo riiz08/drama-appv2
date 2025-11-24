@@ -1,9 +1,9 @@
 import "@/styles/globals.css";
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Sidebar from "@/components/layout/Sidebar";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://mangeakkk.my.id"),
@@ -104,7 +104,10 @@ export default async function RootLayout({
         <div className="max-w-7xl mx-auto px-2 lg:px-8 py-6">
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Main Content - 70% */}
-            <div className="flex-1 lg:w-[70%]">{children}</div>
+            <div className="flex-1 lg:w-[70%]">
+              {children}
+              <Analytics />
+            </div>
 
             {/* Sidebar - 30% */}
             <aside className="lg:w-[30%]">
