@@ -8,10 +8,7 @@ import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 import AdWrapper from "@/components/ads/AdWrapper";
 
-export async function generateStaticParams() {
-  return [];
-}
-
+export const dynamic = "force-static";
 export const revalidate = 604800;
 
 // Type for search params

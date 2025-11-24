@@ -14,10 +14,7 @@ import { TVSeriesSchema } from "@/components/schema/TvSeriesSchema";
 import DramaCredits from "@/components/drama/DramaCredits";
 import AdWrapper from "@/components/ads/AdWrapper";
 
-export async function generateStaticParams() {
-  return [];
-}
-
+export const dynamic = "force-static";
 export const revalidate = 86400;
 
 // Generate metadata for SEO

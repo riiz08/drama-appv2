@@ -14,12 +14,13 @@ import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { VideoObjectSchema } from "@/components/schema/VideoObjectSchema";
 import VideoPlayerWrapper from "@/components/episode/VideoPlayerWrapper";
 import { EpisodeSchema } from "@/components/schema/EpisodeSchema";
-import ViewTracker from "@/components/shared/VIewTracker";
 import AdWrapper from "@/components/ads/AdWrapper";
 
-export async function generateStaticParams() {
-  return [];
-}
+// export async function generateStaticParams() {
+//   return [];
+// }
+
+export const dynamic = "force-static";
 
 export const revalidate = 86400;
 
@@ -158,7 +159,6 @@ export default async function EpisodePlayerPage({
       />
       <VideoObjectSchema episode={episode} />
       <EpisodeSchema episode={episode} />
-      <ViewTracker dramaId={data.episode.dramaId} />
 
       <div className="min-h-screen bg-black">
         <AdWrapper slot={ADSENSE_CONFIG.slots.hads2} format="auto" />

@@ -5,14 +5,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getSiteStats } from "@/app/actions/homepage";
 import { Card, CardBody } from "@heroui/card";
-import {
-  Tv,
-  PlayCircle,
-  TrendingUp,
-  CheckCircle,
-  Plus,
-  ExternalLink,
-} from "lucide-react";
+import { Tv, PlayCircle, TrendingUp, CheckCircle } from "lucide-react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import TrafficChart from "@/components/admin/TrafficChart";
 import { getTopDramas, getRecentActivities } from "@/app/actions/dashboard";
@@ -20,7 +13,8 @@ import TopDramasList from "@/components/admin/TopDramaList";
 import RecentActivity from "@/components/admin/RecentActicity";
 import QuickActions from "@/components/admin/QuickActions";
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static";
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: "Dashboard Admin | Mangeakkk Drama",
