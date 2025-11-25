@@ -40,19 +40,19 @@ export async function generateMetadata({
 
   const title = `${drama.title} Full Episod HD Percuma | Mangeakkk Drama`;
 
-  // Cast drama ke any untuk akses nested data dari Supabase
+  // Cast drama ke any untuk akses nested data
   const dramaData = drama as any;
 
   // Build rich description with cast/director/production info
   let description = `Tonton drama ${drama.title} full episod dalam kualiti HD. Streaming percuma tanpa iklan hanya di Mangeakkk.`;
 
-  // Add cast info
+  // ✅ UBAH: casts -> dramaCasts
   if (
-    dramaData.casts &&
-    Array.isArray(dramaData.casts) &&
-    dramaData.casts.length > 0
+    dramaData.dramaCasts &&
+    Array.isArray(dramaData.dramaCasts) &&
+    dramaData.dramaCasts.length > 0
   ) {
-    const topCast = dramaData.casts
+    const topCast = dramaData.dramaCasts
       .slice(0, 4)
       .map((c: any) => c.cast?.name)
       .filter(Boolean)
@@ -60,20 +60,20 @@ export async function generateMetadata({
 
     if (topCast) {
       description += ` Lakonan ${topCast}`;
-      if (dramaData.casts.length > 4) {
+      if (dramaData.dramaCasts.length > 4) {
         description += ` dan lain-lain`;
       }
       description += `.`;
     }
   }
 
-  // Add director info
+  // ✅ UBAH: directors -> dramaDirectors
   if (
-    dramaData.directors &&
-    Array.isArray(dramaData.directors) &&
-    dramaData.directors.length > 0
+    dramaData.dramaDirectors &&
+    Array.isArray(dramaData.dramaDirectors) &&
+    dramaData.dramaDirectors.length > 0
   ) {
-    const directorNames = dramaData.directors
+    const directorNames = dramaData.dramaDirectors
       .map((d: any) => d.director?.name)
       .filter(Boolean)
       .join(", ");
@@ -86,12 +86,14 @@ export async function generateMetadata({
   // Add production & network info
   if (dramaData.production?.name) {
     description += ` Produksi ${dramaData.production.name}`;
+
+    // ✅ UBAH: networks -> dramaNetworks
     if (
-      dramaData.networks &&
-      Array.isArray(dramaData.networks) &&
-      dramaData.networks.length > 0
+      dramaData.dramaNetworks &&
+      Array.isArray(dramaData.dramaNetworks) &&
+      dramaData.dramaNetworks.length > 0
     ) {
-      const networkNames = dramaData.networks
+      const networkNames = dramaData.dramaNetworks
         .map((n: any) => n.network?.name)
         .filter(Boolean)
         .join(", ");
@@ -126,13 +128,13 @@ export async function generateMetadata({
     "tonton drama percuma",
   ];
 
-  // Add cast names to keywords
+  // ✅ UBAH: casts -> dramaCasts
   if (
-    dramaData.casts &&
-    Array.isArray(dramaData.casts) &&
-    dramaData.casts.length > 0
+    dramaData.dramaCasts &&
+    Array.isArray(dramaData.dramaCasts) &&
+    dramaData.dramaCasts.length > 0
   ) {
-    dramaData.casts.slice(0, 6).forEach((cast: any) => {
+    dramaData.dramaCasts.slice(0, 6).forEach((cast: any) => {
       if (cast.cast?.name) {
         keywords.push(`${cast.cast.name} drama`);
         keywords.push(`${cast.cast.name} ${drama.title}`);
@@ -140,13 +142,13 @@ export async function generateMetadata({
     });
   }
 
-  // Add director names
+  // ✅ UBAH: directors -> dramaDirectors
   if (
-    dramaData.directors &&
-    Array.isArray(dramaData.directors) &&
-    dramaData.directors.length > 0
+    dramaData.dramaDirectors &&
+    Array.isArray(dramaData.dramaDirectors) &&
+    dramaData.dramaDirectors.length > 0
   ) {
-    dramaData.directors.forEach((director: any) => {
+    dramaData.dramaDirectors.forEach((director: any) => {
       if (director.director?.name) {
         keywords.push(`${director.director.name} drama`);
         keywords.push(`drama arahan ${director.director.name}`);
@@ -154,13 +156,13 @@ export async function generateMetadata({
     });
   }
 
-  // Add writer names
+  // ✅ UBAH: writers -> dramaWriters
   if (
-    dramaData.writers &&
-    Array.isArray(dramaData.writers) &&
-    dramaData.writers.length > 0
+    dramaData.dramaWriters &&
+    Array.isArray(dramaData.dramaWriters) &&
+    dramaData.dramaWriters.length > 0
   ) {
-    dramaData.writers.forEach((writer: any) => {
+    dramaData.dramaWriters.forEach((writer: any) => {
       if (writer.writer?.name) {
         keywords.push(`${writer.writer.name} penulis`);
       }
@@ -173,13 +175,13 @@ export async function generateMetadata({
     keywords.push(`drama ${dramaData.production.name}`);
   }
 
-  // Add network names
+  // ✅ UBAH: networks -> dramaNetworks
   if (
-    dramaData.networks &&
-    Array.isArray(dramaData.networks) &&
-    dramaData.networks.length > 0
+    dramaData.dramaNetworks &&
+    Array.isArray(dramaData.dramaNetworks) &&
+    dramaData.dramaNetworks.length > 0
   ) {
-    dramaData.networks.forEach((network: any) => {
+    dramaData.dramaNetworks.forEach((network: any) => {
       if (network.network?.name) {
         keywords.push(`drama ${network.network.name}`);
         keywords.push(`${network.network.name} ${drama.title}`);
@@ -196,10 +198,10 @@ export async function generateMetadata({
     keywords.push(`${drama.title} full episode`);
   }
 
-  // Prepare video metadata
+  // ✅ UBAH: Prepare video metadata
   const videoActors =
-    dramaData.casts && Array.isArray(dramaData.casts)
-      ? dramaData.casts
+    dramaData.dramaCasts && Array.isArray(dramaData.dramaCasts)
+      ? dramaData.dramaCasts
           .slice(0, 5)
           .map((c: any) => c.cast?.name)
           .filter(Boolean)
@@ -207,8 +209,8 @@ export async function generateMetadata({
       : undefined;
 
   const videoDirectors =
-    dramaData.directors && Array.isArray(dramaData.directors)
-      ? dramaData.directors
+    dramaData.dramaDirectors && Array.isArray(dramaData.dramaDirectors)
+      ? dramaData.dramaDirectors
           .map((d: any) => d.director?.name)
           .filter(Boolean)
           .join(", ")

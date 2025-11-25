@@ -12,16 +12,23 @@ interface TVSeriesSchemaProps {
     totalEpisode?: number | null;
     endDate?: Date | string | null;
     airTime?: string | null;
-    // Relations
-    casts?: Array<{
+    // ✅ Relations - Updated field names
+    dramaCasts?: Array<{
       cast: { name: string };
       character?: string | null;
     }>;
-    directors?: Array<{
+    dramaDirectors?: Array<{
       director: { name: string };
     }>;
-    writers?: Array<{
+    dramaWriters?: Array<{
       writer: { name: string };
+    }>;
+    dramaNovelAuthor?: Array<{
+      novelAuthor: { name: string };
+      novelTitle?: string | null;
+    }>;
+    dramaNetworks?: Array<{
+      network: { name: string };
     }>;
     production?: {
       name: string;
@@ -42,8 +49,8 @@ export function TVSeriesSchema({ drama }: TVSeriesSchemaProps) {
       : new Date(drama.endDate).toISOString().split("T")[0]
     : undefined;
 
-  // Build actors array
-  const actors = drama.casts?.map((item) => ({
+  // ✅ Build actors array - Updated field name
+  const actors = drama.dramaCasts?.map((item) => ({
     "@type": "PerformanceRole" as const,
     actor: {
       "@type": "Person" as const,
@@ -54,16 +61,38 @@ export function TVSeriesSchema({ drama }: TVSeriesSchemaProps) {
     }),
   }));
 
-  // Build directors array
-  const directors = drama.directors?.map((item) => ({
+  // ✅ Build directors array - Updated field name
+  const directors = drama.dramaDirectors?.map((item) => ({
     "@type": "Person" as const,
     name: item.director.name,
   }));
 
-  // Build writers array (creators in schema.org)
-  const creators = drama.writers?.map((item) => ({
+  // ✅ Build writers array - Updated field name
+  const writers = drama.dramaWriters?.map((item) => ({
     "@type": "Person" as const,
     name: item.writer.name,
+  }));
+
+  // ✅ Build novel authors array (as additional creators)
+  const novelAuthors = drama.dramaNovelAuthor?.map((item) => ({
+    "@type": "Person" as const,
+    name: item.novelAuthor.name,
+    ...(item.novelTitle && {
+      workExample: {
+        "@type": "Book" as const,
+        name: item.novelTitle,
+      },
+    }),
+  }));
+
+  // ✅ Combine writers and novel authors as creators
+  const creators = [...(writers || []), ...(novelAuthors || [])];
+
+  // ✅ Build broadcast networks
+  const broadcastNetworks = drama.dramaNetworks?.map((item) => ({
+    "@type": "BroadcastService" as const,
+    name: item.network.name,
+    broadcastDisplayName: item.network.name,
   }));
 
   const schema: WithContext<TVSeries> = {
@@ -79,31 +108,54 @@ export function TVSeriesSchema({ drama }: TVSeriesSchemaProps) {
       "@type": "Country",
       name: "Malaysia",
     },
+
+    // ✅ Add air time if available
+    ...(drama.airTime && {
+      schedule: drama.airTime,
+    }),
+
     ...(drama.totalEpisode && {
       numberOfEpisodes: drama.totalEpisode,
     }),
+
     ...(drama.status === "TAMAT" &&
       endDate && {
         endDate: endDate,
       }),
+
+    // ✅ Actors
     ...(actors &&
       actors.length > 0 && {
         actor: actors,
       }),
+
+    // ✅ Directors
     ...(directors &&
       directors.length > 0 && {
         director: directors,
       }),
-    ...(creators &&
-      creators.length > 0 && {
-        creator: creators,
-      }),
+
+    // ✅ Creators (writers + novel authors)
+    ...(creators.length > 0 && {
+      creator: creators,
+    }),
+
+    // ✅ Production company
     ...(drama.production && {
       productionCompany: {
         "@type": "Organization",
         name: drama.production.name,
       },
     }),
+
+    // ✅ Broadcast networks
+    ...(broadcastNetworks &&
+      broadcastNetworks.length > 0 && {
+        containedInPlace: broadcastNetworks,
+      }),
+
+    // ✅ Genre (default untuk drama melayu)
+    genre: ["Drama", "Malaysian Drama"],
   };
 
   return (

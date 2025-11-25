@@ -1,6 +1,6 @@
 "use server";
 
-import { supabase } from "@/lib/supabase";
+import { prisma } from "@/lib/db";
 import { unstable_cache } from "next/cache";
 
 // ============================================
@@ -12,39 +12,48 @@ export async function getTopDramas(limit: number = 5) {
     async () => {
       try {
         // Single optimized query with aggregation
-        const { data: dramas, error } = await supabase
-          .from("Drama")
-          .select(
-            `
-            id,
-            title,
-            slug,
-            thumbnail,
-            isPopular,
-            dramaStats:DramaStats(totalViews),
-            episodes:Episode(id)
-          `
-          )
-          .order("isPopular", { ascending: false })
-          .order("createdAt", { ascending: false })
-          .limit(limit * 2); // Fetch more to ensure we have enough after sorting
-
-        if (error) throw error;
+        const dramas = await prisma.drama.findMany({
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            thumbnail: true,
+            isPopular: true,
+            dramaStats: {
+              select: {
+                totalViews: true,
+              },
+            },
+            _count: {
+              select: {
+                episodes: true,
+              },
+            },
+          },
+          orderBy: [
+            {
+              isPopular: "desc",
+            },
+            {
+              createdAt: "desc",
+            },
+          ],
+          take: limit * 2, // Fetch more to ensure we have enough after sorting
+        });
 
         // Format and sort by views
-        const formattedDramas =
-          dramas
-            ?.map((drama) => ({
-              id: drama.id,
-              title: drama.title,
-              slug: drama.slug,
-              thumbnail: drama.thumbnail,
-              episodes: drama.episodes?.length || 0,
-              views: (drama.dramaStats as any)?.[0]?.totalViews || 0,
-              trend: `+${Math.floor(Math.random() * 20) + 5}%`,
-            }))
-            .sort((a, b) => b.views - a.views)
-            .slice(0, limit) || [];
+        const formattedDramas = dramas
+          .map((drama) => ({
+            id: drama.id,
+            title: drama.title,
+            slug: drama.slug,
+            thumbnail: drama.thumbnail,
+            episodes: drama._count.episodes,
+            views: drama.dramaStats?.totalViews || 0,
+            trend: `+${Math.floor(Math.random() * 20) + 5}%`,
+          }))
+          .sort((a, b) => b.views - a.views)
+          .slice(0, limit);
 
         return { success: true, dramas: formattedDramas };
       } catch (error) {
@@ -72,40 +81,46 @@ export async function getRecentActivities(limit: number = 5) {
     async () => {
       try {
         // Fetch both in parallel
-        const [dramasResult, episodesResult] = await Promise.all([
-          supabase
-            .from("Drama")
-            .select("title, createdAt")
-            .order("createdAt", { ascending: false })
-            .limit(3),
-          supabase
-            .from("Episode")
-            .select(
-              `
-              episodeNum, 
-              createdAt,
-              drama:Drama!inner(title)
-            `
-            )
-            .order("createdAt", { ascending: false })
-            .limit(3),
+        const [dramas, episodes] = await Promise.all([
+          prisma.drama.findMany({
+            select: {
+              title: true,
+              createdAt: true,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 3,
+          }),
+          prisma.episode.findMany({
+            select: {
+              episodeNum: true,
+              createdAt: true,
+              drama: {
+                select: {
+                  title: true,
+                },
+              },
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 3,
+          }),
         ]);
-
-        if (dramasResult.error) throw dramasResult.error;
-        if (episodesResult.error) throw episodesResult.error;
 
         // Combine and sort
         const activities = [
-          ...(dramasResult.data?.map((d) => ({
+          ...dramas.map((d) => ({
             type: "drama" as const,
             title: `Drama "${d.title}" ditambahkan`,
             time: d.createdAt,
-          })) || []),
-          ...(episodesResult.data?.map((e) => ({
+          })),
+          ...episodes.map((e) => ({
             type: "episode" as const,
-            title: `Episode ${e.episodeNum} "${(e.drama as any)?.title || "Unknown"}" di-upload`,
+            title: `Episode ${e.episodeNum} "${e.drama.title}" di-upload`,
             time: e.createdAt,
-          })) || []),
+          })),
         ]
           .sort(
             (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()

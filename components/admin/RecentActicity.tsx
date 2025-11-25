@@ -7,7 +7,7 @@ import { id as idLocale } from "date-fns/locale";
 type Activity = {
   type: "drama" | "episode";
   title: string;
-  time: string;
+  time: Date;
 };
 
 type Props = {

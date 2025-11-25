@@ -1,26 +1,32 @@
 // middleware.ts
-import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
-import { NextRequest } from "next/server";
-
-const secret = process.env.NEXTAUTH_SECRET;
+import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 export async function middleware(req: NextRequest) {
-  const path = req.nextUrl.pathname;
+  const { pathname } = req.nextUrl;
 
-  if (path.startsWith("/admin")) {
-    const token = await getToken({ req, secret });
+  // Get token dari cookie
+  const token = await getToken({
+    req,
+    secret: process.env.NEXTAUTH_SECRET,
+    secureCookie: process.env.NODE_ENV === "production",
+  });
 
-    if (!token) {
-      const url = new URL("/admin/login", req.url);
-      url.searchParams.set("callbackUrl", path);
-      return NextResponse.redirect(url);
-    }
+  const isLoggedIn = !!token;
 
-    // Opsional: pastikan role admin (meski hanya 1)
-    if (token.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
+  // Sudah login, akses login page → redirect ke admin
+  if (pathname === "/admin/login" && isLoggedIn) {
+    return NextResponse.redirect(new URL("/admin", req.url));
+  }
+
+  // Belum login, akses admin page → redirect ke login
+  if (
+    pathname.startsWith("/admin") &&
+    pathname !== "/admin/login" &&
+    !isLoggedIn
+  ) {
+    return NextResponse.redirect(new URL("/admin/login", req.url));
   }
 
   return NextResponse.next();

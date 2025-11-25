@@ -3,41 +3,36 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  // Aktifkan jika kamu deploy ke custom domain
-  trustHost: true,
+  trustHost: true, // ✅ PENTING untuk localhost
 
   providers: [
     Credentials({
-      name: "Admin Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      authorize: async (credentials) => {
+        console.log("🔐 Authorize called with:", credentials?.email);
+
         if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
-
-        const adminEmail = process.env.ADMIN_EMAIL;
-        const adminPassword = process.env.ADMIN_PASSWORD;
-
-        if (!adminEmail || !adminPassword) {
-          console.error("ADMIN_EMAIL or ADMIN_PASSWORD not set in environment");
+          console.log("❌ Missing credentials");
           return null;
         }
 
         if (
-          credentials.email === adminEmail &&
-          credentials.password === adminPassword
+          credentials.email === process.env.ADMIN_EMAIL &&
+          credentials.password === process.env.ADMIN_PASSWORD
         ) {
+          console.log("✅ Credentials valid");
           return {
-            id: "admin",
-            email: adminEmail,
+            id: "admin-001",
+            email: process.env.ADMIN_EMAIL!,
             name: "Admin",
-            role: "admin",
+            role: "ADMIN",
           };
         }
 
+        console.log("❌ Invalid credentials");
         return null;
       },
     }),
@@ -45,34 +40,36 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
   pages: {
     signIn: "/admin/login",
-    error: "/admin/login",
   },
 
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 hari
+    maxAge: 30 * 24 * 60 * 60,
   },
 
   callbacks: {
-    authorized: async ({ auth }) => {
-      // Hanya izinkan akses ke /admin jika sudah login
-      return !!auth;
-    },
-    jwt: async ({ token, user }) => {
+    async jwt({ token, user, trigger }) {
+      console.log("🎫 JWT callback triggered:", trigger);
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        console.log("✅ JWT token updated:", token);
       }
       return token;
     },
-    session: async ({ session, token }) => {
+    async session({ session, token }) {
+      console.log("📋 Session callback called");
       if (session.user && token) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        console.log("✅ Session created:", session);
       }
       return session;
     },
   },
 
   secret: process.env.NEXTAUTH_SECRET,
+
+  // ✅ Tambahkan ini untuk debugging
+  debug: process.env.NODE_ENV === "development",
 });

@@ -9,178 +9,212 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model Cast {
+  id         String      @id @default(dbgenerated("gen_random_uuid()"))
+  name       String
+  dramaCasts DramaCast[]
+
+  @@index([name])
+}
+
+model Director {
+  id            String          @id @default(dbgenerated("uuid_generate_v4()"))
+  name          String
+  dramaDirector DramaDirector[]
+
+  @@index([name])
+}
+
+model Production {
+  id     String  @id @default(dbgenerated("gen_random_uuid()"))
+  name   String
+  dramas Drama[]
+
+  @@index([name])
+}
+
+model Network {
+  id           String         @id @default(dbgenerated("uuid_generate_v4()"))
+  name         String
+  dramaNetwork DramaNetwork[]
+
+  @@index([name])
+}
+
+model NovelAuthor {
+  id               String             @id @default(dbgenerated("uuid_generate_v4()"))
+  name             String
+  dramaNovelAuthor DramaNovelAuthor[]
+
+  @@index([name])
+}
+
+model Writer {
+  id          String        @id @default(dbgenerated("uuid_generate_v4()"))
+  name        String
+  dramaWriter DramaWriter[]
+
+  @@index([name])
+}
+
 model Drama {
-  id           String    @id @default(uuid())
-  title        String
-  slug         String    @unique
-  description  String
-  thumbnail    String
-  status       Status
-  releaseDate  DateTime
-  isPopular    Boolean   @default(false)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  totalEpisode Int?      @db.SmallInt
-  airTime      String?
-  
-  episodes     Episode[]
-  casts        DramaCast[]
-  directors    DramaDirector[]
-  writers      DramaWriter[]
-  novelAuthors DramaNovelAuthor[]
-  networks     DramaNetwork[]
-  productionId String?
-  production   Production? @relation(fields: [productionId], references: [id])
-  
-  // OPTIMIZED INDEXES FOR BROWSE PAGE PERFORMANCE
-  @@index([productionId])
+  id               String             @id @default(dbgenerated("gen_random_uuid()"))
+  title            String
+  slug             String             @unique
+  description      String
+  thumbnail        String
+  status           Status
+  releaseDate      DateTime
+  isPopular        Boolean            @default(false)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
+  totalEpisode     Int?               @db.SmallInt
+  airTime          String?
+  productionId     String?
+  production       Production?        @relation(fields: [productionId], references: [id])
+  dramaCasts       DramaCast[]
+  dramaDirectors   DramaDirector[]
+  dramaNetworks    DramaNetwork[]
+  dramaNovelAuthor DramaNovelAuthor[]
+  dramaStats       DramaStats?
+  dramaViewsDaily  DramaViewsDaily[]
+  dramaWriters     DramaWriter[]
+  episodes         Episode[]
+
   @@index([status])
   @@index([isPopular])
-  @@index([releaseDate(sort: Desc)]) // Latest sorting
-  @@index([title]) // Search queries
-  @@index([status, releaseDate(sort: Desc)]) // Filter by status + sort
-  @@index([isPopular, releaseDate(sort: Desc)]) // Popular sorting
-  @@index([status, isPopular, releaseDate(sort: Desc)]) // Filtered popular
-}
-
-model Episode {
-  id          String   @id @default(uuid())
-  videoUrl    String
-  dramaId     String
-  createdAt   DateTime @default(now())
-  episodeNum  Int
-  releaseDate DateTime
-  updatedAt   DateTime @updatedAt
-  slug        String   @unique
-  drama       Drama    @relation(fields: [dramaId], references: [id], onDelete: Cascade)
-  
-  // OPTIMIZED INDEXES
-  @@index([dramaId])
-  @@index([episodeNum])
-  @@index([dramaId, episodeNum]) // Composite for episode listing
-  @@index([releaseDate(sort: Desc)]) // Latest episodes
-  @@index([slug]) // Fast slug lookup (already unique but explicit index)
-}
-
-// Cast - cuma nama
-model Cast {
-  id     String      @id @default(uuid())
-  name   String
-  dramas DramaCast[]
-  
-  @@index([name]) // For cast search/autocomplete
+  @@index([releaseDate(sort: Desc)])
+  @@index([productionId])
+  @@index([status, isPopular, releaseDate(sort: Desc)])
+  @@index([isPopular, releaseDate(sort: Desc)])
+  @@index([status, releaseDate(sort: Desc)])
+  @@index([title])
 }
 
 model DramaCast {
-  id        String  @id @default(uuid())
+  id        String  @id @default(dbgenerated("gen_random_uuid()"))
   dramaId   String
   castId    String
-  character String? // nama karakter (sebagai siapa)
-  
-  drama Drama @relation(fields: [dramaId], references: [id], onDelete: Cascade)
-  cast  Cast  @relation(fields: [castId], references: [id], onDelete: Cascade)
-  
+  character String?
+  cast      Cast    @relation(fields: [castId], references: [id], onDelete: Cascade)
+  drama     Drama   @relation(fields: [dramaId], references: [id], onDelete: Cascade)
+
   @@unique([dramaId, castId])
   @@index([dramaId])
   @@index([castId])
 }
 
-// Director - cuma nama
-model Director {
-  id     String          @id @default(uuid())
-  name   String
-  dramas DramaDirector[]
-  
-  @@index([name]) // For director search
-}
-
 model DramaDirector {
-  id         String @id @default(uuid())
+  id         String   @id @default(dbgenerated("gen_random_uuid()"))
   dramaId    String
   directorId String
-  
-  drama    Drama    @relation(fields: [dramaId], references: [id], onDelete: Cascade)
-  director Director @relation(fields: [directorId], references: [id], onDelete: Cascade)
-  
+  director   Director @relation(fields: [directorId], references: [id], onDelete: Cascade)
+  drama      Drama    @relation(fields: [dramaId], references: [id], onDelete: Cascade)
+
   @@unique([dramaId, directorId])
   @@index([dramaId])
   @@index([directorId])
 }
 
-// Writer - cuma nama
-model Writer {
-  id     String        @id @default(uuid())
-  name   String
-  dramas DramaWriter[]
-  
-  @@index([name]) // For writer search
-}
+model DramaNetwork {
+  id        String  @id @default(dbgenerated("gen_random_uuid()"))
+  dramaId   String
+  networkId String
+  drama     Drama   @relation(fields: [dramaId], references: [id], onDelete: Cascade)
+  network   Network @relation(fields: [networkId], references: [id], onDelete: Cascade)
 
-model DramaWriter {
-  id       String @id @default(uuid())
-  dramaId  String
-  writerId String
-  
-  drama  Drama  @relation(fields: [dramaId], references: [id], onDelete: Cascade)
-  writer Writer @relation(fields: [writerId], references: [id], onDelete: Cascade)
-  
-  @@unique([dramaId, writerId])
+  @@unique([dramaId, networkId])
   @@index([dramaId])
-  @@index([writerId])
-}
-
-// Novel Author - cuma nama + judul novel
-model NovelAuthor {
-  id     String             @id @default(uuid())
-  name   String
-  dramas DramaNovelAuthor[]
-  
-  @@index([name]) // For author search
+  @@index([networkId])
 }
 
 model DramaNovelAuthor {
-  id            String @id @default(uuid())
+  id            String      @id @default(dbgenerated("gen_random_uuid()"))
   dramaId       String
   novelAuthorId String
-  novelTitle    String? // judul novel asli
-  
-  drama       Drama       @relation(fields: [dramaId], references: [id], onDelete: Cascade)
-  novelAuthor NovelAuthor @relation(fields: [novelAuthorId], references: [id], onDelete: Cascade)
-  
+  novelTitle    String?
+  drama         Drama       @relation(fields: [dramaId], references: [id], onDelete: Cascade)
+  novelAuthor   NovelAuthor @relation(fields: [novelAuthorId], references: [id], onDelete: Cascade)
+
   @@unique([dramaId, novelAuthorId])
   @@index([dramaId])
   @@index([novelAuthorId])
 }
 
-// Production - cuma nama
-model Production {
-  id     String  @id @default(uuid())
-  name   String
-  dramas Drama[]
-  
-  @@index([name]) // For production search
-}
+model DramaWriter {
+  id       String @id @default(dbgenerated("gen_random_uuid()"))
+  dramaId  String
+  writerId String
+  drama    Drama  @relation(fields: [dramaId], references: [id], onDelete: Cascade)
+  writer   Writer @relation(fields: [writerId], references: [id], onDelete: Cascade)
 
-// Network/Rangkaian (BARU) - Astro Ria, Astro GO, sooka, dll
-model Network {
-  id     String         @id @default(uuid())
-  name   String
-  dramas DramaNetwork[]
-  
-  @@index([name]) // For network search
-}
-
-model DramaNetwork {
-  id        String @id @default(uuid())
-  dramaId   String
-  networkId String
-  
-  drama   Drama   @relation(fields: [dramaId], references: [id], onDelete: Cascade)
-  network Network @relation(fields: [networkId], references: [id], onDelete: Cascade)
-  
-  @@unique([dramaId, networkId])
+  @@unique([dramaId, writerId])
   @@index([dramaId])
-  @@index([networkId])
+  @@index([writerId])
+}
+
+model DramaStats {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  dramaId    String    @unique
+  totalViews Int?      @default(0)
+  updatedAt  DateTime? @default(now()) @updatedAt @db.Timestamptz(6)
+  drama      Drama     @relation(fields: [dramaId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([dramaId], map: "idx_dramastats_drama")
+}
+
+model DramaViewsDaily {
+  id      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  dramaId String
+  date    DateTime @db.Date
+  views   Int?     @default(0)
+  drama   Drama    @relation(fields: [dramaId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([dramaId, date])
+  @@index([dramaId, date], map: "idx_dramaviewsdaily_drama_date")
+}
+
+model Episode {
+  id          String   @id @default(dbgenerated("gen_random_uuid()"))
+  videoUrl    String
+  dramaId     String
+  createdAt   DateTime @default(now())
+  episodeNum  Int
+  releaseDate DateTime
+  updatedAt   DateTime @default(now()) @updatedAt
+  slug        String   @unique
+  drama       Drama    @relation(fields: [dramaId], references: [id], onDelete: Cascade)
+
+  @@index([dramaId])
+  @@index([slug])
+  @@index([releaseDate(sort: Desc)])
+  @@index([dramaId, episodeNum])
+  @@index([episodeNum])
+}
+
+model Donation {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  supporter  String?
+  amount     Int      @default(0)
+  currency   String   @default("IDR")
+  message    String?
+  source     String?  @default("Sociabuzz")
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([created_at(sort: Desc)], map: "idx_donations_created_at")
+  @@map("donations")
+}
+
+model DonationGoal {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  target_amount    Int      @default(0)
+  current_amount   Int      @default(0)
+  base_currency    String   @default("IDR")
+  last_reset_month String
+  updated_at       DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  @@index([last_reset_month], map: "idx_donation_goal_last_reset_month")
+  @@map("donation_goal")
 }
 
 enum Status {

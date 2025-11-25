@@ -1,6 +1,6 @@
 "use server";
 
-import { supabase } from "@/lib/supabase";
+import { prisma } from "@/lib/db";
 import { StatusType } from "@/types";
 import { revalidateTag } from "next/cache";
 
@@ -40,22 +40,23 @@ async function batchGetOrCreateCasts(names: string[]) {
 
   const trimmedNames = names.map((n) => n.trim()).filter(Boolean);
 
-  const { data: existingCasts } = await supabase
-    .from("Cast")
-    .select("*")
-    .in("name", trimmedNames);
+  const existingCasts = await prisma.cast.findMany({
+    where: {
+      name: {
+        in: trimmedNames,
+      },
+    },
+  });
 
-  const existingMap = new Map((existingCasts || []).map((c) => [c.name, c]));
-
+  const existingMap = new Map(existingCasts.map((c) => [c.name, c]));
   const missingNames = trimmedNames.filter((name) => !existingMap.has(name));
 
   if (missingNames.length > 0) {
-    const { data: newCasts } = await supabase
-      .from("Cast")
-      .insert(missingNames.map((name) => ({ name })))
-      .select();
+    const newCasts = await prisma.cast.createManyAndReturn({
+      data: missingNames.map((name) => ({ name })),
+    });
 
-    newCasts?.forEach((cast) => existingMap.set(cast.name, cast));
+    newCasts.forEach((cast) => existingMap.set(cast.name, cast));
   }
 
   return trimmedNames.map((name) => existingMap.get(name)!);
@@ -66,24 +67,23 @@ async function batchGetOrCreateDirectors(names: string[]) {
 
   const trimmedNames = names.map((n) => n.trim()).filter(Boolean);
 
-  const { data: existingDirectors } = await supabase
-    .from("Director")
-    .select("*")
-    .in("name", trimmedNames);
+  const existingDirectors = await prisma.director.findMany({
+    where: {
+      name: {
+        in: trimmedNames,
+      },
+    },
+  });
 
-  const existingMap = new Map(
-    (existingDirectors || []).map((d) => [d.name, d])
-  );
-
+  const existingMap = new Map(existingDirectors.map((d) => [d.name, d]));
   const missingNames = trimmedNames.filter((name) => !existingMap.has(name));
 
   if (missingNames.length > 0) {
-    const { data: newDirectors } = await supabase
-      .from("Director")
-      .insert(missingNames.map((name) => ({ name })))
-      .select();
+    const newDirectors = await prisma.director.createManyAndReturn({
+      data: missingNames.map((name) => ({ name })),
+    });
 
-    newDirectors?.forEach((director) =>
+    newDirectors.forEach((director) =>
       existingMap.set(director.name, director)
     );
   }
@@ -96,22 +96,23 @@ async function batchGetOrCreateWriters(names: string[]) {
 
   const trimmedNames = names.map((n) => n.trim()).filter(Boolean);
 
-  const { data: existingWriters } = await supabase
-    .from("Writer")
-    .select("*")
-    .in("name", trimmedNames);
+  const existingWriters = await prisma.writer.findMany({
+    where: {
+      name: {
+        in: trimmedNames,
+      },
+    },
+  });
 
-  const existingMap = new Map((existingWriters || []).map((w) => [w.name, w]));
-
+  const existingMap = new Map(existingWriters.map((w) => [w.name, w]));
   const missingNames = trimmedNames.filter((name) => !existingMap.has(name));
 
   if (missingNames.length > 0) {
-    const { data: newWriters } = await supabase
-      .from("Writer")
-      .insert(missingNames.map((name) => ({ name })))
-      .select();
+    const newWriters = await prisma.writer.createManyAndReturn({
+      data: missingNames.map((name) => ({ name })),
+    });
 
-    newWriters?.forEach((writer) => existingMap.set(writer.name, writer));
+    newWriters.forEach((writer) => existingMap.set(writer.name, writer));
   }
 
   return trimmedNames.map((name) => existingMap.get(name)!);
@@ -122,22 +123,23 @@ async function batchGetOrCreateNovelAuthors(names: string[]) {
 
   const trimmedNames = names.map((n) => n.trim()).filter(Boolean);
 
-  const { data: existingAuthors } = await supabase
-    .from("NovelAuthor")
-    .select("*")
-    .in("name", trimmedNames);
+  const existingAuthors = await prisma.novelAuthor.findMany({
+    where: {
+      name: {
+        in: trimmedNames,
+      },
+    },
+  });
 
-  const existingMap = new Map((existingAuthors || []).map((a) => [a.name, a]));
-
+  const existingMap = new Map(existingAuthors.map((a) => [a.name, a]));
   const missingNames = trimmedNames.filter((name) => !existingMap.has(name));
 
   if (missingNames.length > 0) {
-    const { data: newAuthors } = await supabase
-      .from("NovelAuthor")
-      .insert(missingNames.map((name) => ({ name })))
-      .select();
+    const newAuthors = await prisma.novelAuthor.createManyAndReturn({
+      data: missingNames.map((name) => ({ name })),
+    });
 
-    newAuthors?.forEach((author) => existingMap.set(author.name, author));
+    newAuthors.forEach((author) => existingMap.set(author.name, author));
   }
 
   return trimmedNames.map((name) => existingMap.get(name)!);
@@ -148,22 +150,23 @@ async function batchGetOrCreateNetworks(names: string[]) {
 
   const trimmedNames = names.map((n) => n.trim()).filter(Boolean);
 
-  const { data: existingNetworks } = await supabase
-    .from("Network")
-    .select("*")
-    .in("name", trimmedNames);
+  const existingNetworks = await prisma.network.findMany({
+    where: {
+      name: {
+        in: trimmedNames,
+      },
+    },
+  });
 
-  const existingMap = new Map((existingNetworks || []).map((n) => [n.name, n]));
-
+  const existingMap = new Map(existingNetworks.map((n) => [n.name, n]));
   const missingNames = trimmedNames.filter((name) => !existingMap.has(name));
 
   if (missingNames.length > 0) {
-    const { data: newNetworks } = await supabase
-      .from("Network")
-      .insert(missingNames.map((name) => ({ name })))
-      .select();
+    const newNetworks = await prisma.network.createManyAndReturn({
+      data: missingNames.map((name) => ({ name })),
+    });
 
-    newNetworks?.forEach((network) => existingMap.set(network.name, network));
+    newNetworks.forEach((network) => existingMap.set(network.name, network));
   }
 
   return trimmedNames.map((name) => existingMap.get(name)!);
@@ -172,21 +175,16 @@ async function batchGetOrCreateNetworks(names: string[]) {
 async function getOrCreateProduction(name: string) {
   const trimmedName = name.trim();
 
-  const { data: production } = await supabase
-    .from("Production")
-    .select("*")
-    .eq("name", trimmedName)
-    .maybeSingle();
+  const production = await prisma.production.findFirst({
+    where: { name: trimmedName },
+  });
 
   if (production) return production;
 
-  const { data: newProduction, error } = await supabase
-    .from("Production")
-    .insert({ name: trimmedName })
-    .select()
-    .single();
+  const newProduction = await prisma.production.create({
+    data: { name: trimmedName },
+  });
 
-  if (error) throw error;
   return newProduction;
 }
 
@@ -204,24 +202,20 @@ export async function createDrama(data: CreateDramaWithRelationsInput) {
     }
 
     // 2. Create drama
-    const { data: drama, error: dramaError } = await supabase
-      .from("Drama")
-      .insert({
+    const drama = await prisma.drama.create({
+      data: {
         title: data.title,
         slug: data.slug,
         description: data.description,
         thumbnail: data.thumbnail,
         status: data.status,
-        releaseDate: new Date(data.releaseDate).toISOString(),
+        releaseDate: new Date(data.releaseDate),
         isPopular: data.isPopular ?? false,
         totalEpisode: data.totalEpisode,
         airTime: data.airTime,
         productionId,
-      })
-      .select()
-      .single();
-
-    if (dramaError) throw dramaError;
+      },
+    });
 
     // 3. Batch process all relations in parallel
     const relationPromises = [];
@@ -239,11 +233,9 @@ export async function createDrama(data: CreateDramaWithRelationsInput) {
             character: castInput.character?.trim() || null,
           }));
 
-          const { error } = await supabase
-            .from("DramaCast")
-            .insert(dramaCastInserts);
-
-          if (error) throw new Error(`Failed to add casts: ${error.message}`);
+          await prisma.dramaCast.createMany({
+            data: dramaCastInserts,
+          });
         })()
       );
     }
@@ -262,12 +254,9 @@ export async function createDrama(data: CreateDramaWithRelationsInput) {
             directorId: director.id,
           }));
 
-          const { error } = await supabase
-            .from("DramaDirector")
-            .insert(dramaDirectorInserts);
-
-          if (error)
-            throw new Error(`Failed to add directors: ${error.message}`);
+          await prisma.dramaDirector.createMany({
+            data: dramaDirectorInserts,
+          });
         })()
       );
     }
@@ -284,11 +273,9 @@ export async function createDrama(data: CreateDramaWithRelationsInput) {
             writerId: writer.id,
           }));
 
-          const { error } = await supabase
-            .from("DramaWriter")
-            .insert(dramaWriterInserts);
-
-          if (error) throw new Error(`Failed to add writers: ${error.message}`);
+          await prisma.dramaWriter.createMany({
+            data: dramaWriterInserts,
+          });
         })()
       );
     }
@@ -310,12 +297,9 @@ export async function createDrama(data: CreateDramaWithRelationsInput) {
             })
           );
 
-          const { error } = await supabase
-            .from("DramaNovelAuthor")
-            .insert(dramaAuthorInserts);
-
-          if (error)
-            throw new Error(`Failed to add novel authors: ${error.message}`);
+          await prisma.dramaNovelAuthor.createMany({
+            data: dramaAuthorInserts,
+          });
         })()
       );
     }
@@ -334,12 +318,9 @@ export async function createDrama(data: CreateDramaWithRelationsInput) {
             networkId: network.id,
           }));
 
-          const { error } = await supabase
-            .from("DramaNetwork")
-            .insert(dramaNetworkInserts);
-
-          if (error)
-            throw new Error(`Failed to add networks: ${error.message}`);
+          await prisma.dramaNetwork.createMany({
+            data: dramaNetworkInserts,
+          });
         })()
       );
     }
@@ -359,7 +340,7 @@ export async function createDrama(data: CreateDramaWithRelationsInput) {
     revalidateTag("homepage");
     revalidateTag("site-stats");
     if (data.status === "TAMAT") {
-      revalidateTag("dramas-completed");
+      revalidateTag("dramas-tamat");
       revalidateTag("dashboard-activities");
       revalidateTag("dashboard-top-dramas");
       revalidateTag("dashboard");
@@ -392,8 +373,7 @@ export async function updateDrama(
     if (data.description) updateData.description = data.description;
     if (data.thumbnail) updateData.thumbnail = data.thumbnail;
     if (data.status) updateData.status = data.status;
-    if (data.releaseDate)
-      updateData.releaseDate = new Date(data.releaseDate).toISOString();
+    if (data.releaseDate) updateData.releaseDate = new Date(data.releaseDate);
     if (data.isPopular !== undefined) updateData.isPopular = data.isPopular;
     if (data.totalEpisode !== undefined)
       updateData.totalEpisode = data.totalEpisode;
@@ -406,14 +386,10 @@ export async function updateDrama(
     }
 
     // 2. Update drama basic info
-    const { data: drama, error: updateError } = await supabase
-      .from("Drama")
-      .update(updateData)
-      .eq("id", id)
-      .select()
-      .single();
-
-    if (updateError) throw updateError;
+    const drama = await prisma.drama.update({
+      where: { id },
+      data: updateData,
+    });
 
     // 3. Batch update all relations in parallel
     const relationPromises = [];
@@ -422,7 +398,9 @@ export async function updateDrama(
     if (data.casts !== undefined) {
       relationPromises.push(
         (async () => {
-          await supabase.from("DramaCast").delete().eq("dramaId", id);
+          await prisma.dramaCast.deleteMany({
+            where: { dramaId: id },
+          });
 
           if (data.casts!.length > 0) {
             const castNames = data.casts!.map((c) => c.name).filter(Boolean);
@@ -434,12 +412,9 @@ export async function updateDrama(
               character: castInput.character?.trim() || null,
             }));
 
-            const { error } = await supabase
-              .from("DramaCast")
-              .insert(dramaCastInserts);
-
-            if (error)
-              throw new Error(`Failed to update casts: ${error.message}`);
+            await prisma.dramaCast.createMany({
+              data: dramaCastInserts,
+            });
           }
         })()
       );
@@ -449,7 +424,9 @@ export async function updateDrama(
     if (data.directors !== undefined) {
       relationPromises.push(
         (async () => {
-          await supabase.from("DramaDirector").delete().eq("dramaId", id);
+          await prisma.dramaDirector.deleteMany({
+            where: { dramaId: id },
+          });
 
           if (data.directors!.length > 0) {
             const directorNames = data
@@ -462,12 +439,9 @@ export async function updateDrama(
               directorId: director.id,
             }));
 
-            const { error } = await supabase
-              .from("DramaDirector")
-              .insert(dramaDirectorInserts);
-
-            if (error)
-              throw new Error(`Failed to update directors: ${error.message}`);
+            await prisma.dramaDirector.createMany({
+              data: dramaDirectorInserts,
+            });
           }
         })()
       );
@@ -477,7 +451,9 @@ export async function updateDrama(
     if (data.writers !== undefined) {
       relationPromises.push(
         (async () => {
-          await supabase.from("DramaWriter").delete().eq("dramaId", id);
+          await prisma.dramaWriter.deleteMany({
+            where: { dramaId: id },
+          });
 
           if (data.writers!.length > 0) {
             const writerNames = data
@@ -490,12 +466,9 @@ export async function updateDrama(
               writerId: writer.id,
             }));
 
-            const { error } = await supabase
-              .from("DramaWriter")
-              .insert(dramaWriterInserts);
-
-            if (error)
-              throw new Error(`Failed to update writers: ${error.message}`);
+            await prisma.dramaWriter.createMany({
+              data: dramaWriterInserts,
+            });
           }
         })()
       );
@@ -505,7 +478,9 @@ export async function updateDrama(
     if (data.novelAuthors !== undefined) {
       relationPromises.push(
         (async () => {
-          await supabase.from("DramaNovelAuthor").delete().eq("dramaId", id);
+          await prisma.dramaNovelAuthor.deleteMany({
+            where: { dramaId: id },
+          });
 
           if (data.novelAuthors!.length > 0) {
             const authorNames = data
@@ -521,14 +496,9 @@ export async function updateDrama(
               })
             );
 
-            const { error } = await supabase
-              .from("DramaNovelAuthor")
-              .insert(dramaAuthorInserts);
-
-            if (error)
-              throw new Error(
-                `Failed to update novel authors: ${error.message}`
-              );
+            await prisma.dramaNovelAuthor.createMany({
+              data: dramaAuthorInserts,
+            });
           }
         })()
       );
@@ -538,7 +508,9 @@ export async function updateDrama(
     if (data.networks !== undefined) {
       relationPromises.push(
         (async () => {
-          await supabase.from("DramaNetwork").delete().eq("dramaId", id);
+          await prisma.dramaNetwork.deleteMany({
+            where: { dramaId: id },
+          });
 
           if (data.networks!.length > 0) {
             const networkNames = data
@@ -551,12 +523,9 @@ export async function updateDrama(
               networkId: network.id,
             }));
 
-            const { error } = await supabase
-              .from("DramaNetwork")
-              .insert(dramaNetworkInserts);
-
-            if (error)
-              throw new Error(`Failed to update networks: ${error.message}`);
+            await prisma.dramaNetwork.createMany({
+              data: dramaNetworkInserts,
+            });
           }
         })()
       );
@@ -579,7 +548,7 @@ export async function updateDrama(
       revalidateTag("dramas-featured");
     }
     if (data.status === "TAMAT" || updateData.status === "TAMAT") {
-      revalidateTag("dramas-completed");
+      revalidateTag("dramas-tamat");
     }
 
     return { success: true, drama };
@@ -596,22 +565,21 @@ export async function updateDrama(
 export async function deleteDrama(id: string) {
   try {
     // Get slug before delete for cache invalidation
-    const { data: drama } = await supabase
-      .from("Drama")
-      .select("slug")
-      .eq("id", id)
-      .single();
+    const drama = await prisma.drama.findUnique({
+      where: { id },
+      select: { slug: true },
+    });
 
-    const { error } = await supabase.from("Drama").delete().eq("id", id);
-
-    if (error) throw error;
+    await prisma.drama.delete({
+      where: { id },
+    });
 
     // Invalidate all related caches
     revalidateTag("dramas");
     revalidateTag("dramas-list");
     revalidateTag("dramas-filtered");
     revalidateTag("dramas-popular");
-    revalidateTag("dramas-completed");
+    revalidateTag("dramas-tamat");
     revalidateTag("dramas-featured");
     revalidateTag(`drama-${id}`);
     revalidateTag("homepage");
@@ -633,24 +601,19 @@ export async function deleteDrama(id: string) {
 // Toggle popular status
 export async function togglePopular(id: string) {
   try {
-    const { data: drama, error: fetchError } = await supabase
-      .from("Drama")
-      .select("isPopular, slug")
-      .eq("id", id)
-      .single();
+    const drama = await prisma.drama.findUnique({
+      where: { id },
+      select: { isPopular: true, slug: true },
+    });
 
-    if (fetchError || !drama) {
+    if (!drama) {
       return { success: false, error: "Drama not found" };
     }
 
-    const { data: updated, error: updateError } = await supabase
-      .from("Drama")
-      .update({ isPopular: !drama.isPopular })
-      .eq("id", id)
-      .select()
-      .single();
-
-    if (updateError) throw updateError;
+    const updated = await prisma.drama.update({
+      where: { id },
+      data: { isPopular: !drama.isPopular },
+    });
 
     // Invalidate popular-related caches
     revalidateTag("dramas");

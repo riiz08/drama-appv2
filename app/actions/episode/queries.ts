@@ -1,6 +1,6 @@
 "use server";
 
-import { supabase } from "@/lib/supabase";
+import { prisma } from "@/lib/db";
 import { unstable_cache } from "next/cache";
 
 // ============================================
@@ -11,75 +11,60 @@ export async function getEpisodeFullData(slug: string) {
   return unstable_cache(
     async () => {
       try {
-        const { data: episode, error } = await supabase
-          .from("Episode")
-          .select(
-            `
-            *,
-            drama:Drama!inner(
-              id,
-              title,
-              slug,
-              thumbnail,
-              description,
-              status,
-              totalEpisode,
-              airTime,
-              production:Production(
-                id,
-                name
-              ),
-              casts:DramaCast(
-                id,
-                character,
-                cast:Cast(
-                  id,
-                  name
-                )
-              ),
-              directors:DramaDirector(
-                id,
-                director:Director(
-                  id,
-                  name
-                )
-              ),
-              writers:DramaWriter(
-                id,
-                writer:Writer(
-                  id,
-                  name
-                )
-              ),
-              novelAuthors:DramaNovelAuthor(
-                id,
-                novelTitle,
-                novelAuthor:NovelAuthor(
-                  id,
-                  name
-                )
-              ),
-              networks:DramaNetwork(
-                id,
-                network:Network(
-                  id,
-                  name
-                )
-              ),
-              episodes:Episode(
-                id,
-                slug,
-                episodeNum,
-                releaseDate,
-                videoUrl
-              )
-            )
-          `
-          )
-          .eq("slug", slug)
-          .single();
+        const episode = await prisma.episode.findUnique({
+          where: { slug },
+          include: {
+            drama: {
+              include: {
+                production: true,
+                dramaCasts: {
+                  take: 5,
+                  include: {
+                    cast: true,
+                  },
+                },
+                dramaDirectors: {
+                  take: 2,
+                  include: {
+                    director: true,
+                  },
+                },
+                dramaWriters: {
+                  take: 2,
+                  include: {
+                    writer: true,
+                  },
+                },
+                dramaNovelAuthor: {
+                  take: 1,
+                  include: {
+                    novelAuthor: true,
+                  },
+                },
+                dramaNetworks: {
+                  take: 2,
+                  include: {
+                    network: true,
+                  },
+                },
+                episodes: {
+                  select: {
+                    id: true,
+                    slug: true,
+                    episodeNum: true,
+                    releaseDate: true,
+                    videoUrl: true,
+                  },
+                  orderBy: {
+                    episodeNum: "asc",
+                  },
+                },
+              },
+            },
+          },
+        });
 
-        if (error || !episode) {
+        if (!episode) {
           return {
             success: false,
             episode: null,
@@ -89,24 +74,11 @@ export async function getEpisodeFullData(slug: string) {
           };
         }
 
-        const drama = episode.drama as any;
+        const allEpisodes = episode.drama.episodes;
 
-        // Limit relations manually (Supabase doesn't support nested limit)
-        if (drama.casts) drama.casts = drama.casts.slice(0, 5);
-        if (drama.directors) drama.directors = drama.directors.slice(0, 2);
-        if (drama.writers) drama.writers = drama.writers.slice(0, 2);
-        if (drama.novelAuthors)
-          drama.novelAuthors = drama.novelAuthors.slice(0, 1);
-        if (drama.networks) drama.networks = drama.networks.slice(0, 2);
-
-        // Sort episodes by episodeNum
-        const allEpisodes = (drama.episodes || []).sort(
-          (a: any, b: any) => a.episodeNum - b.episodeNum
-        );
-
-        // Calculate prev/next in-memory (more efficient than 2 extra queries)
+        // Calculate prev/next in-memory
         const currentIndex = allEpisodes.findIndex(
-          (ep: any) => ep.episodeNum === episode.episodeNum
+          (ep) => ep.episodeNum === episode.episodeNum
         );
 
         const prev = currentIndex > 0 ? allEpisodes[currentIndex - 1] : null;
@@ -135,7 +107,7 @@ export async function getEpisodeFullData(slug: string) {
     },
     ["episode-full-data", slug],
     {
-      revalidate: 300, // 5 minutes (episodes change occasionally)
+      revalidate: 300,
       tags: ["episodes", `episode-${slug}`],
     }
   )();
@@ -149,50 +121,43 @@ export async function getEpisodeBySlug(slug: string) {
   return unstable_cache(
     async () => {
       try {
-        const { data: episode, error } = await supabase
-          .from("Episode")
-          .select(
-            `
-            *,
-            drama:Drama!inner(
-              id,
-              title,
-              slug,
-              thumbnail,
-              description,
-              status,
-              totalEpisode,
-              airTime,
-              production:Production(id, name),
-              casts:DramaCast(
-                id,
-                character,
-                cast:Cast(id, name)
-              ),
-              directors:DramaDirector(
-                id,
-                director:Director(id, name)
-              ),
-              writers:DramaWriter(
-                id,
-                writer:Writer(id, name)
-              ),
-              novelAuthors:DramaNovelAuthor(
-                id,
-                novelTitle,
-                novelAuthor:NovelAuthor(id, name)
-              ),
-              networks:DramaNetwork(
-                id,
-                network:Network(id, name)
-              )
-            )
-          `
-          )
-          .eq("slug", slug)
-          .single();
+        const episode = await prisma.episode.findUnique({
+          where: { slug },
+          include: {
+            drama: {
+              include: {
+                production: true,
+                dramaCasts: {
+                  include: {
+                    cast: true,
+                  },
+                },
+                dramaDirectors: {
+                  include: {
+                    director: true,
+                  },
+                },
+                dramaWriters: {
+                  include: {
+                    writer: true,
+                  },
+                },
+                dramaNovelAuthor: {
+                  include: {
+                    novelAuthor: true,
+                  },
+                },
+                dramaNetworks: {
+                  include: {
+                    network: true,
+                  },
+                },
+              },
+            },
+          },
+        });
 
-        if (error || !episode) {
+        if (!episode) {
           return { success: false, episode: null };
         }
 
@@ -207,7 +172,7 @@ export async function getEpisodeBySlug(slug: string) {
     },
     ["episode-by-slug", slug],
     {
-      revalidate: 300, // 5 minutes
+      revalidate: 300,
       tags: ["episodes", `episode-${slug}`],
     }
   )();
@@ -221,43 +186,38 @@ export async function getLatestEpisodes(limit?: number, offset?: number) {
   const actualLimit = limit || 12;
   const actualOffset = offset || 0;
 
-  // Generate unique cache key for pagination
   const cacheKey = ["episodes-latest", actualLimit, actualOffset].join("-");
 
   return unstable_cache(
     async () => {
       try {
-        const {
-          data: episodes,
-          error,
-          count,
-        } = await supabase
-          .from("Episode")
-          .select(
-            `
-            *,
-            drama:Drama!inner(
-              id,
-              title,
-              slug,
-              thumbnail,
-              status
-            )
-          `,
-            { count: "exact" }
-          )
-          .order("releaseDate", { ascending: false })
-          .range(actualOffset, actualOffset + actualLimit - 1);
-
-        if (error) throw error;
-
-        const total = count || 0;
+        const [episodes, total] = await Promise.all([
+          prisma.episode.findMany({
+            include: {
+              drama: {
+                select: {
+                  id: true,
+                  title: true,
+                  slug: true,
+                  thumbnail: true,
+                  status: true,
+                },
+              },
+            },
+            orderBy: {
+              releaseDate: "desc",
+            },
+            skip: actualOffset,
+            take: actualLimit,
+          }),
+          prisma.episode.count(),
+        ]);
 
         return {
           success: true,
           episodes: episodes || [],
           total,
-          hasMore: actualOffset + (episodes?.length || 0) < total,
+          hasMore: actualOffset + episodes.length < total,
         };
       } catch (error) {
         return {
@@ -271,7 +231,7 @@ export async function getLatestEpisodes(limit?: number, offset?: number) {
     },
     [cacheKey],
     {
-      revalidate: 60, // 1 minute (homepage content, should be fresh)
+      revalidate: 60,
       tags: ["episodes", "episodes-latest"],
     }
   )();
@@ -288,21 +248,28 @@ export async function getAdjacentEpisodes(
   return unstable_cache(
     async () => {
       try {
-        // Single query with OR condition (more efficient than 2 queries)
-        const { data: episodes, error } = await supabase
-          .from("Episode")
-          .select("id, slug, episodeNum")
-          .eq("dramaId", dramaId)
-          .in("episodeNum", [currentEpisodeNum - 1, currentEpisodeNum + 1])
-          .order("episodeNum", { ascending: true });
-
-        if (error) throw error;
+        const episodes = await prisma.episode.findMany({
+          where: {
+            dramaId,
+            episodeNum: {
+              in: [currentEpisodeNum - 1, currentEpisodeNum + 1],
+            },
+          },
+          select: {
+            id: true,
+            slug: true,
+            episodeNum: true,
+          },
+          orderBy: {
+            episodeNum: "asc",
+          },
+        });
 
         const prev =
-          episodes?.find((ep) => ep.episodeNum === currentEpisodeNum - 1) ||
+          episodes.find((ep) => ep.episodeNum === currentEpisodeNum - 1) ||
           null;
         const next =
-          episodes?.find((ep) => ep.episodeNum === currentEpisodeNum + 1) ||
+          episodes.find((ep) => ep.episodeNum === currentEpisodeNum + 1) ||
           null;
 
         return {
@@ -321,7 +288,7 @@ export async function getAdjacentEpisodes(
     },
     ["episodes-adjacent", dramaId, currentEpisodeNum.toString()],
     {
-      revalidate: 300, // 5 minutes
+      revalidate: 300,
       tags: ["episodes", `drama-${dramaId}-episodes`],
     }
   )();
@@ -335,13 +302,19 @@ export async function getEpisodesByDramaId(dramaId: string) {
   return unstable_cache(
     async () => {
       try {
-        const { data: episodes, error } = await supabase
-          .from("Episode")
-          .select("id, slug, episodeNum, releaseDate, videoUrl")
-          .eq("dramaId", dramaId)
-          .order("episodeNum", { ascending: true });
-
-        if (error) throw error;
+        const episodes = await prisma.episode.findMany({
+          where: { dramaId },
+          select: {
+            id: true,
+            slug: true,
+            episodeNum: true,
+            releaseDate: true,
+            videoUrl: true,
+          },
+          orderBy: {
+            episodeNum: "asc",
+          },
+        });
 
         return { success: true, episodes: episodes || [] };
       } catch (error) {
@@ -354,7 +327,7 @@ export async function getEpisodesByDramaId(dramaId: string) {
     },
     ["episodes-by-drama-id", dramaId],
     {
-      revalidate: 180, // 3 minutes
+      revalidate: 180,
       tags: ["episodes", `drama-${dramaId}-episodes`],
     }
   )();
@@ -368,25 +341,25 @@ export async function getEpisodesByDramaSlug(dramaSlug: string) {
   return unstable_cache(
     async () => {
       try {
-        // Single query with join (more efficient than 2 queries)
-        const { data: episodes, error } = await supabase
-          .from("Episode")
-          .select(
-            `
-            id,
-            slug,
-            episodeNum,
-            releaseDate,
-            videoUrl,
-            drama:Drama!inner(id)
-          `
-          )
-          .eq("drama.slug", dramaSlug)
-          .order("episodeNum", { ascending: true });
+        const episodes = await prisma.episode.findMany({
+          where: {
+            drama: {
+              slug: dramaSlug,
+            },
+          },
+          select: {
+            id: true,
+            slug: true,
+            episodeNum: true,
+            releaseDate: true,
+            videoUrl: true,
+          },
+          orderBy: {
+            episodeNum: "asc",
+          },
+        });
 
-        if (error) throw error;
-
-        if (!episodes || episodes.length === 0) {
+        if (episodes.length === 0) {
           return {
             success: false,
             episodes: [],
@@ -394,10 +367,7 @@ export async function getEpisodesByDramaSlug(dramaSlug: string) {
           };
         }
 
-        // Clean up the nested drama object (we only needed it for filtering)
-        const cleanEpisodes = episodes.map(({ drama, ...ep }: any) => ep);
-
-        return { success: true, episodes: cleanEpisodes };
+        return { success: true, episodes };
       } catch (error) {
         return {
           success: false,
@@ -408,7 +378,7 @@ export async function getEpisodesByDramaSlug(dramaSlug: string) {
     },
     ["episodes-by-drama-slug", dramaSlug],
     {
-      revalidate: 180, // 3 minutes
+      revalidate: 180,
       tags: ["episodes", `drama-slug-${dramaSlug}-episodes`],
     }
   )();
@@ -422,21 +392,23 @@ export async function getAllEpisodeSlugs() {
   return unstable_cache(
     async () => {
       try {
-        const { data: episodes, error } = await supabase
-          .from("Episode")
-          .select("slug, updatedAt")
-          .order("updatedAt", { ascending: false });
-
-        if (error) throw error;
+        const episodes = await prisma.episode.findMany({
+          select: {
+            slug: true,
+            updatedAt: true,
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
 
         return {
           success: true,
-          slugs: episodes?.map((e) => e.slug) || [],
-          episodes:
-            episodes?.map((e) => ({
-              slug: e.slug,
-              updatedAt: e.updatedAt,
-            })) || [],
+          slugs: episodes.map((e) => e.slug),
+          episodes: episodes.map((e) => ({
+            slug: e.slug,
+            updatedAt: e.updatedAt,
+          })),
         };
       } catch (error) {
         console.error("Error fetching episode slugs:", error);
@@ -450,7 +422,7 @@ export async function getAllEpisodeSlugs() {
     },
     ["episodes-all-slugs"],
     {
-      revalidate: 600, // 10 minutes (rarely changes, used for build)
+      revalidate: 600,
       tags: ["episodes", "episodes-slugs"],
     }
   )();
@@ -464,15 +436,17 @@ export async function getPopularEpisodeSlugs(limit: number = 50) {
   return unstable_cache(
     async () => {
       try {
-        const { data: episodes, error } = await supabase
-          .from("Episode")
-          .select("slug")
-          .order("createdAt", { ascending: false })
-          .limit(limit);
+        const episodes = await prisma.episode.findMany({
+          select: {
+            slug: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: limit,
+        });
 
-        if (error) throw error;
-
-        return episodes?.map((ep) => ep.slug) || [];
+        return episodes.map((ep) => ep.slug);
       } catch (error) {
         console.error("Error fetching popular episodes:", error);
         return [];
@@ -480,7 +454,7 @@ export async function getPopularEpisodeSlugs(limit: number = 50) {
     },
     ["episodes-popular-slugs", limit.toString()],
     {
-      revalidate: 300, // 5 minutes
+      revalidate: 300,
       tags: ["episodes", "episodes-popular"],
     }
   )();
@@ -490,13 +464,12 @@ export async function getPopularEpisodeSlugs(limit: number = 50) {
 // EPISODE METADATA - FOR SEO
 // ============================================
 
-// Types untuk response
 interface Cast {
   cast: {
     id: string;
     name: string;
   };
-  character?: string;
+  character?: string | null;
 }
 
 interface Director {
@@ -532,10 +505,10 @@ interface Drama {
   description: string;
   thumbnail: string;
   status: string;
-  releaseDate: string;
+  releaseDate: Date;
   isPopular: boolean;
-  totalEpisode?: number;
-  airTime?: string;
+  totalEpisode?: number | null;
+  airTime?: string | null;
   casts?: Cast[];
   directors?: Director[];
   writers?: Writer[];
@@ -548,7 +521,7 @@ interface Episode {
   slug: string;
   episodeNum: number;
   videoUrl: string;
-  releaseDate: string;
+  releaseDate: Date;
   drama: Drama;
 }
 
@@ -564,26 +537,75 @@ interface EpisodeMetadataResponse {
   next?: PrevNextEpisode | null;
 }
 
-// Internal function tanpa cache (untuk revalidation)
 async function _getEpisodeMetadata(
   slug: string
 ): Promise<EpisodeMetadataResponse> {
   try {
-    // Call RPC function
-    const { data, error } = await supabase.rpc("get_episode_metadata", {
-      episode_slug: slug,
+    const episode = await prisma.episode.findUnique({
+      where: { slug },
+      include: {
+        drama: {
+          include: {
+            production: true,
+            dramaCasts: {
+              include: {
+                cast: true,
+              },
+            },
+            dramaDirectors: {
+              include: {
+                director: true,
+              },
+            },
+            dramaWriters: {
+              include: {
+                writer: true,
+              },
+            },
+            dramaNetworks: {
+              include: {
+                network: true,
+              },
+            },
+          },
+        },
+      },
     });
 
-    if (error) {
-      console.error("Error fetching episode metadata:", error);
+    if (!episode) {
       return { success: false };
     }
 
-    if (!data || !data.success) {
-      return { success: false };
-    }
+    // Get prev/next episodes
+    const [prev, next] = await Promise.all([
+      prisma.episode.findFirst({
+        where: {
+          dramaId: episode.dramaId,
+          episodeNum: episode.episodeNum - 1,
+        },
+        select: {
+          slug: true,
+          episodeNum: true,
+        },
+      }),
+      prisma.episode.findFirst({
+        where: {
+          dramaId: episode.dramaId,
+          episodeNum: episode.episodeNum + 1,
+        },
+        select: {
+          slug: true,
+          episodeNum: true,
+        },
+      }),
+    ]);
 
-    return data as EpisodeMetadataResponse;
+    return {
+      success: true,
+      episode: episode as any,
+      prev,
+      next,
+    };
   } catch (error) {
     console.error("Unexpected error in getEpisodeMetadata:", error);
     return { success: false };
@@ -595,43 +617,36 @@ export async function getEpisodeMetadata(
 ): Promise<EpisodeMetadataResponse> {
   const getCachedMetadata = unstable_cache(
     async (episodeSlug: string) => _getEpisodeMetadata(episodeSlug),
-    [`episode-metadata-${slug}`], // cache key
+    [`episode-metadata-${slug}`],
     {
-      revalidate: 3600, // revalidate setiap 1 jam (3600 detik)
-      tags: [`episode-${slug}`, "episode-metadata"], // tags untuk on-demand revalidation
+      revalidate: 3600,
+      tags: [`episode-${slug}`, "episode-metadata"],
     }
   );
 
   return getCachedMetadata(slug);
 }
 
-// Optional: Helper function untuk fetch hanya basic episode info
 export async function getBasicEpisodeInfo(slug: string) {
   try {
-    const { data, error } = await supabase
-      .from("Episode")
-      .select(
-        `
-        id,
-        slug,
-        episodeNum,
-        videoUrl,
-        releaseDate,
-        drama:Drama(
-          id,
-          title,
-          slug,
-          thumbnail
-        )
-      `
-      )
-      .eq("slug", slug)
-      .single();
-
-    if (error) {
-      console.error("Error fetching basic episode info:", error);
-      return null;
-    }
+    const data = await prisma.episode.findUnique({
+      where: { slug },
+      select: {
+        id: true,
+        slug: true,
+        episodeNum: true,
+        videoUrl: true,
+        releaseDate: true,
+        drama: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            thumbnail: true,
+          },
+        },
+      },
+    });
 
     return data;
   } catch (error) {
@@ -639,12 +654,12 @@ export async function getBasicEpisodeInfo(slug: string) {
     return null;
   }
 }
+
 // ============================================
 // ALL EPISODES - ADMIN WITH PAGINATION
 // ============================================
 
 export async function getAllEpisodes(page: number = 1, limit: number = 20) {
-  // Generate cache key with pagination
   const cacheKey = ["episodes-all", page, limit].join("-");
 
   return unstable_cache(
@@ -652,30 +667,27 @@ export async function getAllEpisodes(page: number = 1, limit: number = 20) {
       try {
         const skip = (page - 1) * limit;
 
-        const {
-          data: episodes,
-          error,
-          count,
-        } = await supabase
-          .from("Episode")
-          .select(
-            `
-            *,
-            drama:Drama!inner(
-              id,
-              title,
-              slug,
-              thumbnail
-            )
-          `,
-            { count: "exact" }
-          )
-          .order("createdAt", { ascending: false })
-          .range(skip, skip + limit - 1);
+        const [episodes, total] = await Promise.all([
+          prisma.episode.findMany({
+            include: {
+              drama: {
+                select: {
+                  id: true,
+                  title: true,
+                  slug: true,
+                  thumbnail: true,
+                },
+              },
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+            skip,
+            take: limit,
+          }),
+          prisma.episode.count(),
+        ]);
 
-        if (error) throw error;
-
-        const total = count || 0;
         const totalPages = Math.ceil(total / limit);
 
         return {
@@ -706,7 +718,7 @@ export async function getAllEpisodes(page: number = 1, limit: number = 20) {
     },
     [cacheKey],
     {
-      revalidate: 60, // 1 minute (admin dashboard)
+      revalidate: 60,
       tags: ["episodes", "episodes-admin"],
     }
   )();
@@ -720,14 +732,11 @@ export async function getEpisodeCountByDrama(dramaId: string) {
   return unstable_cache(
     async () => {
       try {
-        const { count, error } = await supabase
-          .from("Episode")
-          .select("*", { count: "exact", head: true })
-          .eq("dramaId", dramaId);
+        const count = await prisma.episode.count({
+          where: { dramaId },
+        });
 
-        if (error) throw error;
-
-        return { success: true, count: count || 0 };
+        return { success: true, count };
       } catch (error) {
         return {
           success: false,
@@ -738,7 +747,7 @@ export async function getEpisodeCountByDrama(dramaId: string) {
     },
     ["episode-count-by-drama", dramaId],
     {
-      revalidate: 180, // 3 minutes
+      revalidate: 180,
       tags: ["episodes", `drama-${dramaId}-count`],
     }
   )();
@@ -748,33 +757,48 @@ export async function getEpisodeForPublic(slug: string) {
   return unstable_cache(
     async () => {
       try {
-        const { data: episode, error } = await supabase
-          .from("Episode")
-          .select(
-            `
-            *,
-            drama:Drama!inner(
-              id,
-              slug,
-              title,
-              thumbnail,
-              description,
-              status,
-              totalEpisode,
-              airTime,
-              production:Production(id, name),
-              casts:DramaCast(id, character, cast:Cast(id, name)),
-              directors:DramaDirector(id, director:Director(id, name)),
-              writers:DramaWriter(id, writer:Writer(id, name)),
-              novelAuthors:DramaNovelAuthor(id, novelTitle, novelAuthor:NovelAuthor(id, name)),
-              networks:DramaNetwork(id, network:Network(id, name))
-            )
-          `
-          )
-          .eq("slug", slug)
-          .single();
+        const episode = await prisma.episode.findUnique({
+          where: { slug },
+          include: {
+            drama: {
+              include: {
+                production: true,
+                dramaCasts: {
+                  take: 5,
+                  include: {
+                    cast: true,
+                  },
+                },
+                dramaDirectors: {
+                  take: 2,
+                  include: {
+                    director: true,
+                  },
+                },
+                dramaWriters: {
+                  take: 2,
+                  include: {
+                    writer: true,
+                  },
+                },
+                dramaNovelAuthor: {
+                  take: 1,
+                  include: {
+                    novelAuthor: true,
+                  },
+                },
+                dramaNetworks: {
+                  take: 2,
+                  include: {
+                    network: true,
+                  },
+                },
+              },
+            },
+          },
+        });
 
-        if (error || !episode) {
+        if (!episode) {
           return {
             success: false,
             episode: null,
@@ -784,34 +808,29 @@ export async function getEpisodeForPublic(slug: string) {
           };
         }
 
-        const drama = episode.drama as any;
-
-        // Limit relations
-        drama.casts = drama.casts?.slice(0, 5) || [];
-        drama.directors = drama.directors?.slice(0, 2) || [];
-        drama.writers = drama.writers?.slice(0, 2) || [];
-        drama.novelAuthors = drama.novelAuthors?.slice(0, 1) || [];
-        drama.networks = drama.networks?.slice(0, 2) || [];
-
-        // ✅ Get ALL episodes for list (lightweight)
-        const { data: allEpisodes } = await supabase
-          .from("Episode")
-          .select("id, slug, episodeNum, releaseDate")
-          .eq("dramaId", drama.id)
-          .order("episodeNum", { ascending: true });
-
-        // ✅ Safe handling - default to empty array
-        const episodes = allEpisodes || [];
+        // Get ALL episodes for list (lightweight)
+        const allEpisodes = await prisma.episode.findMany({
+          where: { dramaId: episode.drama.id },
+          select: {
+            id: true,
+            slug: true,
+            episodeNum: true,
+            releaseDate: true,
+          },
+          orderBy: {
+            episodeNum: "asc",
+          },
+        });
 
         // Find prev/next from episodes
-        const currentIndex = episodes.findIndex(
+        const currentIndex = allEpisodes.findIndex(
           (ep) => ep.episodeNum === episode.episodeNum
         );
 
-        const prev = currentIndex > 0 ? episodes[currentIndex - 1] : null;
+        const prev = currentIndex > 0 ? allEpisodes[currentIndex - 1] : null;
         const next =
-          currentIndex < episodes.length - 1
-            ? episodes[currentIndex + 1]
+          currentIndex < allEpisodes.length - 1
+            ? allEpisodes[currentIndex + 1]
             : null;
 
         return {
@@ -819,7 +838,7 @@ export async function getEpisodeForPublic(slug: string) {
           episode,
           prev,
           next,
-          allEpisodes: episodes, // ✅ Now guaranteed not null
+          allEpisodes,
         };
       } catch (error) {
         return {
@@ -827,7 +846,7 @@ export async function getEpisodeForPublic(slug: string) {
           episode: null,
           prev: null,
           next: null,
-          allEpisodes: [], // ✅ Added
+          allEpisodes: [],
         };
       }
     },
@@ -842,38 +861,37 @@ export async function getLatestEpisodesForPublic(limit = 12, offset = 0) {
   return unstable_cache(
     async () => {
       try {
-        const {
-          data: episodes,
-          error,
-          count,
-        } = await supabase
-          .from("Episode")
-          .select(
-            `
-            id,
-            slug,
-            episodeNum,
-            releaseDate,
-            drama:Drama!inner(
-              id,
-              title,
-              slug,
-              thumbnail,
-              status
-            )
-          `,
-            { count: "exact" }
-          )
-          .order("releaseDate", { ascending: false })
-          .range(offset, offset + limit - 1);
-
-        if (error) throw error;
+        const [episodes, total] = await Promise.all([
+          prisma.episode.findMany({
+            select: {
+              id: true,
+              slug: true,
+              episodeNum: true,
+              releaseDate: true,
+              drama: {
+                select: {
+                  id: true,
+                  title: true,
+                  slug: true,
+                  thumbnail: true,
+                  status: true,
+                },
+              },
+            },
+            orderBy: {
+              releaseDate: "desc",
+            },
+            skip: offset,
+            take: limit,
+          }),
+          prisma.episode.count(),
+        ]);
 
         return {
           success: true,
           episodes: episodes || [],
-          total: count || 0,
-          hasMore: offset + (episodes?.length || 0) < (count || 0),
+          total,
+          hasMore: offset + episodes.length < total,
         };
       } catch (error) {
         return {

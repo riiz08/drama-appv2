@@ -13,8 +13,7 @@ import TopDramasList from "@/components/admin/TopDramaList";
 import RecentActivity from "@/components/admin/RecentActicity";
 import QuickActions from "@/components/admin/QuickActions";
 
-export const dynamic = "force-static";
-export const revalidate = 86400;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Dashboard Admin | Mangeakkk Drama",
@@ -27,9 +26,9 @@ export const metadata: Metadata = {
 export default async function AdminDashboard() {
   const session = await auth();
 
-  if (!session) {
-    redirect("/admin/login");
-  }
+  // if (!session) {
+  //   redirect("/admin/login");
+  // }
 
   // Get statistics
   const statsResult = await getSiteStats();
@@ -79,14 +78,14 @@ export default async function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-black">
-      <AdminHeader user={session.user} />
+      {/* <AdminHeader user={session?.user} /> */}
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Message */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
           <p className="text-gray-400">
-            Selamat datang, {session.user?.name || "Admin"}!
+            Selamat datang, {session?.user?.name || "Admin"}!
           </p>
         </div>
 

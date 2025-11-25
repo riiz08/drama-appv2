@@ -1,6 +1,6 @@
 "use server";
 
-import { supabase } from "@/lib/supabase";
+import { prisma } from "@/lib/db";
 import { revalidateTag } from "next/cache";
 
 // Types
@@ -12,22 +12,22 @@ export interface CreateEpisodeInput {
   slug: string;
 }
 
-function generateUUID(): string {
-  return crypto.randomUUID();
-}
-
 // ============================================
 // HELPER: Check Episode Exists
 // ============================================
 
 export async function checkEpisodeExists(dramaId: string, episodeNum: number) {
   try {
-    const { data: existingEpisode, error } = await supabase
-      .from("Episode")
-      .select("id, slug")
-      .eq("dramaId", dramaId)
-      .eq("episodeNum", episodeNum)
-      .maybeSingle();
+    const existingEpisode = await prisma.episode.findFirst({
+      where: {
+        dramaId,
+        episodeNum,
+      },
+      select: {
+        id: true,
+        slug: true,
+      },
+    });
 
     return {
       success: true,
@@ -63,23 +63,17 @@ export async function createEpisode(data: CreateEpisodeInput) {
     }
 
     // Get drama info for cache invalidation
-    const { data: drama } = await supabase
-      .from("Drama")
-      .select("slug")
-      .eq("id", data.dramaId)
-      .single();
+    const drama = await prisma.drama.findUnique({
+      where: { id: data.dramaId },
+      select: { slug: true },
+    });
 
-    const { data: episode, error } = await supabase
-      .from("Episode")
-      .insert({
-        id: generateUUID(),
+    const episode = await prisma.episode.create({
+      data: {
         ...data,
-        releaseDate: new Date(data.releaseDate).toISOString(),
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
+        releaseDate: new Date(data.releaseDate),
+      },
+    });
 
     // Smart cache invalidation
     revalidateTag("episodes");
@@ -123,27 +117,28 @@ export async function updateEpisode(
 ) {
   try {
     // Get current episode
-    const { data: currentEpisode, error: fetchError } = await supabase
-      .from("Episode")
-      .select(
-        `
-        dramaId,
-        episodeNum,
-        slug,
-        drama:Drama!inner(slug)
-      `
-      )
-      .eq("id", id)
-      .single();
+    const currentEpisode = await prisma.episode.findUnique({
+      where: { id },
+      select: {
+        dramaId: true,
+        episodeNum: true,
+        slug: true,
+        drama: {
+          select: {
+            slug: true,
+          },
+        },
+      },
+    });
 
-    if (fetchError || !currentEpisode) {
+    if (!currentEpisode) {
       return {
         success: false,
         error: "Episode not found",
       };
     }
 
-    const dramaSlug = (currentEpisode.drama as any).slug;
+    const dramaSlug = currentEpisode.drama.slug;
     const oldSlug = currentEpisode.slug;
 
     // Check for duplicate if episodeNum is being changed
@@ -164,17 +159,13 @@ export async function updateEpisode(
     const updateData: any = { ...data };
 
     if (data.releaseDate) {
-      updateData.releaseDate = new Date(data.releaseDate).toISOString();
+      updateData.releaseDate = new Date(data.releaseDate);
     }
 
-    const { data: episode, error } = await supabase
-      .from("Episode")
-      .update(updateData)
-      .eq("id", id)
-      .select()
-      .single();
-
-    if (error) throw error;
+    const episode = await prisma.episode.update({
+      where: { id },
+      data: updateData,
+    });
 
     // Smart cache invalidation
     revalidateTag("episodes");
@@ -221,21 +212,22 @@ export async function updateEpisode(
 export async function deleteEpisode(id: string) {
   try {
     // Get episode info before deletion for cache invalidation
-    const { data: episode } = await supabase
-      .from("Episode")
-      .select(
-        `
-        slug,
-        dramaId,
-        drama:Drama!inner(slug)
-      `
-      )
-      .eq("id", id)
-      .single();
+    const episode = await prisma.episode.findUnique({
+      where: { id },
+      select: {
+        slug: true,
+        dramaId: true,
+        drama: {
+          select: {
+            slug: true,
+          },
+        },
+      },
+    });
 
-    const { error } = await supabase.from("Episode").delete().eq("id", id);
-
-    if (error) throw error;
+    await prisma.episode.delete({
+      where: { id },
+    });
 
     // Smart cache invalidation
     revalidateTag("episodes");
@@ -248,7 +240,7 @@ export async function deleteEpisode(id: string) {
     revalidateTag("site-stats");
 
     if (episode) {
-      const dramaSlug = (episode.drama as any).slug;
+      const dramaSlug = episode.drama.slug;
 
       revalidateTag(`episode-${episode.slug}`);
       revalidateTag(`episode-${episode.slug}-metadata`);
@@ -295,24 +287,19 @@ export async function bulkCreateEpisodes(episodes: CreateEpisodeInput[]) {
     }
 
     const formattedEpisodes = episodes.map((ep) => ({
-      id: generateUUID(),
       ...ep,
-      releaseDate: new Date(ep.releaseDate).toISOString(),
+      releaseDate: new Date(ep.releaseDate),
     }));
 
-    const { data, error } = await supabase
-      .from("Episode")
-      .insert(formattedEpisodes)
-      .select();
-
-    if (error) throw error;
+    const data = await prisma.episode.createMany({
+      data: formattedEpisodes,
+    });
 
     // Get drama slug for cache invalidation
-    const { data: drama } = await supabase
-      .from("Drama")
-      .select("slug")
-      .eq("id", episodes[0].dramaId)
-      .single();
+    const drama = await prisma.drama.findUnique({
+      where: { id: episodes[0].dramaId },
+      select: { slug: true },
+    });
 
     const dramaId = episodes[0].dramaId;
 
@@ -344,8 +331,8 @@ export async function bulkCreateEpisodes(episodes: CreateEpisodeInput[]) {
 
     return {
       success: true,
-      count: data?.length || 0,
-      message: `Successfully created ${data?.length || 0} episode(s)`,
+      count: data.count || 0,
+      message: `Successfully created ${data.count || 0} episode(s)`,
     };
   } catch (error) {
     console.error("Error bulk creating episodes:", error);
@@ -364,29 +351,24 @@ export async function bulkCreateEpisodes(episodes: CreateEpisodeInput[]) {
 export async function bulkDeleteEpisodesByDrama(dramaId: string) {
   try {
     // Get drama info and episodes before deletion
-    const { data: drama } = await supabase
-      .from("Drama")
-      .select("slug")
-      .eq("id", dramaId)
-      .single();
+    const drama = await prisma.drama.findUnique({
+      where: { id: dramaId },
+      select: { slug: true },
+    });
 
-    const { data: episodes } = await supabase
-      .from("Episode")
-      .select("slug")
-      .eq("dramaId", dramaId);
+    const episodes = await prisma.episode.findMany({
+      where: { dramaId },
+      select: { slug: true },
+    });
 
     // Get count before deletion
-    const { count: beforeCount } = await supabase
-      .from("Episode")
-      .select("*", { count: "exact", head: true })
-      .eq("dramaId", dramaId);
+    const beforeCount = await prisma.episode.count({
+      where: { dramaId },
+    });
 
-    const { error } = await supabase
-      .from("Episode")
-      .delete()
-      .eq("dramaId", dramaId);
-
-    if (error) throw error;
+    await prisma.episode.deleteMany({
+      where: { dramaId },
+    });
 
     // Comprehensive cache invalidation
     revalidateTag("episodes");
@@ -399,7 +381,7 @@ export async function bulkDeleteEpisodesByDrama(dramaId: string) {
     revalidateTag(`drama-${dramaId}-count`);
 
     // Invalidate all episode slugs
-    episodes?.forEach((ep) => {
+    episodes.forEach((ep) => {
       revalidateTag(`episode-${ep.slug}`);
       revalidateTag(`episode-${ep.slug}-metadata`);
     });
@@ -444,29 +426,33 @@ export async function bulkDeleteEpisodesByIds(episodeIds: string[]) {
     }
 
     // Get episode info before deletion
-    const { data: episodes } = await supabase
-      .from("Episode")
-      .select(
-        `
-        slug,
-        dramaId,
-        drama:Drama!inner(slug)
-      `
-      )
-      .in("id", episodeIds);
+    const episodes = await prisma.episode.findMany({
+      where: {
+        id: { in: episodeIds },
+      },
+      select: {
+        slug: true,
+        dramaId: true,
+        drama: {
+          select: {
+            slug: true,
+          },
+        },
+      },
+    });
 
     // Get count before deletion
-    const { count: beforeCount } = await supabase
-      .from("Episode")
-      .select("*", { count: "exact", head: true })
-      .in("id", episodeIds);
+    const beforeCount = await prisma.episode.count({
+      where: {
+        id: { in: episodeIds },
+      },
+    });
 
-    const { error } = await supabase
-      .from("Episode")
-      .delete()
-      .in("id", episodeIds);
-
-    if (error) throw error;
+    await prisma.episode.deleteMany({
+      where: {
+        id: { in: episodeIds },
+      },
+    });
 
     // Comprehensive cache invalidation
     revalidateTag("episodes");
@@ -477,11 +463,9 @@ export async function bulkDeleteEpisodesByIds(episodeIds: string[]) {
     revalidateTag("episodes-popular");
 
     // Invalidate affected dramas and episodes
-    const uniqueDramaIds = Array.from(
-      new Set(episodes?.map((e) => e.dramaId) || [])
-    );
+    const uniqueDramaIds = Array.from(new Set(episodes.map((e) => e.dramaId)));
     const uniqueDramaSlugs = Array.from(
-      new Set(episodes?.map((e) => (e.drama as any).slug) || [])
+      new Set(episodes.map((e) => e.drama.slug))
     );
 
     uniqueDramaIds.forEach((dramaId) => {
@@ -495,7 +479,7 @@ export async function bulkDeleteEpisodesByIds(episodeIds: string[]) {
       revalidateTag(`drama-slug-${slug}`);
     });
 
-    episodes?.forEach((ep) => {
+    episodes.forEach((ep) => {
       revalidateTag(`episode-${ep.slug}`);
       revalidateTag(`episode-${ep.slug}-metadata`);
     });

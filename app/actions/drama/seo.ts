@@ -1,17 +1,19 @@
 "use server";
 
-import { supabase } from "@/lib/supabase";
+import { prisma } from "@/lib/db";
 
 // Get all drama slugs for static generation
 export async function getAllDramaSlugs() {
   try {
-    const { data: dramas, error } = await supabase.from("Drama").select("slug");
-
-    if (error) throw error;
+    const dramas = await prisma.drama.findMany({
+      select: {
+        slug: true,
+      },
+    });
 
     return {
       success: true,
-      slugs: dramas?.map((d) => d.slug) || [],
+      slugs: dramas.map((d) => d.slug),
     };
   } catch (error) {
     return {
@@ -25,34 +27,30 @@ export async function getAllDramaSlugs() {
 // Get drama metadata for SEO
 export async function getDramaMetadata(slug: string) {
   try {
-    const { data: drama, error } = await supabase
-      .from("Drama")
-      .select(
-        `
-        id,
-        title,
-        slug,
-        description,
-        thumbnail,
-        releaseDate,
-        status,
-        totalEpisode,
-        airTime,
-        updatedAt
-      `
-      )
-      .eq("slug", slug)
-      .single();
+    const drama = await prisma.drama.findUnique({
+      where: { slug },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        description: true,
+        thumbnail: true,
+        releaseDate: true,
+        status: true,
+        totalEpisode: true,
+        airTime: true,
+        updatedAt: true,
+        _count: {
+          select: {
+            episodes: true,
+          },
+        },
+      },
+    });
 
-    if (error || !drama) {
+    if (!drama) {
       return { success: false, metadata: null };
     }
-
-    // Get episode count
-    const { count } = await supabase
-      .from("Episode")
-      .select("*", { count: "exact", head: true })
-      .eq("dramaId", drama.id);
 
     return {
       success: true,
@@ -62,7 +60,7 @@ export async function getDramaMetadata(slug: string) {
         image: drama.thumbnail,
         releaseDate: drama.releaseDate,
         status: drama.status,
-        totalEpisodes: drama.totalEpisode || count || 0,
+        totalEpisodes: drama.totalEpisode || drama._count.episodes || 0,
         lastUpdated: drama.updatedAt,
       },
     };
@@ -78,16 +76,19 @@ export async function getDramaMetadata(slug: string) {
 // Get sitemap data for all dramas
 export async function getDramaSitemapData() {
   try {
-    const { data: dramas, error } = await supabase
-      .from("Drama")
-      .select("slug, updatedAt")
-      .order("updatedAt", { ascending: false });
-
-    if (error) throw error;
+    const dramas = await prisma.drama.findMany({
+      select: {
+        slug: true,
+        updatedAt: true,
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+    });
 
     return {
       success: true,
-      data: (dramas || []).map((d) => ({
+      data: dramas.map((d) => ({
         slug: d.slug,
         lastModified: d.updatedAt,
       })),

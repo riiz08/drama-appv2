@@ -40,7 +40,8 @@ interface EpisodeInfoProps {
         id: string;
         name: string;
       } | null;
-      casts?: Array<{
+      dramaCasts?: Array<{
+        // ✅ Ubah dari casts ke dramaCasts
         id: string;
         character: string | null;
         cast: {
@@ -48,21 +49,24 @@ interface EpisodeInfoProps {
           name: string;
         };
       }>;
-      directors?: Array<{
+      dramaDirectors?: Array<{
+        // ✅ Ubah dari directors ke dramaDirectors
         id: string;
         director: {
           id: string;
           name: string;
         };
       }>;
-      writers?: Array<{
+      dramaWriters?: Array<{
+        // ✅ Ubah dari writers ke dramaWriters
         id: string;
         writer: {
           id: string;
           name: string;
         };
       }>;
-      novelAuthors?: Array<{
+      dramaNovelAuthor?: Array<{
+        // ✅ Ubah dari novelAuthors ke dramaNovelAuthor (SINGULAR!)
         id: string;
         novelTitle: string | null;
         novelAuthor: {
@@ -70,7 +74,8 @@ interface EpisodeInfoProps {
           name: string;
         };
       }>;
-      networks?: Array<{
+      dramaNetworks?: Array<{
+        // ✅ Ubah dari networks ke dramaNetworks
         id: string;
         network: {
           id: string;
@@ -86,14 +91,15 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
   const statusLabel = getStatusLabel(episode.drama.status);
   const dramaUrl = getDramaUrl(episode.drama.slug);
 
-  // Check if has credits
+  // ✅ Update field names
   const hasCredits =
-    (episode.drama.casts && episode.drama.casts.length > 0) ||
-    (episode.drama.directors && episode.drama.directors.length > 0) ||
-    (episode.drama.writers && episode.drama.writers.length > 0) ||
-    (episode.drama.novelAuthors && episode.drama.novelAuthors.length > 0) ||
+    (episode.drama.dramaCasts && episode.drama.dramaCasts.length > 0) ||
+    (episode.drama.dramaDirectors && episode.drama.dramaDirectors.length > 0) ||
+    (episode.drama.dramaWriters && episode.drama.dramaWriters.length > 0) ||
+    (episode.drama.dramaNovelAuthor &&
+      episode.drama.dramaNovelAuthor.length > 0) ||
     episode.drama.production ||
-    (episode.drama.networks && episode.drama.networks.length > 0);
+    (episode.drama.dramaNetworks && episode.drama.dramaNetworks.length > 0);
 
   return (
     <div className="relative w-full bg-black">
@@ -248,19 +254,23 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
               )}
 
               {/* Networks */}
-              {episode.drama.networks && episode.drama.networks.length > 0 && (
-                <div className="flex items-center gap-3 text-gray-300">
-                  <TvIcon className="w-5 h-5 text-red-500" aria-hidden="true" />
-                  <div>
-                    <dt className="text-xs text-gray-500">Rangkaian</dt>
-                    <dd className="text-sm font-medium">
-                      {episode.drama.networks
-                        .map((n) => n.network.name)
-                        .join(", ")}
-                    </dd>
+              {episode.drama.dramaNetworks &&
+                episode.drama.dramaNetworks.length > 0 && (
+                  <div className="flex items-center gap-3 text-gray-300">
+                    <TvIcon
+                      className="w-5 h-5 text-red-500"
+                      aria-hidden="true"
+                    />
+                    <div>
+                      <dt className="text-xs text-gray-500">Rangkaian</dt>
+                      <dd className="text-sm font-medium">
+                        {episode.drama.dramaNetworks
+                          .map((n) => n.network.name)
+                          .join(", ")}
+                      </dd>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </dl>
 
             <AdWrapper slot={ADSENSE_CONFIG.slots.hads1} format="auto" />
@@ -295,9 +305,9 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
                     startContent={<Users className="w-4 h-4 text-red-500" />}
                   >
                     <div className="space-y-4">
-                      {/* Cast */}
-                      {episode.drama.casts &&
-                        episode.drama.casts.length > 0 && (
+                      {/* Cast - ✅ Update field name */}
+                      {episode.drama.dramaCasts &&
+                        episode.drama.dramaCasts.length > 0 && (
                           <div>
                             <div className="flex items-center gap-2 mb-2">
                               <Users
@@ -309,7 +319,7 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
                               </h3>
                             </div>
                             <div className="space-y-1 text-gray-400">
-                              {episode.drama.casts.map((item) => (
+                              {episode.drama.dramaCasts.map((item) => (
                                 <p key={item.id}>
                                   <span className="text-white">
                                     {item.cast.name}
@@ -326,9 +336,9 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
                           </div>
                         )}
 
-                      {/* Directors */}
-                      {episode.drama.directors &&
-                        episode.drama.directors.length > 0 && (
+                      {/* Directors - ✅ Update field name */}
+                      {episode.drama.dramaDirectors &&
+                        episode.drama.dramaDirectors.length > 0 && (
                           <div>
                             <div className="flex items-center gap-2 mb-2">
                               <Clapperboard
@@ -340,7 +350,7 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
                               </h3>
                             </div>
                             <div className="flex flex-wrap gap-2">
-                              {episode.drama.directors.map((item) => (
+                              {episode.drama.dramaDirectors.map((item) => (
                                 <Chip
                                   key={item.id}
                                   size="sm"
@@ -354,9 +364,9 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
                           </div>
                         )}
 
-                      {/* Writers */}
-                      {episode.drama.writers &&
-                        episode.drama.writers.length > 0 && (
+                      {/* Writers - ✅ Update field name */}
+                      {episode.drama.dramaWriters &&
+                        episode.drama.dramaWriters.length > 0 && (
                           <div>
                             <div className="flex items-center gap-2 mb-2">
                               <Pencil
@@ -368,7 +378,7 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
                               </h3>
                             </div>
                             <div className="flex flex-wrap gap-2">
-                              {episode.drama.writers.map((item) => (
+                              {episode.drama.dramaWriters.map((item) => (
                                 <Chip
                                   key={item.id}
                                   size="sm"
@@ -382,9 +392,9 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
                           </div>
                         )}
 
-                      {/* Novel Authors */}
-                      {episode.drama.novelAuthors &&
-                        episode.drama.novelAuthors.length > 0 && (
+                      {/* Novel Authors - ✅ Update field name */}
+                      {episode.drama.dramaNovelAuthor &&
+                        episode.drama.dramaNovelAuthor.length > 0 && (
                           <div>
                             <div className="flex items-center gap-2 mb-2">
                               <BookOpen
@@ -396,7 +406,7 @@ export default function EpisodeInfo({ episode }: EpisodeInfoProps) {
                               </h3>
                             </div>
                             <div className="space-y-1 text-gray-400">
-                              {episode.drama.novelAuthors.map((item) => (
+                              {episode.drama.dramaNovelAuthor.map((item) => (
                                 <p key={item.id}>
                                   <span className="text-white">
                                     {item.novelAuthor.name}

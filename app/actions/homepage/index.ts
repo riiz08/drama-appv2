@@ -1,6 +1,6 @@
 "use server";
 
-import { supabase } from "@/lib/supabase";
+import { prisma } from "@/lib/db";
 import { unstable_cache } from "next/cache";
 
 export async function getHomepageData() {
@@ -9,53 +9,100 @@ export async function getHomepageData() {
       try {
         // Parallel fetch with Promise.all
         const [
-          { data: allPopular },
-          { data: popularDramas },
-          { data: ongoingDramas },
-          { data: completedDramas },
-          { data: latestEpisodes },
+          allPopular,
+          popularDramas,
+          ongoingDramas,
+          completedDramas,
+          latestEpisodes,
         ] = await Promise.all([
-          supabase
-            .from("Drama")
-            .select(
-              "id, title, slug, thumbnail, description, releaseDate, status, totalEpisode, airTime"
-            )
-            .eq("isPopular", true)
-            .order("releaseDate", { ascending: false })
-            .limit(5),
+          prisma.drama.findMany({
+            where: { isPopular: true },
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              thumbnail: true,
+              description: true,
+              releaseDate: true,
+              status: true,
+              totalEpisode: true,
+              airTime: true,
+            },
+            orderBy: { releaseDate: "desc" },
+            take: 5,
+          }),
 
-          supabase
-            .from("Drama")
-            .select(
-              "id, title, slug, thumbnail, releaseDate, status, totalEpisode, description"
-            )
-            .eq("isPopular", true)
-            .order("releaseDate", { ascending: false })
-            .limit(10),
+          prisma.drama.findMany({
+            where: { isPopular: true },
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              thumbnail: true,
+              releaseDate: true,
+              status: true,
+              totalEpisode: true,
+              description: true,
+            },
+            orderBy: { releaseDate: "desc" },
+            take: 10,
+          }),
 
-          supabase
-            .from("Drama")
-            .select(
-              "id, title, slug, thumbnail, releaseDate, status, totalEpisode, description, airTime"
-            )
-            .eq("status", "ONGOING")
-            .order("releaseDate", { ascending: false })
-            .limit(10),
+          prisma.drama.findMany({
+            where: { status: "ONGOING" },
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              thumbnail: true,
+              releaseDate: true,
+              status: true,
+              totalEpisode: true,
+              description: true,
+              airTime: true,
+            },
+            orderBy: { releaseDate: "desc" },
+            take: 10,
+          }),
 
-          supabase
-            .from("Drama")
-            .select(
-              "id, title, slug, thumbnail, releaseDate, status, totalEpisode, description"
-            )
-            .eq("status", "TAMAT")
-            .order("releaseDate", { ascending: false })
-            .limit(10),
+          prisma.drama.findMany({
+            where: { status: "TAMAT" },
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              thumbnail: true,
+              releaseDate: true,
+              status: true,
+              totalEpisode: true,
+              description: true,
+            },
+            orderBy: { releaseDate: "desc" },
+            take: 10,
+          }),
 
-          supabase
-            .from("Episode")
-            .select(`*, drama:Drama!inner(title, slug, thumbnail, status)`)
-            .order("releaseDate", { ascending: false })
-            .limit(12),
+          prisma.episode.findMany({
+            select: {
+              id: true,
+              videoUrl: true,
+              episodeNum: true,
+              releaseDate: true,
+              slug: true,
+              dramaId: true,
+              createdAt: true,
+              updatedAt: true,
+              drama: {
+                select: {
+                  title: true,
+                  slug: true,
+                  thumbnail: true,
+                  status: true,
+                },
+              },
+            },
+            orderBy: { releaseDate: "desc" },
+            take: 12,
+          }),
         ]);
 
         const featuredDrama =
@@ -102,23 +149,17 @@ export async function getSiteStats() {
   return unstable_cache(
     async () => {
       try {
-        const [
-          { count: totalDramas },
-          { count: totalEpisodes },
-          { count: ongoingCount },
-          { count: completedCount },
-        ] = await Promise.all([
-          supabase.from("Drama").select("*", { count: "exact", head: true }),
-          supabase.from("Episode").select("*", { count: "exact", head: true }),
-          supabase
-            .from("Drama")
-            .select("*", { count: "exact", head: true })
-            .eq("status", "ONGOING"),
-          supabase
-            .from("Drama")
-            .select("*", { count: "exact", head: true })
-            .eq("status", "TAMAT"),
-        ]);
+        const [totalDramas, totalEpisodes, ongoingCount, completedCount] =
+          await Promise.all([
+            prisma.drama.count(),
+            prisma.episode.count(),
+            prisma.drama.count({
+              where: { status: "ONGOING" },
+            }),
+            prisma.drama.count({
+              where: { status: "TAMAT" },
+            }),
+          ]);
 
         return {
           success: true,

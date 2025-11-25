@@ -10,9 +10,14 @@ import {
   Hash,
   Building2,
   Tv,
+  Users,
+  Clapperboard,
+  Pencil,
+  BookOpen,
 } from "lucide-react";
 import { formatDate, getStatusLabel } from "@/lib/utils";
 import { Chip } from "@heroui/chip";
+import { Accordion, AccordionItem } from "@heroui/accordion";
 
 interface DramaHeroProps {
   drama: {
@@ -28,9 +33,40 @@ interface DramaHeroProps {
       id: string;
       name: string;
     } | null;
-    networks?: Array<{
+    dramaNetworks?: Array<{
       id: string;
       network: {
+        id: string;
+        name: string;
+      };
+    }>;
+    // ✅ Added cast, director, writer, novel author
+    dramaCasts?: Array<{
+      id: string;
+      character: string | null;
+      cast: {
+        id: string;
+        name: string;
+      };
+    }>;
+    dramaDirectors?: Array<{
+      id: string;
+      director: {
+        id: string;
+        name: string;
+      };
+    }>;
+    dramaWriters?: Array<{
+      id: string;
+      writer: {
+        id: string;
+        name: string;
+      };
+    }>;
+    dramaNovelAuthor?: Array<{
+      id: string;
+      novelTitle: string | null;
+      novelAuthor: {
         id: string;
         name: string;
       };
@@ -41,6 +77,13 @@ interface DramaHeroProps {
 export default function DramaHero({ drama }: DramaHeroProps) {
   const [imageError, setImageError] = useState(false);
   const statusLabel = getStatusLabel(drama.status);
+
+  // ✅ Check if has credits
+  const hasCredits =
+    (drama.dramaCasts && drama.dramaCasts.length > 0) ||
+    (drama.dramaDirectors && drama.dramaDirectors.length > 0) ||
+    (drama.dramaWriters && drama.dramaWriters.length > 0) ||
+    (drama.dramaNovelAuthor && drama.dramaNovelAuthor.length > 0);
 
   return (
     <div className="relative w-full bg-black">
@@ -174,18 +217,171 @@ export default function DramaHero({ drama }: DramaHeroProps) {
               )}
 
               {/* Networks */}
-              {drama.networks && drama.networks.length > 0 && (
+              {drama.dramaNetworks && drama.dramaNetworks.length > 0 && (
                 <div className="flex items-center gap-3 text-gray-300">
                   <Tv className="w-5 h-5 text-red-500" aria-hidden="true" />
                   <div>
                     <dt className="text-xs text-gray-500">Rangkaian</dt>
                     <dd className="text-sm font-medium">
-                      {drama.networks.map((n) => n.network.name).join(", ")}
+                      {drama.dramaNetworks
+                        .map((n) => n.network.name)
+                        .join(", ")}
                     </dd>
                   </div>
                 </div>
               )}
             </dl>
+
+            {/* ✅ Description */}
+            <article className="pt-2 border-t border-zinc-800">
+              <h2 className="text-sm font-semibold text-white mb-2">
+                Sinopsis
+              </h2>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                {drama.description}
+              </p>
+            </article>
+
+            {/* ✅ Credits Accordion */}
+            {hasCredits && (
+              <div className="pt-2 border-t border-zinc-800">
+                <Accordion
+                  variant="bordered"
+                  className="px-0"
+                  itemClasses={{
+                    base: "bg-zinc-900/50 border-zinc-800",
+                    title: "text-white font-semibold text-sm",
+                    trigger: "py-3 px-4",
+                    content: "px-4 pb-4 text-sm",
+                  }}
+                >
+                  <AccordionItem
+                    key="credits"
+                    aria-label="Kredit & Pelakon"
+                    title="Kredit & Pelakon"
+                    startContent={<Users className="w-4 h-4 text-red-500" />}
+                  >
+                    <div className="space-y-4">
+                      {/* Cast */}
+                      {drama.dramaCasts && drama.dramaCasts.length > 0 && (
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Users
+                              className="w-4 h-4 text-red-500"
+                              aria-hidden="true"
+                            />
+                            <h3 className="font-semibold text-white">
+                              Pelakon
+                            </h3>
+                          </div>
+                          <div className="space-y-1 text-gray-400">
+                            {drama.dramaCasts.map((item) => (
+                              <p key={item.id}>
+                                <span className="text-white">
+                                  {item.cast.name}
+                                </span>
+                                {item.character && (
+                                  <span className="text-gray-500">
+                                    {" "}
+                                    sebagai {item.character}
+                                  </span>
+                                )}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Directors */}
+                      {drama.dramaDirectors &&
+                        drama.dramaDirectors.length > 0 && (
+                          <div>
+                            <div className="flex items-center gap-2 mb-2">
+                              <Clapperboard
+                                className="w-4 h-4 text-red-500"
+                                aria-hidden="true"
+                              />
+                              <h3 className="font-semibold text-white">
+                                Pengarah
+                              </h3>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {drama.dramaDirectors.map((item) => (
+                                <Chip
+                                  key={item.id}
+                                  size="sm"
+                                  variant="flat"
+                                  className="bg-zinc-800 text-white"
+                                >
+                                  {item.director.name}
+                                </Chip>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                      {/* Writers */}
+                      {drama.dramaWriters && drama.dramaWriters.length > 0 && (
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Pencil
+                              className="w-4 h-4 text-red-500"
+                              aria-hidden="true"
+                            />
+                            <h3 className="font-semibold text-white">
+                              Penulis
+                            </h3>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {drama.dramaWriters.map((item) => (
+                              <Chip
+                                key={item.id}
+                                size="sm"
+                                variant="flat"
+                                className="bg-zinc-800 text-white"
+                              >
+                                {item.writer.name}
+                              </Chip>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Novel Authors */}
+                      {drama.dramaNovelAuthor &&
+                        drama.dramaNovelAuthor.length > 0 && (
+                          <div>
+                            <div className="flex items-center gap-2 mb-2">
+                              <BookOpen
+                                className="w-4 h-4 text-red-500"
+                                aria-hidden="true"
+                              />
+                              <h3 className="font-semibold text-white">
+                                Penulis Novel
+                              </h3>
+                            </div>
+                            <div className="space-y-1 text-gray-400">
+                              {drama.dramaNovelAuthor.map((item) => (
+                                <p key={item.id}>
+                                  <span className="text-white">
+                                    {item.novelAuthor.name}
+                                  </span>
+                                  {item.novelTitle && (
+                                    <span className="text-gray-500 italic">
+                                      {" "}
+                                      - "{item.novelTitle}"
+                                    </span>
+                                  )}
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                    </div>
+                  </AccordionItem>
+                </Accordion>
+              </div>
+            )}
 
             {/* Tags - SEO Keywords */}
             <nav aria-label="Kata kunci berkaitan">
