@@ -851,7 +851,7 @@ export async function getEpisodeForPublic(slug: string) {
       }
     },
     ["episode-public", slug],
-    { revalidate: 3600, tags: ["episodes", `episode-${slug}`] }
+    { revalidate: 86400, tags: ["episodes", `episode-${slug}`] }
   )();
 }
 
