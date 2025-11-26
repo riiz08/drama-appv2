@@ -4,6 +4,17 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    serverActions: {
+      allowedOrigins: ["*"],
+    },
+  },
+  webpack: (config) => {
+    config.externals.push({
+      ".prisma/client": "commonjs .prisma/client",
+    });
+    return config;
+  },
   images: {
     remotePatterns: [
       {

@@ -30,10 +30,5 @@
       "destination": "/drama?sort=popular",
       "statusCode": 301
     }
-  ],
-  "functions": {
-    "api/**/*": {
-      "includeFiles": ".prisma/**"
-    }
-  }
+  ]
 }
