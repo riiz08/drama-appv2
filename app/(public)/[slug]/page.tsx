@@ -15,6 +15,7 @@ import { VideoObjectSchema } from "@/components/schema/VideoObjectSchema";
 import VideoPlayerWrapper from "@/components/episode/VideoPlayerWrapper";
 import { EpisodeSchema } from "@/components/schema/EpisodeSchema";
 import AdWrapper from "@/components/ads/AdWrapper";
+import OverlayDonation from "@/components/episode/OverlayDonation";
 
 export const dynamic = "force-static";
 
@@ -195,6 +196,7 @@ export default async function EpisodePlayerPage({
               />
             </section>
           )}
+          <OverlayDonation />
         </div>
       </div>
     </>
