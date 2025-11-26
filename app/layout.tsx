@@ -23,11 +23,6 @@ export default async function RootLayout({
           crossOrigin="anonymous"
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4287822627580434"
         />
-        <Script
-          async
-          data-key="OtQz1d0e2E+0YDRYqKFR/A"
-          src="https://analytics.ahrefs.com/analytics.js"
-        />
       </head>
       <body
         className={clsx(
