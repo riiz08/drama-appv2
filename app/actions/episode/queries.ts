@@ -422,7 +422,7 @@ export async function getAllEpisodeSlugs() {
     },
     ["episodes-all-slugs"],
     {
-      revalidate: 600,
+      revalidate: 3600,
       tags: ["episodes", "episodes-slugs"],
     }
   )();
