@@ -18,6 +18,8 @@ import {
 import { formatDate, getStatusLabel } from "@/lib/utils";
 import { Chip } from "@heroui/chip";
 import { Accordion, AccordionItem } from "@heroui/accordion";
+import AdWrapper from "../ads/AdWrapper";
+import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 
 interface DramaHeroProps {
   drama: {
@@ -134,6 +136,7 @@ export default function DramaHero({ drama }: DramaHeroProps) {
                     className="w-16 h-16 text-zinc-600 mb-2"
                     aria-hidden="true"
                   />
+
                   <span className="text-sm text-zinc-500 text-center px-4">
                     {drama.title}
                   </span>

@@ -29,7 +29,6 @@ interface LatestEpisodesSectionProps {
 function EpisodeCard({ episode }: { episode: EpisodeCardType }) {
   const [imageError, setImageError] = useState(false);
   const episodeUrl = getEpisodeUrl(episode.slug);
-  const releaseDate = new Date(episode.releaseDate);
   const relativeTime = formatRelativeTime(episode.releaseDate);
 
   return (
@@ -38,7 +37,7 @@ function EpisodeCard({ episode }: { episode: EpisodeCardType }) {
         as={Link}
         prefetch={false}
         aria-label={`Tonton ${episode.drama.title} Episod ${episode.episodeNum} - ${relativeTime}`}
-        href={episodeUrl}
+        href={`/drama/${episode.drama.slug}`}
         isPressable
         fullWidth
         isHoverable

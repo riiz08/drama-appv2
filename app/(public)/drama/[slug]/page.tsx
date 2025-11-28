@@ -311,6 +311,8 @@ export default async function DramaDetailPage({
       <TVSeriesSchema drama={drama} />
 
       <div className="min-h-screen bg-black">
+        <AdWrapper slot={ADSENSE_CONFIG.slots.hads1} format="auto" />
+
         {/* Hero Section */}
         <header>
           <DramaHero drama={drama} />
@@ -322,7 +324,6 @@ export default async function DramaDetailPage({
           <section aria-labelledby="synopsis-heading">
             <DramaSynopsis description={drama.description} />
           </section>
-          <AdWrapper slot={ADSENSE_CONFIG.slots.hads1} format="auto" />
 
           <DramaCredits
             casts={dramaData.casts || []}

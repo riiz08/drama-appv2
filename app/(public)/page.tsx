@@ -5,6 +5,7 @@ import PopularSection from "@/components/home/PopularSection";
 import LatestEpisodesSection from "@/components/home/LatestEpisodesSection";
 import { ADSENSE_CONFIG } from "@/lib/adsense-config";
 import AdWrapper from "@/components/ads/AdWrapper";
+import LatestEpisodesSectionSkeleton from "@/components/home/LatestEpisodeSectionSkeleton";
 
 export const revalidate = 3600;
 
@@ -101,7 +102,9 @@ export default async function HomePage() {
       <AdWrapper slot={ADSENSE_CONFIG.slots.hads2} format="auto" />
 
       {/* Latest Episodes */}
-      {homepageData.data.latestEpisodes.length > 0 && (
+      {homepageData.data.latestEpisodes.length < 0 ? (
+        <LatestEpisodesSectionSkeleton />
+      ) : (
         <LatestEpisodesSection episodes={homepageData.data.latestEpisodes} />
       )}
     </div>
