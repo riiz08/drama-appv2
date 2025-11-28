@@ -16,11 +16,39 @@ interface VideoObjectSchemaProps {
 }
 
 export function VideoObjectSchema({ episode }: VideoObjectSchemaProps) {
-  const uploadDate =
-    episode.releaseDate instanceof Date
-      ? episode.releaseDate.toISOString()
-      : new Date(episode.releaseDate).toISOString();
+  const getFormattedDate = () => {
+    try {
+      const date =
+        episode.releaseDate instanceof Date
+          ? episode.releaseDate
+          : new Date(episode.releaseDate);
 
+      // Cek jika date valid
+      if (isNaN(date.getTime())) {
+        const now = new Date();
+        return now.toISOString().replace("Z", "+08:00");
+      }
+
+      // Set waktu ke jam tayang drama (22:00 waktu Malaysia)
+      date.setHours(22, 0, 0, 0);
+
+      // Format dengan timezone offset Malaysia
+      // Output: 2025-11-27T22:00:00+08:00
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      const seconds = String(date.getSeconds()).padStart(2, "0");
+
+      return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}+08:00`;
+    } catch (error) {
+      const now = new Date();
+      return now.toISOString().replace("Z", "+08:00");
+    }
+  };
+
+  const uploadDate = getFormattedDate();
   // Plain object - no TypeScript type restrictions
   const schema = {
     "@context": "https://schema.org",

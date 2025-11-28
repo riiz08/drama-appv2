@@ -14,8 +14,8 @@ import { logoutAction } from "@/app/actions/auth/logout";
 
 interface AdminHeaderProps {
   user: {
-    name?: string | null;
-    email?: string | null;
+    id?: string;
+    role?: string;
   };
 }
 
@@ -67,9 +67,7 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
             <DropdownTrigger>
               <Button variant="flat" className="bg-zinc-800">
                 <User className="w-4 h-4" />
-                <span className="hidden sm:inline">
-                  {user.name || user.email}
-                </span>
+                <span className="hidden sm:inline">{user.id || user.role}</span>
               </Button>
             </DropdownTrigger>
             <DropdownMenu aria-label="User menu">
