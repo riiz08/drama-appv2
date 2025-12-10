@@ -15,7 +15,7 @@ import DramaCredits from "@/components/drama/DramaCredits";
 import AdWrapper from "@/components/ads/AdWrapper";
 
 export const dynamic = "force-static";
-export const revalidate = 86400;
+export const revalidate = 3600;
 
 // Generate metadata for SEO
 export async function generateMetadata({
